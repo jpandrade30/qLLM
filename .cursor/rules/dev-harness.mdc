@@ -1,0 +1,15 @@
+---
+description: Dev harness and Kubernetes fixtures for Rancher Desktop
+globs: deploy/**/*,fixtures/**/*,scripts/**
+alwaysApply: false
+---
+
+# Dev harness
+
+- Target: Rancher Desktop with containerd + Kubernetes (`planning/05-dev-harness.md`).
+- Namespace/services names stay stable (`qllm-dev`, `postgres`, `mysql`, `mongodb`, `test-api`).
+- Seeds must keep cross-source keys aligned (`customer_id` / `customerId`).
+- Test API may be Python/FastAPI; databases use official images.
+- Dev credentials only in harness docs/manifests — never reuse as production defaults.
+- Golden Query IR files live under `fixtures/queries/` and must validate against `query-ir.schema.json`.
+- Include at least one forced-timeout scenario for fail-fast verification.

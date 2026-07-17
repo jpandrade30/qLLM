@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qllm.dev/schemas/catalog.schema.json",
+  "title": "qLLM Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "project", "entities"],
+  "properties": {
+    "protocolVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "project": { "type": "string", "minLength": 1 },
+    "entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entity" }
+    }
+  },
+  "$defs": {
+    "logicalType": {
+      "type": "string",
+      "enum": ["string", "number", "boolean", "timestamp", "json"]
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "source", "binding", "fields"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "uniqueItems": true,
+          "description": "Optional alternate names resolvable in IR from/joins"
+        },
+        "description": { "type": "string" },
+        "source": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "binding": { "$ref": "#/$defs/binding" },
+        "primaryKey": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/field" }
+        },
+        "relations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relation" }
+        }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["table", "collection", "rest_resource"]
+        },
+        "schema": { "type": "string" },
+        "table": { "type": "string" },
+        "collection": { "type": "string" },
+        "resource": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "table" } } },
+          "then": { "required": ["schema", "table"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "collection" } } },
+          "then": { "required": ["collection"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "rest_resource" } } },
+          "then": { "required": ["resource"] }
+        }
+      ]
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "physical"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "type": { "$ref": "#/$defs/logicalType" },
+        "physical": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "to", "type", "on"],
+      "properties": {
+        "name": { "type": "string" },
+        "to": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["many_to_one", "one_to_many", "one_to_one"]
+        },
+        "on": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

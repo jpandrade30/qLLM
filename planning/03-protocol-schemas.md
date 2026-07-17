@@ -1,0 +1,601 @@
+# 03 — Protocol Schemas (fonte da verdade)
+
+`protocolVersion`: **0.1.0**
+
+Todos os exemplos abaixo são normativos para o MVP. JSON Schema máquina-legível: [`schemas/`](schemas/).
+
+---
+
+## 0. Project layout — como o executável lê as specs
+
+As specs de **onde estão os bancos/APIs** e **o que se pode consultar** são arquivos no projeto consumidor (não hardcode no binário).
+
+### Arquivos
+
+| Arquivo | Obrigatório | Conteúdo |
+|---------|-------------|----------|
+| `qllm.preset.yaml` (ou `.json`) | sim | sources, connection/`*Env`, limits |
+| `qllm.catalog.yaml` (ou `.json`) | sim | entidades lógicas → source + binding + fields |
+| `qllm.project.yaml` (ou `.json`) | não | ponteiro para preset/catalog |
+
+### `qllm.project.yaml` (opcional)
+
+```yaml
+protocolVersion: "0.1.0"
+preset: ./qllm.preset.yaml
+catalog: ./qllm.catalog.yaml
+# paths relativos a este arquivo
+```
+
+JSON Schema: [`schemas/project.schema.json`](schemas/project.schema.json).
+
+### Como o binário resolve
+
+Ordem de precedência:
+
+1. `--preset PATH` **e** `--catalog PATH`
+2. `--project PATH` → lê `preset`/`catalog` do project file
+3. `--config-dir DIR` → `DIR/qllm.preset.{yaml,yml,json}` + `DIR/qllm.catalog.{yaml,yml,json}`
+4. Working directory atual com os nomes default `qllm.preset.*` + `qllm.catalog.*`
+
+```bash
+qllm serve --http --config-dir ./config
+qllm validate --project ./qllm.project.yaml
+qllm query --preset ./p.yaml --catalog ./c.yaml -f ./ir.json
+```
+
+- `serve`: carrega preset+catalog **no startup**; falha rápido se inválidos.
+- Segredos continuam só via env referenciado no preset (`passwordEnv`, `uriEnv`, …).
+- O harness de dev usa o mesmo mecanismo (`fixtures/presets/` + `--config-dir`).
+
+---
+
+## 0.1 Naming & aliases — 10 REST com o mesmo `email`
+
+**Problema:** várias APIs/tabelas expõem `id`, `email`, `name`.  
+**Solução:** nunca citar só o campo físico. Sempre há três camadas:
+
+| Camada | Exemplo | Função |
+|--------|---------|--------|
+| `sources[].id` | `rest_crm`, `rest_erp` | conexão/auth distintas |
+| `entities[].name` | `crm_users`, `erp_users` | o que o IR consulta (único no catalog) |
+| alias de query `as` | `cu`, `eu` | nome curto **nessa** query |
+
+Campo físico pode ser idêntico (`physical: email`); o FieldRef no IR usa **entity ou alias**:
+
+- `crm_users.email` vs `erp_users.email`
+- ou, com alias: `cu.email` vs `eu.email`
+
+### Catalog: nomes únicos (+ aliases opcionais de entidade)
+
+```yaml
+entities:
+  - name: crm_users          # único — é o identificador canônico
+    aliases: [users_crm]      # opcional: nomes alternativos no IR
+    source: rest_crm
+    binding: { kind: rest_resource, resource: users }
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: email, type: string, physical: email }
+
+  - name: erp_users
+    source: rest_erp
+    binding: { kind: rest_resource, resource: users }
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: email, type: string, physical: email }
+```
+
+Regras:
+
+- `entities[].name` **globalmente único** no catalog.
+- `aliases[]` também únicos e não podem colidir com outro `name`/alias.
+- Dois resources “users” em APIs diferentes ⇒ **dois entity names** (não reutilizar `users`).
+- `describe_catalog` devolve `name`, `aliases`, `source`, fields — o agente escolhe o nome certo.
+
+### IR: alias de query (`as`)
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "from": "crm_users",
+  "as": "cu",
+  "joins": [
+    {
+      "type": "left",
+      "from": "erp_users",
+      "as": "eu",
+      "on": [{ "left": "cu.email", "right": "eu.email" }]
+    }
+  ],
+  "select": ["cu.id", "cu.email", "eu.id"],
+  "limit": 50
+}
+```
+
+Regras de binding na query:
+
+1. Cada `from`/`joins[]` introduz um **binding name** = `as` se presente, senão `entity.name` (ou alias de catalog usado no `from`).
+2. Binding names únicos na query (`AMBIGUOUS_ALIAS` se repetir).
+3. Com **mais de uma** entidade no escopo, FieldRef **deve** ser qualificado (`binding.field`). Não qualificado ⇒ `AMBIGUOUS_FIELD`.
+4. Com uma entidade só, `email` curto continua válido.
+5. `as` no agg (`{ "agg": "sum", "as": "revenue" }`) é alias de **coluna de saída**, não de entidade.
+
+---
+
+## 1. Project Preset
+
+Arquivo típico: `qllm.preset.yaml` ou `qllm.preset.json` (YAML vira JSON na carga). Ver § 0 para discovery.
+
+### Semântica
+
+- Um preset = um projeto/ambiente.
+- `sources[]`: N fontes; `id` único e estável (referenciado pelo catalog). Várias REST ⇒ vários `id` (`rest_crm`, `rest_erp`, …).
+- Segredos: preferir env (`passwordEnv`) — não commit de senha.
+
+### Exemplo
+
+```yaml
+protocolVersion: "0.1.0"
+project: acme-billing
+limits:
+  maxSyncMs: 15000
+  maxSourceMs: 12000
+  defaultLimit: 100
+  maxLimit: 1000
+  readOnly: true
+sources:
+  - id: crm_pg
+    type: postgres
+    connection:
+      hostEnv: QLLM_CRM_PG_HOST
+      port: 5432
+      database: crm
+      userEnv: QLLM_CRM_PG_USER
+      passwordEnv: QLLM_CRM_PG_PASSWORD
+      sslMode: disable
+    options:
+      statementTimeoutMs: 12000
+
+  - id: billing_mysql
+    type: mysql
+    connection:
+      hostEnv: QLLM_BILLING_MYSQL_HOST
+      port: 3306
+      database: billing
+      userEnv: QLLM_BILLING_MYSQL_USER
+      passwordEnv: QLLM_BILLING_MYSQL_PASSWORD
+
+  - id: events_mongo
+    type: mongodb
+    connection:
+      uriEnv: QLLM_EVENTS_MONGO_URI
+      database: events
+
+  - id: legacy_api
+    type: rest
+    connection:
+      baseUrlEnv: QLLM_LEGACY_API_BASE_URL
+      auth:
+        type: bearer
+        tokenEnv: QLLM_LEGACY_API_TOKEN
+    options:
+      timeoutMs: 10000
+```
+
+### Campos obrigatórios
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| `protocolVersion` | string | semver |
+| `project` | string | nome lógico |
+| `limits` | object | ver abaixo |
+| `sources` | array | min 1 |
+| `sources[].id` | string | `[a-z][a-z0-9_]*` |
+| `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` |
+| `sources[].connection` | object | por tipo (ver schemas) |
+
+### `limits`
+
+| Campo | Default | Significado |
+|-------|---------|-------------|
+| `maxSyncMs` | 15000 | budget total |
+| `maxSourceMs` | 12000 | por round-trip de fonte |
+| `defaultLimit` | 100 | se IR omitir limit |
+| `maxLimit` | 1000 | teto absoluto |
+| `readOnly` | true | bloqueia writes |
+
+---
+
+## 2. Catalog
+
+Arquivo: `qllm.catalog.yaml` / `.json`. Descreve **entidades lógicas** que o agente pode consultar.
+
+### Exemplo
+
+```yaml
+protocolVersion: "0.1.0"
+project: acme-billing
+entities:
+  - name: customers
+    description: Clientes do CRM
+    source: crm_pg
+    binding:
+      kind: table
+      schema: public
+      table: customers
+    primaryKey: [id]
+    fields:
+      - name: id
+        type: string
+        physical: id
+      - name: email
+        type: string
+        physical: email
+      - name: created_at
+        type: timestamp
+        physical: created_at
+
+  - name: invoices
+    description: Faturas
+    source: billing_mysql
+    binding:
+      kind: table
+      schema: billing
+      table: invoices
+    primaryKey: [id]
+    fields:
+      - name: id
+        type: string
+        physical: id
+      - name: customer_id
+        type: string
+        physical: customer_id
+      - name: total
+        type: number
+        physical: total_cents
+        transform: cents_to_decimal   # opcional v1.1; v0.1 pode omitir
+      - name: status
+        type: string
+        physical: status
+    relations:
+      - name: customer
+        to: customers
+        type: many_to_one
+        on: [[customer_id, id]]
+
+  - name: events
+    source: events_mongo
+    binding:
+      kind: collection
+      collection: app_events
+    fields:
+      - name: id
+        type: string
+        physical: _id
+      - name: customer_id
+        type: string
+        physical: customerId
+      - name: type
+        type: string
+        physical: type
+      - name: ts
+        type: timestamp
+        physical: ts
+
+  - name: legacy_users
+    source: legacy_api
+    binding:
+      kind: rest_resource
+      resource: users
+    fields:
+      - name: id
+        type: string
+        physical: id
+      - name: email
+        type: string
+        physical: email
+```
+
+### Regras
+
+- `entities[].name` único; identificador canônico em `IR.from` / joins (ver § 0.1).
+- `entities[].aliases` opcional; cada alias único no catalog; também resolvível no `from`.
+- `source` deve existir no preset (`sources[].id`).
+- `fields[].name` = nome lógico na entidade; `physical` = coluna/path na fonte (pode repetir entre entidades).
+- Tipos lógicos v0.1: `string` | `number` | `boolean` | `timestamp` | `json`
+- `relations` são **hints** para o agente e para joins no IR; não criam FK automática no banco.
+
+### REST no catalog
+
+Resources REST detalhados ficam no preset ou em `fixtures` OpenAPI referenciado:
+
+```yaml
+# trecho no preset sources[].options.resources (REST)
+resources:
+  users:
+    list:
+      method: GET
+      path: /users
+      queryParams: [email, limit, offset]
+    getById:
+      method: GET
+      path: /users/{id}
+```
+
+IR para REST no MVP: filter/project/limit mapeáveis a query params; agg/join → DuckDB local após fetch limitado.
+
+---
+
+## 3. Query IR
+
+Contrato que a tool `execute_query` recebe.
+
+### Exemplo single-source
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "from": "invoices",
+  "select": [
+    "customer_id",
+    { "agg": "sum", "field": "total", "as": "revenue" },
+    { "agg": "count", "as": "n" }
+  ],
+  "where": {
+    "op": "and",
+    "args": [
+      { "field": "status", "op": "eq", "value": "paid" },
+      { "field": "total", "op": "gte", "value": 10 }
+    ]
+  },
+  "groupBy": ["customer_id"],
+  "orderBy": [{ "field": "revenue", "dir": "desc" }],
+  "limit": 50
+}
+```
+
+### Exemplo join (local ou pushdown se mesma fonte)
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "from": "invoices",
+  "as": "inv",
+  "joins": [
+    {
+      "type": "left",
+      "from": "customers",
+      "as": "c",
+      "on": [{ "left": "inv.customer_id", "right": "c.id" }]
+    }
+  ],
+  "select": ["inv.id", "c.email", "inv.total"],
+  "where": {
+    "field": "inv.status",
+    "op": "eq",
+    "value": "paid"
+  },
+  "limit": 100
+}
+```
+
+### Forma gramatical (v0.1)
+
+```text
+Query =
+  protocolVersion?
+  from: EntityRef          # name canônico ou alias de catalog
+  as?: BindingName         # alias só desta query
+  joins?: Join[]
+  select: (FieldRef | AggExpr)[]
+  where?: BoolExpr
+  groupBy?: FieldRef[]
+  orderBy?: OrderExpr[]
+  limit: number            # se omitido, defaultLimit do preset
+  offset?: number
+  mode?: "sync" | "async"  # default sync
+
+Join = { type: "inner"|"left", from: EntityRef, as?: BindingName, on: EqualOn[] }
+EqualOn = { left: FieldRef, right: FieldRef }
+
+EntityRef = string         # entities[].name ou entities[].aliases[]
+BindingName = string       # [a-z][a-z0-9_]*
+FieldRef = string          # "field" | "binding.field" | "entity.field"
+
+AggExpr = { agg: "count"|"sum"|"avg"|"min"|"max", field?: FieldRef, as: string }
+
+BoolExpr =
+  | { field, op, value }
+  | { op: "and"|"or", args: BoolExpr[] }
+  | { op: "not", args: [BoolExpr] }
+
+CompareOp = eq|neq|gt|gte|lt|lte|in|nin|contains|is_null|not_null
+```
+
+### Regras de validação
+
+1. Toda entidade em `from`/`joins` resolve via `name` ou `aliases` do catalog e está allowlisted.
+2. Binding names (`as` ou entity name) únicos na query.
+3. Todo campo referenciado ∈ fields da entidade do binding; com >1 entidade, FieldRef deve ser qualificado.
+4. `limit` ∈ (0, maxLimit].
+5. Se houver `agg` sem `groupBy`, só aggs globais permitidas (uma linha).
+6. `select` com mistura de field cru + agg exige `groupBy` contendo os fields crus.
+7. Ops não suportadas pela fonte → planner marca local ou rejeita com `UNSUPPORTED`.
+8. `readOnly: true` → IR não tem mutação (v0.1 nem define mutate).
+
+---
+
+## 4. API HTTP
+
+Base path: `/v1`
+
+### 4.1 `GET /v1/health`
+
+```json
+{ "ok": true, "protocolVersion": "0.1.0" }
+```
+
+### 4.2 `GET /v1/catalog`
+
+Resposta: catalog efetivo (entities + fields + relations + capabilities resumidas por source).
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "project": "acme-billing",
+  "entities": [ /* igual ao catalog, possivelmente enriquecido */ ],
+  "sources": [
+    {
+      "id": "crm_pg",
+      "type": "postgres",
+      "capabilities": {
+        "filter": true,
+        "project": true,
+        "agg": true,
+        "groupBy": true,
+        "joinSameSource": true,
+        "orderBy": true,
+        "limit": true
+      }
+    }
+  ]
+}
+```
+
+### 4.3 `POST /v1/queries`
+
+Request body = Query IR.
+
+**Sync success `200`:**
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "queryId": "01HZX…",
+  "status": "succeeded",
+  "result": {
+    "columns": [
+      { "name": "customer_id", "type": "string" },
+      { "name": "revenue", "type": "number" }
+    ],
+    "rows": [
+      ["cust_1", 199.5],
+      ["cust_2", 50]
+    ],
+    "rowCount": 2,
+    "truncated": false
+  },
+  "meta": {
+    "elapsedMs": 42,
+    "mode": "sync",
+    "plan": {
+      "usedDuckDB": false,
+      "steps": [
+        { "source": "billing_mysql", "pushdown": true, "elapsedMs": 40 }
+      ]
+    }
+  }
+}
+```
+
+**Async accepted `202`:**
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "queryId": "01HZX…",
+  "status": "accepted"
+}
+```
+
+Nota: mesmo em async, o job respeita `maxSyncMs` / budget; status final será `succeeded` ou `failed` rapidamente.
+
+### 4.4 `GET /v1/queries/{queryId}`
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "queryId": "01HZX…",
+  "status": "running",
+  "meta": { "elapsedMs": 800 }
+}
+```
+
+Statuses: `accepted` | `running` | `succeeded` | `failed` | `canceled`
+
+### 4.5 `GET /v1/queries/{queryId}/result`
+
+- `200` + mesmo shape de `result` + `meta` se `succeeded`
+- `409` se ainda não pronto
+- `404` se expirado/desconhecido
+
+### Representação tabular
+
+- `columns[].name` / `columns[].type` (tipos lógicos)
+- `rows` = array de arrays na ordem das columns (JSON scalars; timestamp = RFC3339 string)
+- `null` JSON permitido
+- `truncated: true` se bateu em maxLimit do runtime
+
+---
+
+## 5. Erros tipados
+
+Todo erro de API:
+
+```json
+{
+  "protocolVersion": "0.1.0",
+  "error": {
+    "code": "TIMEOUT",
+    "message": "source billing_mysql exceeded 12000ms",
+    "details": {
+      "source": "billing_mysql",
+      "elapsedMs": 12001
+    }
+  }
+}
+```
+
+| code | HTTP | Quando |
+|------|------|--------|
+| `INVALID_IR` | 400 | schema/gramática |
+| `UNKNOWN_ENTITY` | 400 | entity/alias fora do catalog |
+| `UNKNOWN_FIELD` | 400 | field inexistente no binding |
+| `AMBIGUOUS_FIELD` | 400 | field sem qualificar com >1 entidade |
+| `AMBIGUOUS_ALIAS` | 400 | `as`/binding repetido na query |
+| `LIMIT_EXCEEDED` | 400 | limit > maxLimit |
+| `FORBIDDEN` | 403 | entidade/fonte não allowlisted |
+| `UNSUPPORTED` | 400 | op não suportada e não degradável |
+| `CONFIG_ERROR` | 500 | preset/catalog ausente ou inválido no startup |
+| `TIMEOUT` | 504 | budget/fonte |
+| `SOURCE_ERROR` | 502 | erro da fonte (msg sanitizada) |
+| `NOT_READY` | 409 | result antes da hora |
+| `NOT_FOUND` | 404 | queryId |
+| `INTERNAL` | 500 | bug |
+
+---
+
+## 6. MCP tool mapping (MVP)
+
+| Tool | Input | Output |
+|------|-------|--------|
+| `describe_catalog` | `{}` | body de `GET /v1/catalog` |
+| `execute_query` | Query IR | body de `POST /v1/queries` (sync ou accepted) |
+| `get_query` | `{ queryId }` | status e result se ready |
+
+---
+
+## 7. Compatibilidade e evolução
+
+- Additive (novos ops/campos opcionais) → bump **minor**
+- Remoção/renomeação/semântica breaking → bump **major**
+- Preset/catalog/IR/API compartilham o mesmo `protocolVersion` major.minor; patch só docs/bugfix de validação
+
+## 8. Checklist antes de implementar código
+
+- [ ] JSON Schemas em `planning/schemas/` batem com este doc (incl. `project`, `as`, `aliases`)
+- [ ] Discovery `--config-dir` / `--project` / flags explícitas documentada na CLI
+- [ ] Exemplos do harness usam entity names distintos por fonte REST
+- [ ] Capability matrix em `04-connectors.md` alinhada ao IR
+- [ ] Nenhuma tool de agente expõe SQL cru no default

@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qllm.dev/schemas/query-ir.schema.json",
+  "title": "qLLM Query IR",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["from", "select"],
+  "properties": {
+    "protocolVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "from": { "$ref": "#/$defs/entityRef" },
+    "as": { "$ref": "#/$defs/bindingName" },
+    "joins": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/join" }
+    },
+    "select": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/fieldRef" },
+          { "$ref": "#/$defs/aggExpr" }
+        ]
+      }
+    },
+    "where": { "$ref": "#/$defs/boolExpr" },
+    "groupBy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fieldRef" }
+    },
+    "orderBy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/orderExpr" }
+    },
+    "limit": { "type": "integer", "minimum": 1 },
+    "offset": { "type": "integer", "minimum": 0 },
+    "mode": {
+      "type": "string",
+      "enum": ["sync", "async"],
+      "default": "sync"
+    }
+  },
+  "$defs": {
+    "entityRef": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "entities[].name or entities[].aliases[] entry"
+    },
+    "bindingName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Query-local alias introduced by as"
+    },
+    "fieldRef": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$"
+    },
+    "join": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "on"],
+      "properties": {
+        "type": { "type": "string", "enum": ["inner", "left"] },
+        "from": { "$ref": "#/$defs/entityRef" },
+        "as": { "$ref": "#/$defs/bindingName" },
+        "on": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["left", "right"],
+            "properties": {
+              "left": { "$ref": "#/$defs/fieldRef" },
+              "right": { "$ref": "#/$defs/fieldRef" }
+            }
+          }
+        }
+      }
+    },
+    "aggExpr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agg", "as"],
+      "properties": {
+        "agg": {
+          "type": "string",
+          "enum": ["count", "sum", "avg", "min", "max"]
+        },
+        "field": { "$ref": "#/$defs/fieldRef" },
+        "as": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "agg": { "const": "count" } },
+            "required": ["agg"]
+          },
+          "then": {},
+          "else": { "required": ["field"] }
+        }
+      ]
+    },
+    "orderExpr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field"],
+      "properties": {
+        "field": { "$ref": "#/$defs/fieldRef" },
+        "dir": {
+          "type": "string",
+          "enum": ["asc", "desc"],
+          "default": "asc"
+        }
+      }
+    },
+    "boolExpr": {
+      "oneOf": [
+        { "$ref": "#/$defs/compareExpr" },
+        { "$ref": "#/$defs/logicExpr" },
+        { "$ref": "#/$defs/notExpr" }
+      ]
+    },
+    "compareOp": {
+      "type": "string",
+      "enum": [
+        "eq",
+        "neq",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "in",
+        "nin",
+        "contains",
+        "is_null",
+        "not_null"
+      ]
+    },
+    "compareExpr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "op"],
+      "properties": {
+        "field": { "$ref": "#/$defs/fieldRef" },
+        "op": { "$ref": "#/$defs/compareOp" },
+        "value": true
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": { "enum": ["is_null", "not_null"] }
+            }
+          },
+          "then": {
+            "not": { "required": ["value"] }
+          },
+          "else": {
+            "required": ["value"]
+          }
+        }
+      ]
+    },
+    "logicExpr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "args"],
+      "properties": {
+        "op": { "type": "string", "enum": ["and", "or"] },
+        "args": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/boolExpr" }
+        }
+      }
+    },
+    "notExpr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "args"],
+      "properties": {
+        "op": { "type": "string", "const": "not" },
+        "args": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/boolExpr" }
+        }
+      }
+    }
+  }
+}

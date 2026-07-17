@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qllm.dev/schemas/query-response.schema.json",
+  "title": "qLLM Query Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "queryId", "status"],
+  "properties": {
+    "protocolVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "queryId": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["accepted", "running", "succeeded", "failed", "canceled"]
+    },
+    "result": { "$ref": "#/$defs/result" },
+    "meta": { "$ref": "#/$defs/meta" },
+    "error": { "$ref": "#/$defs/errorBody" }
+  },
+  "$defs": {
+    "logicalType": {
+      "type": "string",
+      "enum": ["string", "number", "boolean", "timestamp", "json"]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["columns", "rows", "rowCount", "truncated"],
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "type"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "$ref": "#/$defs/logicalType" }
+            }
+          }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": ["string", "number", "boolean", "object", "null"]
+            }
+          }
+        },
+        "rowCount": { "type": "integer", "minimum": 0 },
+        "truncated": { "type": "boolean" }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "elapsedMs": { "type": "integer", "minimum": 0 },
+        "mode": { "type": "string", "enum": ["sync", "async"] },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "usedDuckDB": { "type": "boolean" },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source": { "type": "string" },
+                  "pushdown": { "type": "boolean" },
+                  "elapsedMs": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "errorBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVALID_IR",
+            "UNKNOWN_ENTITY",
+            "UNKNOWN_FIELD",
+            "AMBIGUOUS_FIELD",
+            "AMBIGUOUS_ALIAS",
+            "LIMIT_EXCEEDED",
+            "FORBIDDEN",
+            "UNSUPPORTED",
+            "CONFIG_ERROR",
+            "TIMEOUT",
+            "SOURCE_ERROR",
+            "NOT_READY",
+            "NOT_FOUND",
+            "INTERNAL"
+          ]
+        },
+        "message": { "type": "string" },
+        "details": { "type": "object" }
+      }
+    }
+  }
+}

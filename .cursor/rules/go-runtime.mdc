@@ -1,0 +1,16 @@
+---
+description: Go runtime conventions for qLLM
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Go runtime
+
+- Module: `qLLM`. Prefer `cmd/qllm` + `internal/...` until a stable public Go API exists.
+- Pass `context.Context` everywhere connectors run; honor cancel on budget timeout.
+- Validate IR/preset/catalog before planning; map failures to protocol error codes.
+- Connectors return normalized tabular batches; do not leak driver-specific types across the facade.
+- Apply `min(sourceTimeout, limits.maxSourceMs)` per source call.
+- Do not pull unbounded tables to “emulate” unsupported ops — return `UNSUPPORTED`.
+- Secrets only via env referenced by preset (`*Env` fields), never hardcode in repo.
+- Tests: table-driven for IR validation; integration tests against `deploy/dev` when harness exists.

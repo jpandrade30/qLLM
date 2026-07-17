@@ -1,0 +1,18 @@
+---
+description: Protocol/schema change discipline for preset, catalog, IR, API
+globs: planning/**/*.{md,json},**/schemas/**
+alwaysApply: false
+---
+
+# Protocol schemas
+
+- Source of truth: `planning/03-protocol-schemas.md` + `planning/schemas/*.schema.json`.
+- Any change to connections, entities, IR, or response shape must update **both** the md and JSON Schema in the same change.
+- Bump `protocolVersion` per `planning/01-decisions.md` (D11): additive → minor; breaking → major.
+- Keep logical catalog names separate from physical bindings (`physical`, `binding`).
+- Disambiguate same physical fields across sources via unique `entity.name` (+ optional catalog `aliases` / query `as`); never cite bare physical fields across entities.
+- Specs are YAML/JSON on disk; binary loads via `--config-dir` / `--project` / explicit paths (see `03` § 0).
+- Tabular results: `columns` + `rows` as arrays-of-arrays; logical types only.
+- Errors must use the typed `error.code` enum — no free-form-only failures on the wire.
+- Do not add mutate/write ops to IR in v0.1.
+- Prefer examples that match the demo harness entity names when illustrating.

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qllm.dev/schemas/project.schema.json",
+  "title": "qLLM Project Pointer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "preset", "catalog"],
+  "properties": {
+    "protocolVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "preset": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path to preset file, relative to this project file"
+    },
+    "catalog": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path to catalog file, relative to this project file"
+    }
+  }
+}
