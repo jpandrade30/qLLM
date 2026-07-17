@@ -424,6 +424,38 @@ CompareOp = eq|neq|gt|gte|lt|lte|in|nin|contains|is_null|not_null
 7. Ops não suportadas pela fonte → planner marca local ou rejeita com `UNSUPPORTED`.
 8. `readOnly: true` → IR não tem mutação (v0.1 nem define mutate).
 
+### Agent contract (LLM)
+
+Runtime fonte: **`GET /v1/howtouseme`** (HTTP) ou tool MCP **`how_to_use_me`**. Agentes devem chamar isso **antes** de montar IR.
+
+**Never**
+
+- Gerar SQL / Mongo / GraphQL / URLs REST como API do agente.
+- Inventar entity/field/FK — só o catalog.
+- Escrever `where` como `{"and":[...]}` — forma canônica: `{"op":"and","args":[...]}`.
+- Usar operadores SQL (`=`, `>=`, `LIKE`) — usar `eq`, `gte`, `contains`, …
+- Assumir HAVING, DISTINCT, UNION, CASE, subquery, expressões aritméticas.
+
+**Where — válido vs inválido**
+
+```json
+// válido
+{ "op": "and", "args": [
+  { "field": "status", "op": "eq", "value": "paid" },
+  { "field": "total", "op": "gte", "value": 10 }
+]}
+
+// inválido (shape Mongo) — o runtime rejeita com mensagem prescritiva
+{ "and": [ { "field": "status", "op": "eq", "value": "paid" } ] }
+```
+
+**FieldRef**
+
+- 1 entidade: bare OK (`email`).
+- Com joins / `as`: preferir **sempre** `binding.field` (`c.id`). Não misturar `customers.id` e `c.id` na mesma query.
+
+**groupBy:** todo campo bare no `select` que não é agg **deve** aparecer em `groupBy`.
+
 ---
 
 ## 4. API HTTP
@@ -436,7 +468,19 @@ Base path: `/v1`
 { "ok": true, "protocolVersion": "0.1.0" }
 ```
 
-### 4.2 `GET /v1/catalog`
+### 4.2 `GET /v1/howtouseme`
+
+Contrato fechado para LLM/agente (mesmo payload da tool MCP `how_to_use_me`):
+
+- `workflow`, `never`, `notSupported`
+- `where` (shapes canônicas + anti-exemplo `{and:[…]}` → fix `{op,args}`)
+- `fieldRefRules`, `joinRules`, `aggregateRules`, `orderByRules`, `grammar`
+- `examples` + `invalidExamples`
+- `project` (entityNames, limits)
+
+Chamar **antes** de inventar queries; depois `GET /v1/catalog` para fields/relations.
+
+### 4.3 `GET /v1/catalog`
 
 Resposta: catalog efetivo (entities + fields + relations + capabilities resumidas por source).
 
@@ -463,7 +507,7 @@ Resposta: catalog efetivo (entities + fields + relations + capabilities resumida
 }
 ```
 
-### 4.3 `POST /v1/queries`
+### 4.4 `POST /v1/queries`
 
 Request body = Query IR.
 
@@ -511,7 +555,7 @@ Request body = Query IR.
 
 Nota: mesmo em async, o job respeita `maxSyncMs` / budget; status final será `succeeded` ou `failed` rapidamente.
 
-### 4.4 `GET /v1/queries/{queryId}`
+### 4.5 `GET /v1/queries/{queryId}`
 
 ```json
 {
@@ -524,7 +568,7 @@ Nota: mesmo em async, o job respeita `maxSyncMs` / budget; status final será `s
 
 Statuses: `accepted` | `running` | `succeeded` | `failed` | `canceled`
 
-### 4.5 `GET /v1/queries/{queryId}/result`
+### 4.6 `GET /v1/queries/{queryId}/result`
 
 - `200` + mesmo shape de `result` + `meta` se `succeeded`
 - `409` se ainda não pronto
@@ -580,6 +624,7 @@ Todo erro de API:
 
 | Tool | Input | Output |
 |------|-------|--------|
+| `how_to_use_me` | `{}` | body de `GET /v1/howtouseme` (contrato LLM) |
 | `describe_catalog` | `{}` | body de `GET /v1/catalog` |
 | `execute_query` | Query IR | body de `POST /v1/queries` (sync ou accepted) |
 | `get_query` | `{ queryId }` | status e result se ready |

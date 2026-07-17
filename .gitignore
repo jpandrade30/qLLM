@@ -1,0 +1,6 @@
+*.exe
+/qllm
+/qllm.exe
+.DS_Store
+tmp/
+*.log

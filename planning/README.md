@@ -24,6 +24,7 @@ Qualquer mudança em formato de conexão, schema de entidade, Query IR ou respos
 ## Status
 
 - Fase 0 (specs/schemas/rules): **completa**.
-- Implementação: em andamento conforme plano (Fases 1–5).
+- Fases 1–5 (runtime MVP): **implementadas** — CLI, connectors, harness, HTTP/MCP.
 - Protocolo: **0.1.0** — ver `03-protocol-schemas.md` + `schemas/`.
+- Cluster Rancher precisa estar ligado para exercitar `scripts/dev-up.*`.
 

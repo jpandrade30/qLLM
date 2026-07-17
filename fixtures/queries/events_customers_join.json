@@ -1,0 +1,15 @@
+{
+  "protocolVersion": "0.1.0",
+  "from": "events",
+  "as": "e",
+  "joins": [
+    {
+      "type": "left",
+      "from": "customers",
+      "as": "c",
+      "on": [{ "left": "e.customer_id", "right": "c.id" }]
+    }
+  ],
+  "select": ["e.id", "e.type", "c.email"],
+  "limit": 100
+}

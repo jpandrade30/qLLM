@@ -4,12 +4,11 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ---
 
-### D01 — Core em Go + DuckDB local
+### D01 — Core em Go + compute local (DuckDB-ready)
 
-- **Decisão:** Runtime principal em Go; DuckDB só para join/agg/cálculo local pós-fetch.
-- **Por quê:** Binário único multiplataforma; concurrency para N fontes; DuckDB é cola analítica sem virar warehouse.
-- **Consequência:** Single-source com pushdown nativo pode pular DuckDB. Embed via go-duckdb (ou subprocess se necessário — preferir embed).
-
+- **Decisão:** Runtime principal em Go; joins/aggs cross-source no motor local (`internal/duckdblocal`). MVP usa implementação pure Go (sem CGO) com a mesma interface; DuckDB embutido pode substituir depois.
+- **Por quê:** Binário único multiplataforma; concurrency para N fontes; evita bloqueio de toolchain CGO no Windows.
+- **Consequência:** Single-source com pushdown nativo pode pular o motor local. Flag `meta.plan.usedDuckDB` indica compute local.
 ### D02 — Contrato público = JSON (preset, catalog, IR, API)
 
 - **Decisão:** Tudo que cruza fronteira é JSON validável (JSON Schema).

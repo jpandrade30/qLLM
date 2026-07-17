@@ -1,0 +1,20 @@
+{
+  "protocolVersion": "0.1.0",
+  "from": "invoices",
+  "as": "inv",
+  "joins": [
+    {
+      "type": "left",
+      "from": "customers",
+      "as": "c",
+      "on": [{ "left": "inv.customer_id", "right": "c.id" }]
+    }
+  ],
+  "select": ["inv.id", "c.email", "inv.total"],
+  "where": {
+    "field": "inv.status",
+    "op": "eq",
+    "value": "paid"
+  },
+  "limit": 100
+}

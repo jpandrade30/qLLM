@@ -1,0 +1,7 @@
+{
+  "protocolVersion": "0.1.0",
+  "from": "customers",
+  "select": ["id", "email"],
+  "orderBy": [{ "field": "email", "dir": "asc" }],
+  "limit": 10
+}

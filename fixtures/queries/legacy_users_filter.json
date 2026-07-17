@@ -1,0 +1,7 @@
+{
+  "protocolVersion": "0.1.0",
+  "from": "legacy_users",
+  "select": ["id", "email"],
+  "where": { "field": "email", "op": "eq", "value": "alice@example.com" },
+  "limit": 10
+}

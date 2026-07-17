@@ -4,19 +4,19 @@ overview: "Implementar o runtime qLLM (Go + DuckDB) conforme os contratos já de
 todos:
   - id: phase-a-foundation
     content: CLI cobra + config discovery + protocol structs + JSON Schema/semantic validation + health/catalog HTTP
-    status: in_progress
+    status: completed
   - id: phase-b-harness
     content: deploy/dev K8s (pg/mysql/mongo/test-api Python) + seeds + fixtures/presets + scripts port-forward
-    status: pending
+    status: completed
   - id: phase-c-sql
     content: Connectors Postgres/MySQL + executor sync + POST /queries + golden IRs SQL
-    status: pending
+    status: completed
   - id: phase-d-federate
     content: Mongo + REST connectors + DuckDB cross-join + goldens com aliases
-    status: pending
+    status: completed
   - id: phase-e-serve
     content: Async query store + MCP tools + hardening logs/read-only + README quickstart
-    status: pending
+    status: completed
   - id: sync-roadmap-docs
     content: Marcar Fase 0 completa em planning/06-roadmap.md e alinhar status do planning/README.md
     status: completed

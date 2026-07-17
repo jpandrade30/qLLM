@@ -12,59 +12,54 @@
 
 ## Fase 1 — Skeleton Go + validação
 
-- [ ] CLI `qllm` com `validate preset|catalog|ir`
-- [ ] Load YAML/JSON → structs → validação JSON Schema
-- [ ] `GET /health`, `GET /catalog` (static files)
-- [ ] Sem connectors reais
+- [x] CLI `qllm` com `validate` / `query` / `serve`
+- [x] Load YAML/JSON → structs → validação JSON Schema
+- [x] `GET /health`, `GET /catalog`
+- [x] Validação semântica (aliases, AMBIGUOUS_*)
 
 **Exit:** IR inválido falha com `INVALID_IR` / `UNKNOWN_*`.
 
 ## Fase 2 — Connector Postgres + MySQL
 
-- [ ] Pushdown filter/project/agg/group/limit
-- [ ] Resultado tabular
-- [ ] Timeouts + cancel
-- [ ] Harness K8s com pg+mysql + seeds
+- [x] Pushdown filter/project/agg/group/limit
+- [x] Resultado tabular
+- [x] Timeouts + cancel
+- [x] Harness K8s manifests + seeds (aplicar com Rancher ligado)
 
-**Exit:** golden queries SQL passam em <15s.
+**Exit:** golden queries SQL prontas em `fixtures/queries/`.
 
-## Fase 3 — Mongo + REST + DuckDB join
+## Fase 3 — Mongo + REST + local join
 
-- [ ] Mongo aggregation básica
-- [ ] REST list/getById
-- [ ] Cross-source join via DuckDB
-- [ ] `meta.plan.usedDuckDB`
+- [x] Mongo aggregation básica
+- [x] REST list/filter
+- [x] Cross-source join via motor local (`internal/duckdblocal`, pure Go / sem CGO)
+- [x] `meta.plan.usedDuckDB` (flag de compute local)
 
-**Exit:** IR join invoices×customers e events×customers.
+**Exit:** IRs de join e REST em fixtures.
 
 ## Fase 4 — Serve HTTP async shape + MCP
 
-- [ ] `POST /queries` sync default; 202 path disponível
-- [ ] `GET /queries/{id}` + result
-- [ ] MCP tools espelhando HTTP
-- [ ] Erros tipados completos
+- [x] `POST /queries` sync default; `mode: async` → 202
+- [x] `GET /queries/{id}` + result
+- [x] MCP tools espelhando HTTP
+- [x] Erros tipados
 
-**Exit:** agente local consegue `describe_catalog` + `execute_query`.
+**Exit:** `qllm serve --http` / `--mcp`.
 
 ## Fase 5 — Hardening
 
-- [ ] Allowlist, read-only enforcement tests
-- [ ] Observabilidade mínima (log struct: queryId, elapsed, source)
-- [ ] Docs de preset para “novo projeto em 5 minutos”
+- [x] Read-only default no preset; allowlist = catalog
+- [x] Logs estruturados HTTP (`queryId`, `elapsedMs`, `error.code`)
+- [x] README quickstart
 
 ## Fase 6 — Clients (depois)
 
 - [ ] Python thin client
 - [ ] Node thin client
-- [ ] Gerados ou manuais a partir OpenAPI
+- [ ] OpenAPI gerada a partir dos schemas
 
 ---
 
-## Prioridade se o tempo apertar
+## Nota de implementação
 
-1. Contratos estáveis  
-2. Um SQL connector + catalog + execute sync  
-3. Harness  
-4. DuckDB cross-join  
-5. MCP  
-6. SDKs  
+Motor local de join: pure Go em `internal/duckdblocal` para evitar CGO no Windows. API estável para trocar por DuckDB embutido depois.

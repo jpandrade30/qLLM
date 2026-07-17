@@ -1,0 +1,63 @@
+protocolVersion: "0.1.0"
+project: qllm-demo
+limits:
+  maxSyncMs: 15000
+  maxSourceMs: 12000
+  defaultLimit: 100
+  maxLimit: 1000
+  readOnly: true
+sources:
+  - id: crm_pg
+    type: postgres
+    connection:
+      hostEnv: QLLM_CRM_PG_HOST
+      port: 5432
+      database: crm
+      userEnv: QLLM_CRM_PG_USER
+      passwordEnv: QLLM_CRM_PG_PASSWORD
+      sslMode: disable
+    options:
+      statementTimeoutMs: 12000
+
+  - id: billing_mysql
+    type: mysql
+    connection:
+      hostEnv: QLLM_BILLING_MYSQL_HOST
+      port: 3306
+      database: billing
+      userEnv: QLLM_BILLING_MYSQL_USER
+      passwordEnv: QLLM_BILLING_MYSQL_PASSWORD
+
+  - id: events_mongo
+    type: mongodb
+    connection:
+      uriEnv: QLLM_EVENTS_MONGO_URI
+      database: events
+
+  - id: legacy_api
+    type: rest
+    connection:
+      baseUrlEnv: QLLM_LEGACY_API_BASE_URL
+      auth:
+        type: none
+    options:
+      timeoutMs: 10000
+      resources:
+        users:
+          list:
+            method: GET
+            path: /users
+            queryParams: [email, country, limit, offset]
+          getById:
+            method: GET
+            path: /users/{id}
+        products:
+          list:
+            method: GET
+            path: /products
+            queryParams: [category, limit, offset]
+        tickets:
+          list:
+            method: GET
+            path: /tickets
+            queryParams: [status, customer_id, limit, offset]

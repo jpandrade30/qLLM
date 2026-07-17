@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+  namespace: qllm-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-api
+  template:
+    metadata:
+      labels:
+        app: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: python:3.12-slim
+          workingDir: /app
+          command: ["sh", "-c"]
+          args:
+            - pip install --no-cache-dir fastapi uvicorn && python /app/main.py
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: code
+              mountPath: /app
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: code
+          configMap:
+            name: test-api-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-api
+  namespace: qllm-dev
+spec:
+  selector:
+    app: test-api
+  ports:
+    - port: 8080
+      targetPort: 8080

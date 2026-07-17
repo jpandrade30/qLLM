@@ -1,0 +1,17 @@
+{
+  "protocolVersion": "0.1.0",
+  "from": "invoices",
+  "select": [
+    "customer_id",
+    { "agg": "sum", "field": "total", "as": "revenue" },
+    { "agg": "count", "as": "n" }
+  ],
+  "where": {
+    "field": "status",
+    "op": "eq",
+    "value": "paid"
+  },
+  "groupBy": ["customer_id"],
+  "orderBy": [{ "field": "revenue", "dir": "desc" }],
+  "limit": 50
+}
