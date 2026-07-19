@@ -45,11 +45,41 @@ Or CLI:
 
 ### MCP
 
+**STDIO** (Inspector local):
+
 ```bash
 ./qllm serve --mcp --config-dir ./fixtures/presets
 ```
 
+**Streamable HTTP + SSE** (Jupyter / LangChain / remote Inspector) — no auth; use only on trusted network or localhost:
+
+```bash
+./qllm serve --mcp-http --mcp-addr :8089 --config-dir ./fixtures/presets
+# or together with REST:
+./qllm serve --http --addr :8088 --mcp-http --mcp-addr :8089 --config-dir ./fixtures/presets
+```
+
+| Path | Transport |
+|------|-----------|
+| `http://127.0.0.1:8089/mcp` | Streamable HTTP (LangChain) |
+| `http://127.0.0.1:8089/sse` | SSE (legacy Inspector) |
+
+```python
+# pip install langchain-mcp-adapters
+from langchain_mcp_adapters.client import MultiServerMCPClient
+
+client = MultiServerMCPClient({
+    "qllm": {
+        "transport": "streamable_http",
+        "url": "http://127.0.0.1:8089/mcp",
+    }
+})
+tools = await client.get_tools()
+```
+
 Tools: `how_to_use_me`, `describe_catalog`, `execute_query`, `get_query`.
+
+Requires Go **1.25+** toolchain (deps). `mcp-go` is pinned at **v0.48.0**; with Go 1.25.5+ you can later bump toward `v0.56`.
 
 ## Dev shell (gcc + CGO + duckdblib)
 

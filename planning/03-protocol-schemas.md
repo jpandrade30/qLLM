@@ -629,6 +629,18 @@ Todo erro de API:
 | `execute_query` | Query IR | body de `POST /v1/queries` (sync ou accepted) |
 | `get_query` | `{ queryId }` | status e result se ready |
 
+### Transportes
+
+| Modo | CLI | Endpoint |
+|------|-----|----------|
+| stdio | `qllm serve --mcp` | processo (Inspector STDIO) |
+| Streamable HTTP | `qllm serve --mcp-http --mcp-addr :8089` | `POST/GET http://host:8089/mcp` |
+| SSE (legado) | mesmo `--mcp-http` | `GET http://host:8089/sse` + `/message` |
+
+`--mcp` (stdio) é exclusivo; `--http` e `--mcp-http` podem coexistir em portas distintas.
+
+**Segurança:** MCP HTTP sem autenticação no MVP — expor só em localhost / rede confiável / tunnel.
+
 ---
 
 ## 7. Compatibilidade e evolução

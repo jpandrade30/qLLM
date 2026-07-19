@@ -5,7 +5,7 @@
 ```text
 ┌─────────────────────────────────────────────────────────┐
 │  Clients (agent tool / curl / future py/node SDK)       │
-│  HTTP JSON  and/or  MCP stdio                           │
+│  HTTP JSON  and/or  MCP (stdio | streamable-http | SSE) │
 └──────────────────────────┬──────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────┐
@@ -72,6 +72,8 @@ Detalhes normativos: [03-protocol-schemas.md](03-protocol-schemas.md) § Project
 |------|-----|
 | `qllm serve --http --config-dir …` | API atrás de ingress / local |
 | `qllm serve --mcp --config-dir …` | Agente local via stdio (sem ingress) |
+| `qllm serve --mcp-http --mcp-addr :8089 …` | MCP Streamable HTTP `/mcp` + SSE `/sse` (Jupyter/LangChain) |
+| `qllm serve --http --mcp-http …` | REST `/v1` e MCP HTTP em portas distintas |
 | `qllm query --config-dir … -f ir.json` | CLI one-shot (dev) |
 
 ## Layout de repo (alvo)

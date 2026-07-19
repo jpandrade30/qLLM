@@ -17,6 +17,7 @@ import (
 	"qLLM/internal/validate"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -108,9 +109,14 @@ func main() {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			httpMode, _ := cmd.Flags().GetBool("http")
 			mcpMode, _ := cmd.Flags().GetBool("mcp")
+			mcpHTTP, _ := cmd.Flags().GetBool("mcp-http")
 			addr, _ := cmd.Flags().GetString("addr")
-			if !httpMode && !mcpMode {
+			mcpAddr, _ := cmd.Flags().GetString("mcp-addr")
+			if !httpMode && !mcpMode && !mcpHTTP {
 				httpMode = true
+			}
+			if mcpMode && (httpMode || mcpHTTP) {
+				return fmt.Errorf("--mcp (stdio) cannot be combined with --http or --mcp-http")
 			}
 			p, c, _, err := config.LoadBundle(opts())
 			if err != nil {
@@ -127,21 +133,34 @@ func main() {
 			defer reg.Close()
 			store := querystore.New(2 * time.Minute)
 			exec := executor.New(idx, reg, store)
+			mcpSrv := mcpserver.New(idx, exec, store)
+
 			if mcpMode {
-				return mcpserver.Run(idx, exec, store)
+				return mcpserver.RunStdio(mcpSrv)
 			}
+
+			g, _ := errgroup.WithContext(context.Background())
 			if httpMode {
-				fmt.Fprintf(os.Stderr, "qllm http listening on %s\n", addr)
-				srv := &httpserver.Server{Idx: idx, Exec: exec, Store: store}
-				return httpserver.ListenAndServe(addr, srv)
+				g.Go(func() error {
+					fmt.Fprintf(os.Stderr, "qllm http listening on %s\n", addr)
+					srv := &httpserver.Server{Idx: idx, Exec: exec, Store: store}
+					return httpserver.ListenAndServe(addr, srv)
+				})
 			}
-			return nil
+			if mcpHTTP {
+				g.Go(func() error {
+					return mcpserver.ListenAndServe(mcpAddr, mcpSrv)
+				})
+			}
+			return g.Wait()
 		},
 	}
 	addConfigFlags(serveCmd)
 	serveCmd.Flags().Bool("http", false, "serve HTTP /v1 API")
-	serveCmd.Flags().Bool("mcp", false, "serve MCP on stdio")
-	serveCmd.Flags().String("addr", ":8088", "HTTP listen address")
+	serveCmd.Flags().Bool("mcp", false, "serve MCP on stdio (exclusive)")
+	serveCmd.Flags().Bool("mcp-http", false, "serve MCP Streamable HTTP (/mcp) + SSE (/sse) ")
+	serveCmd.Flags().String("addr", ":8088", "HTTP /v1 listen address")
+	serveCmd.Flags().String("mcp-addr", ":8089", "MCP HTTP listen address")
 
 	root.AddCommand(validateCmd, queryCmd, serveCmd)
 	if err := root.Execute(); err != nil {

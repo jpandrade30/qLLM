@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 
 	"qLLM/internal/agentguide"
@@ -16,7 +17,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-func Run(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store) error {
+// New registers MCP tools on a transport-agnostic MCPServer.
+func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store) *server.MCPServer {
 	s := server.NewMCPServer("qllm", protocol.ProtocolVersion)
 
 	s.AddTool(mcp.NewTool("how_to_use_me",
@@ -44,7 +46,6 @@ func Run(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 		mcp.WithString("ir", mcp.Required(), mcp.Description("Query IR as JSON string or object fields at top-level")),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		var q protocol.QueryIR
-		// Prefer structured arguments matching IR fields
 		raw, _ := json.Marshal(req.Params.Arguments)
 		if err := json.Unmarshal(raw, &q); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -86,6 +87,53 @@ func Run(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 		return mcp.NewToolResultText(string(b)), nil
 	})
 
+	return s
+}
+
+// RunStdio serves MCP over stdio (Inspector / local agents).
+func RunStdio(mcpServer *server.MCPServer) error {
 	fmt.Fprintln(os.Stderr, "qllm mcp server starting on stdio")
-	return server.ServeStdio(s)
+	return server.ServeStdio(mcpServer)
+}
+
+// Run is kept for callers that still pass idx/exec/store directly (stdio).
+func Run(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store) error {
+	return RunStdio(New(idx, exec, store))
+}
+
+// Handler returns the MCP HTTP mux (Streamable /mcp + SSE /sse,/message) with CORS.
+func Handler(mcpServer *server.MCPServer) http.Handler {
+	streamable := server.NewStreamableHTTPServer(mcpServer,
+		server.WithEndpointPath("/mcp"),
+		server.WithStateLess(true),
+	)
+	sseServer := server.NewSSEServer(mcpServer,
+		server.WithSSEEndpoint("/sse"),
+		server.WithMessageEndpoint("/message"),
+	)
+
+	mux := http.NewServeMux()
+	mux.Handle("/mcp", withCORS(streamable))
+	mux.Handle("/sse", withCORS(sseServer))
+	mux.Handle("/message", withCORS(sseServer))
+	return mux
+}
+
+// ListenAndServe serves Streamable HTTP at /mcp and SSE at /sse + /message.
+func ListenAndServe(addr string, mcpServer *server.MCPServer) error {
+	fmt.Fprintf(os.Stderr, "qllm mcp-http listening on %s (/mcp streamable, /sse SSE)\n", addr)
+	return http.ListenAndServe(addr, Handler(mcpServer))
+}
+
+func withCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Accept, Mcp-Session-Id, Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
