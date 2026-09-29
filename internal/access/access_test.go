@@ -78,6 +78,29 @@ func TestExpandKeyEmptyEnv(t *testing.T) {
 	}
 }
 
+func TestLookupBearerDifferentLengths(t *testing.T) {
+	idx := testIdx(t)
+	reg, err := Resolve(&protocol.AccessFile{Apps: []protocol.AccessApp{
+		{Name: "crm", Key: "short", Tables: []string{"customers"}},
+		{Name: "bill", Key: "much-longer-key", Tables: []string{"invoices"}},
+	}}, idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a := reg.LookupBearer("short"); a == nil || a.Name != "crm" {
+		t.Fatalf("short: %+v", a)
+	}
+	if a := reg.LookupBearer("much-longer-key"); a == nil || a.Name != "bill" {
+		t.Fatalf("long: %+v", a)
+	}
+	if a := reg.LookupBearer("nope"); a != nil {
+		t.Fatalf("miss leaked %s", a.Name)
+	}
+	if a := reg.LookupBearer(""); a != nil {
+		t.Fatalf("empty leaked %s", a.Name)
+	}
+}
+
 func TestUnknownTable(t *testing.T) {
 	idx := testIdx(t)
 	_, err := Resolve(&protocol.AccessFile{Apps: []protocol.AccessApp{

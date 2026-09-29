@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://qllm.dev/schemas/env-file.schema.json",
   "title": "qLLM Env File",
-  "description": "Optional qllm.env.yaml: seed process env from YAML. Existing process env wins (K8s Secret). Not Query IR. Do not log values.",
+  "description": "Optional qllm.env.yaml: seed process env from YAML. Existing non-empty process env wins (K8s Secret). Values may be literals or exactly ${ENV_NAME} (expanded from process env; empty NAME is not written). Not Query IR. Do not log values.",
   "type": "object",
   "additionalProperties": false,
   "required": ["env"],

@@ -85,7 +85,7 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 - **Decisão:** Bind addresses, Bearer auth (`authTokenEnv`), CORS allowlist, body size caps e `insecureBind` vivem em `qllm.config.yaml` (opcional) ou flags CLI — **não** no preset. Preset continua sources + limits + `*Env` de conexões.
 - **Por quê:** Preset é o contrato de dados (Query IR / catalog); serve é superfície de exposição. Misturar CORS/auth no preset acopla deploy a catalogs versionados.
-- **Consequência:** Defaults seguros (loopback, CORS off). Precedência: defaults → `qllm.config.*` → flags. Segredo do token só via env. Schema: `schemas/runtime-config.schema.json`.
+- **Consequência:** Defaults seguros (loopback, CORS off). Precedência: defaults → `qllm.config.*` → flags. Segredo do token só via env. Comparação Bearer: HMAC-SHA256 com pepper de processo (`qllm-bearer-compare-v1`) + `hmac.Equal` (digest de 32 bytes; não ramifica em `len(token)`). Schema: `schemas/runtime-config.schema.json`. `qllm.env.yaml` pode usar `${VAR}` (um token, igual access `key`); processo/Secret ganha; placeholder vazio não é gravado.
 
 ### D15 — Dialeto SQL versionado ao lado do Query IR
 

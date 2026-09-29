@@ -19,7 +19,7 @@ As specs de **onde estão os bancos/APIs** e **o que se pode consultar** são YA
 | `qllm.project.yaml` (ou `.json`) | não | ponteiro para preset/catalog |
 | `qllm.config.yaml` (ou `.json`) | não | serve: bind, authTokenEnv, CORS, body caps (D14) |
 | `qllm.access.yaml` (ou `.json`) | não | apps, keys, tabelas (D16); ausente = Bearer único / catalog inteiro |
-| `qllm.env.yaml` (ou `.json`) | não | mapa `env:` nome→valor; preenche variáveis **vazias** no processo (preset `*Env` / `authTokenEnv`). Env já setado (K8s Secret) ganha. |
+| `qllm.env.yaml` (ou `.json`) | não | mapa `env:` nome→valor ou `${VAR}`; preenche variáveis **vazias** no processo. Env já setado (K8s Secret) ganha; `${MISSING}` não grava o placeholder. |
 
 ### `qllm.project.yaml` (opcional)
 
@@ -103,17 +103,17 @@ apps:
 
 ### `qllm.env.yaml` (opcional — seed de env)
 
-JSON Schema: [`schemas/env-file.schema.json`](schemas/env-file.schema.json). Valores para `*Env` do preset / `authTokenEnv` sem `ENV` no Dockerfile.
+JSON Schema: [`schemas/env-file.schema.json`](schemas/env-file.schema.json). Valores para `*Env` do preset / `authTokenEnv` sem `ENV` no Dockerfile. Secrets: exatamente `${ENV_NAME}` (mesmo token que access `key`); ApplyEnvFile lê `os.Getenv(NAME)` e **não** grava a string `${NAME}` se estiver vazia. Literais continuam válidos (hosts DNS). Placeholder malformado (`${}`, `${A}suffix`) → `CONFIG_ERROR`.
 
 ```yaml
 env:
-  QLLM_AUTH_TOKEN: change-me
+  QLLM_AUTH_TOKEN: ${QLLM_AUTH_TOKEN}
   QLLM_CRM_PG_HOST: postgres
   QLLM_CRM_PG_USER: qllm
-  QLLM_CRM_PG_PASSWORD: qllm
+  QLLM_CRM_PG_PASSWORD: ${QLLM_CRM_PG_PASSWORD}
 ```
 
-Processo já tem a variável (Secret do Kubernetes) → YAML **não** sobrescreve. Valores nunca vão para log.
+Processo já tem a variável não-vazia (Secret / compose `environment:`) → YAML **não** sobrescreve. Valores nunca vão para log. `protocolVersion` inalterado.
 
 ---
 
@@ -728,7 +728,7 @@ Descriptions MCP no `serve` interpolam nomes do **catalog carregado** (teto ~4k 
 
 `--mcp` (stdio) é exclusivo; `--http` e `--mcp-http` podem coexistir em portas distintas.
 
-**Segurança (D14/D16):** Bearer opcional via `authTokenEnv`, **ou** keys em `qllm.access.yaml`. CORS allowlist só no MCP HTTP. Defaults loopback; bind não-loopback sem token/key exige `insecureBind`. Stdio MCP é process-local; com access file exige `--app`.
+**Segurança (D14/D16):** Bearer opcional via `authTokenEnv`, **ou** keys em `qllm.access.yaml`. Compare HMAC-SHA256 + `hmac.Equal` (pepper `qllm-bearer-compare-v1`; sem short-circuit de `len`). CORS allowlist só no MCP HTTP. Defaults loopback; bind não-loopback sem token/key exige `insecureBind`. Stdio MCP é process-local; com access file exige `--app`.
 
 ---
 

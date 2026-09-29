@@ -1,13 +1,13 @@
 package serveauth
 
 import (
-	"crypto/subtle"
 	"encoding/json"
 	"net/http"
 	"strings"
 
 	"qLLM/internal/access"
 	"qLLM/internal/appctx"
+	"qLLM/internal/cryptox"
 	"qLLM/internal/protocol"
 )
 
@@ -17,7 +17,6 @@ func Middleware(token string, next http.Handler) http.Handler {
 	if token == "" {
 		return next
 	}
-	want := []byte(token)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
 			next.ServeHTTP(w, r)
@@ -28,7 +27,7 @@ func Middleware(token string, next http.Handler) http.Handler {
 			return
 		}
 		got := bearerToken(r.Header.Get("Authorization"))
-		if !secureEqual(got, want) {
+		if !secureEqual(got, token) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(protocol.ErrorResponse{
@@ -79,14 +78,8 @@ func bearerToken(h string) string {
 	return strings.TrimSpace(h[len(p):])
 }
 
-func secureEqual(got string, want []byte) bool {
-	gb := []byte(got)
-	if len(gb) != len(want) {
-		// Compare against want to keep work closer to constant when lengths differ.
-		_ = subtle.ConstantTimeCompare(want, want)
-		return false
-	}
-	return subtle.ConstantTimeCompare(gb, want) == 1
+func secureEqual(got, want string) bool {
+	return cryptox.HMACEqual(got, want)
 }
 
 // MaxBytes limits request body size (0 = no limit).

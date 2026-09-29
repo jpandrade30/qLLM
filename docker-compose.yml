@@ -58,6 +58,10 @@ services:
 
   qllm:
     build: .
+    environment:
+      QLLM_AUTH_TOKEN: change-me
+      QLLM_CRM_PG_PASSWORD: qllm
+      QLLM_BILLING_MYSQL_PASSWORD: qllm
     ports:
       - "8088:8088"
       - "8089:8089"

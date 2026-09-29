@@ -1,13 +1,13 @@
 package access
 
 import (
-	"crypto/subtle"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
 
 	"qLLM/internal/catalogidx"
+	"qLLM/internal/cryptox"
 	"qLLM/internal/protocol"
 	"qLLM/internal/validate"
 )
@@ -80,18 +80,12 @@ func expandKey(raw string, idx int) (string, *protocol.ProtocolError) {
 }
 
 func (r *Registry) LookupBearer(token string) *App {
-	if r == nil || token == "" {
+	if r == nil {
 		return nil
 	}
-	got := []byte(token)
 	var found *App
 	for _, a := range r.Apps {
-		want := []byte(a.Key)
-		if len(got) != len(want) {
-			_ = subtle.ConstantTimeCompare(want, want)
-			continue
-		}
-		if subtle.ConstantTimeCompare(got, want) == 1 {
+		if cryptox.HMACEqual(token, a.Key) {
 			found = a
 		}
 	}

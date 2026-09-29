@@ -22,7 +22,7 @@ deploy/image/config/
   qllm.preset.yaml          # sources / *Env
   qllm.catalog.yaml         # entidades / fields / bindings
   qllm.config.yaml          # bind 0.0.0.0
-  qllm.env.yaml             # compose DNS + token (container)
+  qllm.env.yaml             # compose DNS; secrets as ${VAR} (container)
   qllm.env.host.yaml        # documentação: localhost no host (não é qllm.env.yaml)
 fixtures/
   datasets/v1/              # JSON lógico congelado + manifest hashes
@@ -65,7 +65,7 @@ pytest fixtures/sqlcheck
 MCP gate: Streamable HTTP `http://127.0.0.1:8089/mcp` Bearer `change-me`. Compare `execute_sql` rows to `fixtures/goldens/sql-v1/expected`. Matrix tags in `cases.yaml` must cover every connector and every dialect-07 family (including composed statements); CI fails if a required tag is missing. CI must not regenerate goldens.
 
 
-HTTP: `Authorization: Bearer change-me` (valor em `deploy/image/config/qllm.env.yaml`).
+HTTP: `Authorization: Bearer change-me` (compose injeta `QLLM_AUTH_TOKEN`; `qllm.env.yaml` só tem `${QLLM_AUTH_TOKEN}`).
 
 Host binário (sem container qllm): `--config-dir deploy/image/config` e env de [`qllm.env.host.yaml`](../deploy/image/config/qllm.env.host.yaml) (`127.0.0.1`). Process env ganha de `qllm.env.yaml` (DNS compose).
 

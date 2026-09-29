@@ -12,7 +12,7 @@ Machine-readable contracts for protocol **0.1.0**.
 | [runtime-config.schema.json](runtime-config.schema.json) | Optional `qllm.config.yaml` serve/runtime settings (not Query IR) |
 | [sql-request.schema.json](sql-request.schema.json) | `POST /v1/sql` / MCP `execute_sql` body |
 | [access.schema.json](access.schema.json) | Optional `qllm.access.yaml` apps/keys/tables |
-| [env-file.schema.json](env-file.schema.json) | Optional `qllm.env.yaml` — seed `os` env (process env wins) |
+| [env-file.schema.json](env-file.schema.json) | Optional `qllm.env.yaml` — seed `os` env (literals or `${VAR}`; process env wins) |
 
 Human-readable rules and examples: [../03-protocol-schemas.md](../03-protocol-schemas.md) (§ 0 layout, § 0.1 naming). SQL dialect inventory: [../07-sql-dialect.md](../07-sql-dialect.md).
 

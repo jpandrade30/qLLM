@@ -36,6 +36,19 @@ func TestMiddlewareReject(t *testing.T) {
 	}
 }
 
+func TestMiddlewareWrongLength(t *testing.T) {
+	h := Middleware("secret", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	req := httptest.NewRequest(http.MethodGet, "/v1/catalog", nil)
+	req.Header.Set("Authorization", "Bearer se")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status=%d", rec.Code)
+	}
+}
+
 func TestMiddlewareHealthExempt(t *testing.T) {
 	h := Middleware("secret", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

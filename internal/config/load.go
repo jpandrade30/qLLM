@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"qLLM/internal/protocol"
@@ -12,6 +13,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+var envPlaceholder = regexp.MustCompile(`^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$`)
 
 type Paths struct {
 	Preset  string
@@ -186,11 +189,36 @@ func ApplyEnvFile(configDir string) error {
 		if os.Getenv(k) != "" {
 			continue
 		}
-		if err := os.Setenv(k, v); err != nil {
+		val, skip, perr := expandEnvFileValue(k, v)
+		if perr != nil {
+			return perr
+		}
+		if skip {
+			continue
+		}
+		if err := os.Setenv(k, val); err != nil {
 			return protocol.NewError(protocol.ErrConfigError, err.Error(), map[string]any{"env": k})
 		}
 	}
 	return nil
+}
+
+// expandEnvFileValue: literal YAML, or exactly ${NAME} from the process env.
+// Missing NAME is skip (do not write the placeholder string). Malformed ${} is CONFIG_ERROR.
+func expandEnvFileValue(k, v string) (string, bool, *protocol.ProtocolError) {
+	if !strings.Contains(v, "${") {
+		return v, false, nil
+	}
+	m := envPlaceholder.FindStringSubmatch(v)
+	if m == nil {
+		return "", false, protocol.NewError(protocol.ErrConfigError,
+			"env value placeholder must be exactly ${ENV_NAME}", map[string]any{"env": k})
+	}
+	from := os.Getenv(m[1])
+	if from == "" {
+		return "", true, nil
+	}
+	return from, false, nil
 }
 
 func LoadQueryIR(path string) (*protocol.QueryIR, error) {

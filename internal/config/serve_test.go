@@ -155,3 +155,52 @@ func TestApplyEnvFileDoesNotOverride(t *testing.T) {
 		t.Fatalf("got %q", os.Getenv("QLLM_TEST_KEEP"))
 	}
 }
+
+func TestApplyEnvFileExpandsPlaceholder(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "qllm.env.yaml")
+	if err := os.WriteFile(p, []byte("env:\n  QLLM_TEST_EXPAND: ${QLLM_TEST_SOURCE}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("QLLM_TEST_EXPAND", "")
+	t.Setenv("QLLM_TEST_SOURCE", "from-process")
+	if err := ApplyEnvFile(dir); err != nil {
+		t.Fatal(err)
+	}
+	if os.Getenv("QLLM_TEST_EXPAND") != "from-process" {
+		t.Fatalf("got %q", os.Getenv("QLLM_TEST_EXPAND"))
+	}
+}
+
+func TestApplyEnvFileMissingPlaceholderNotSet(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "qllm.env.yaml")
+	if err := os.WriteFile(p, []byte("env:\n  QLLM_TEST_MISSING_PH: ${QLLM_TEST_UNSET_SRC}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("QLLM_TEST_MISSING_PH", "")
+	t.Setenv("QLLM_TEST_UNSET_SRC", "")
+	if err := ApplyEnvFile(dir); err != nil {
+		t.Fatal(err)
+	}
+	if os.Getenv("QLLM_TEST_MISSING_PH") != "" {
+		t.Fatalf("got %q", os.Getenv("QLLM_TEST_MISSING_PH"))
+	}
+}
+
+func TestApplyEnvFileBadPlaceholder(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "qllm.env.yaml")
+	if err := os.WriteFile(p, []byte("env:\n  QLLM_TEST_BAD_PH: ${QLLM_TEST_SRC}x\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("QLLM_TEST_BAD_PH", "")
+	err := ApplyEnvFile(dir)
+	if err == nil {
+		t.Fatal("expected CONFIG_ERROR")
+	}
+	pe, ok := err.(*protocol.ProtocolError)
+	if !ok || pe.Code != protocol.ErrConfigError {
+		t.Fatalf("got %v", err)
+	}
+}
