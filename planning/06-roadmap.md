@@ -79,6 +79,13 @@
 
 **Exit:** `go run` sem YAML não lista entidades de demo; introspect/from-openapi escrevem arquivos no projeto alvo.
 
+## Fase 5e — Experimental connectors (no harness)
+
+- [x] Spec 0.2.0: mssql, sqlite, clickhouse, dynamodb, cassandra, ksql pull + `accessPath`
+- [x] Open/Query in Go; no compose/goldens; happy path untested in CI
+
+**Exit:** invalid connection → `CONFIG_ERROR`; key-addressed sources without eq → `UNSUPPORTED`.
+
 ## Fase 6 — Clients (depois)
 
 - [ ] Python thin client

@@ -1,6 +1,6 @@
 package protocol
 
-const ProtocolVersion = "0.1.0"
+const ProtocolVersion = "0.2.0"
 
 type ErrorCode string
 
@@ -54,10 +54,16 @@ type Limits struct {
 type SourceType string
 
 const (
-	SourcePostgres SourceType = "postgres"
-	SourceMySQL    SourceType = "mysql"
-	SourceMongoDB  SourceType = "mongodb"
-	SourceREST     SourceType = "rest"
+	SourcePostgres   SourceType = "postgres"
+	SourceMySQL      SourceType = "mysql"
+	SourceMongoDB    SourceType = "mongodb"
+	SourceREST       SourceType = "rest"
+	SourceMSSQL      SourceType = "mssql"
+	SourceSQLite     SourceType = "sqlite"
+	SourceClickHouse SourceType = "clickhouse"
+	SourceDynamoDB   SourceType = "dynamodb"
+	SourceCassandra  SourceType = "cassandra"
+	SourceKSQL       SourceType = "ksql"
 )
 
 type Source struct {
@@ -84,12 +90,35 @@ const (
 	TypeJSON      LogicalType = "json"
 )
 
+type AccessPath struct {
+	Partition []string `json:"partition,omitempty" yaml:"partition,omitempty"`
+	PK        []string `json:"pk,omitempty" yaml:"pk,omitempty"`
+	Sort      string   `json:"sort,omitempty" yaml:"sort,omitempty"`
+	SK        string   `json:"sk,omitempty" yaml:"sk,omitempty"`
+	KsqlKey   string   `json:"ksqlKey,omitempty" yaml:"ksqlKey,omitempty"`
+}
+
+func (a AccessPath) PartitionKeys() []string {
+	if len(a.Partition) > 0 {
+		return a.Partition
+	}
+	return a.PK
+}
+
+func (a AccessPath) SortKey() string {
+	if a.Sort != "" {
+		return a.Sort
+	}
+	return a.SK
+}
+
 type Binding struct {
-	Kind       string `json:"kind" yaml:"kind"`
-	Schema     string `json:"schema,omitempty" yaml:"schema,omitempty"`
-	Table      string `json:"table,omitempty" yaml:"table,omitempty"`
-	Collection string `json:"collection,omitempty" yaml:"collection,omitempty"`
-	Resource   string `json:"resource,omitempty" yaml:"resource,omitempty"`
+	Kind       string     `json:"kind" yaml:"kind"`
+	Schema     string     `json:"schema,omitempty" yaml:"schema,omitempty"`
+	Table      string     `json:"table,omitempty" yaml:"table,omitempty"`
+	Collection string     `json:"collection,omitempty" yaml:"collection,omitempty"`
+	Resource   string     `json:"resource,omitempty" yaml:"resource,omitempty"`
+	AccessPath AccessPath `json:"accessPath,omitempty" yaml:"accessPath,omitempty"`
 }
 
 type Field struct {

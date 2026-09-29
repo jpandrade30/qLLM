@@ -42,7 +42,18 @@
         },
         "type": {
           "type": "string",
-          "enum": ["postgres", "mysql", "mongodb", "rest"]
+          "enum": [
+            "postgres",
+            "mysql",
+            "mongodb",
+            "rest",
+            "mssql",
+            "sqlite",
+            "clickhouse",
+            "dynamodb",
+            "cassandra",
+            "ksql"
+          ]
         },
         "connection": { "type": "object" },
         "options": { "type": "object" }
@@ -50,35 +61,43 @@
       "allOf": [
         {
           "if": { "properties": { "type": { "const": "postgres" } } },
-          "then": {
-            "properties": {
-              "connection": { "$ref": "#/$defs/sqlConnection" }
-            }
-          }
+          "then": { "properties": { "connection": { "$ref": "#/$defs/sqlConnection" } } }
         },
         {
           "if": { "properties": { "type": { "const": "mysql" } } },
-          "then": {
-            "properties": {
-              "connection": { "$ref": "#/$defs/sqlConnection" }
-            }
-          }
+          "then": { "properties": { "connection": { "$ref": "#/$defs/sqlConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "mssql" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/mssqlConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "clickhouse" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/clickhouseConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "sqlite" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/sqliteConnection" } } }
         },
         {
           "if": { "properties": { "type": { "const": "mongodb" } } },
-          "then": {
-            "properties": {
-              "connection": { "$ref": "#/$defs/mongoConnection" }
-            }
-          }
+          "then": { "properties": { "connection": { "$ref": "#/$defs/mongoConnection" } } }
         },
         {
           "if": { "properties": { "type": { "const": "rest" } } },
-          "then": {
-            "properties": {
-              "connection": { "$ref": "#/$defs/restConnection" }
-            }
-          }
+          "then": { "properties": { "connection": { "$ref": "#/$defs/restConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "dynamodb" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/dynamoConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "cassandra" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/cassandraConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "ksql" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/ksqlConnection" } } }
         }
       ]
     },
@@ -98,6 +117,43 @@
         }
       }
     },
+    "mssqlConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hostEnv", "port", "database", "userEnv", "passwordEnv"],
+      "properties": {
+        "hostEnv": { "type": "string", "minLength": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "database": { "type": "string", "minLength": 1 },
+        "userEnv": { "type": "string", "minLength": 1 },
+        "passwordEnv": { "type": "string", "minLength": 1 },
+        "encrypt": {
+          "type": "string",
+          "enum": ["true", "false", "disable"]
+        }
+      }
+    },
+    "clickhouseConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hostEnv", "port", "database", "userEnv", "passwordEnv"],
+      "properties": {
+        "hostEnv": { "type": "string", "minLength": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "database": { "type": "string", "minLength": 1 },
+        "userEnv": { "type": "string", "minLength": 1 },
+        "passwordEnv": { "type": "string", "minLength": 1 },
+        "secure": { "type": "boolean" }
+      }
+    },
+    "sqliteConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pathEnv"],
+      "properties": {
+        "pathEnv": { "type": "string", "minLength": 1 }
+      }
+    },
     "mongoConnection": {
       "type": "object",
       "additionalProperties": false,
@@ -108,6 +164,37 @@
       }
     },
     "restConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrlEnv"],
+      "properties": {
+        "baseUrlEnv": { "type": "string", "minLength": 1 },
+        "auth": { "$ref": "#/$defs/restAuth" }
+      }
+    },
+    "dynamoConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["region"],
+      "properties": {
+        "region": { "type": "string", "minLength": 1 },
+        "endpointEnv": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cassandraConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keyspace"],
+      "properties": {
+        "hostEnv": { "type": "string", "minLength": 1 },
+        "hostsEnv": { "type": "string", "minLength": 1 },
+        "keyspace": { "type": "string", "minLength": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "userEnv": { "type": "string", "minLength": 1 },
+        "passwordEnv": { "type": "string", "minLength": 1 }
+      }
+    },
+    "ksqlConnection": {
       "type": "object",
       "additionalProperties": false,
       "required": ["baseUrlEnv"],

@@ -51,11 +51,11 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Por quê:** Um comando; DNS de serviço igual ao bake `qllm.env.yaml`; APIs/bancos oficiais.
 - **Consequência:** `docker-compose.yml` + `Dockerfile`; `fixtures/` só sobe satélites (seed, test-api, golden IR/SQL). Formato/acesso/conexões da instância: **`deploy/image/config`**. Harness de processo ≠ YAML de produto (D18).
 
-### D09 — Fontes v1
+### D09 — Fontes v1 + experimentais 0.2.0
 
-- **Decisão:** Postgres, MySQL, MongoDB, REST (OpenAPI/recursos declarados).
-- **Por quê:** Cobrem o dia a dia citado.
-- **Consequência:** Capability flags por connector; REST sem pretender ser SQL completo.
+- **Decisão:** v1 no harness: Postgres, MySQL, MongoDB, REST. **0.2.0 experimental (sem CI/compose):** `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (só pull). Dynamo/Cassandra/ksql exigem `binding.accessPath`; query sem eq na chave → `UNSUPPORTED`.
+- **Por quê:** SQL tabular extra vs KV/stream com access path. Comunidade valida drivers.
+- **Consequência:** Capability flags por connector; REST/KV sem pretender ser SQL completo. Harness D08 **não** sobe these engines.
 
 ### D10 — Segurança default
 
@@ -67,7 +67,7 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 - **Decisão:** Campo `protocolVersion` (semver string, começar em `0.1.0`).
 - **Por quê:** Clients e presets precisam detectar incompatibilidade.
-- **Consequência:** Bump minor = additive; major = breaking em IR/API.
+- **Consequência:** Bump minor = additive; major = breaking em IR/API. **0.2.0** = novos `sources[].type` + `accessPath`. Arquivos **0.1.0** continuam válidos. Runtime responde `protocolVersion: 0.2.0`.
 
 ### D12 — Nomes lógicos + alias (nunca citar só o campo físico)
 
@@ -89,7 +89,7 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ### D15 — Dialeto SQL versionado ao lado do Query IR
 
-- **Decisão:** `POST /v1/sql` e MCP `execute_sql` aceitam `{ "version"?, "sql" }`. `version` omitido = dialeto mais novo (`"2"`). `"1"` permanece válido e congelado (sem `UNION`/`INTERSECT`/`EXCEPT`/`QUALIFY`). Desconhecida = `UNSUPPORTED_VERSION`. Query IR e `protocolVersion` `0.1.0` não mudam.
+- **Decisão:** `POST /v1/sql` e MCP `execute_sql` aceitam `{ "version"?, "sql" }`. `version` omitido = dialeto mais novo (`"2"`). `"1"` permanece válido e congelado (sem `UNION`/`INTERSECT`/`EXCEPT`/`QUALIFY`). Desconhecida = `UNSUPPORTED_VERSION`. Query IR **shape** 0.1.0 não muda; o documento de protocolo passa a **0.2.0** só por tipos de source.
 - **Por quê:** Parser/joins/transforms no DuckDB após fetch das colunas citadas; IR permanece para clientes existentes. Inventário Databricks-like: [`07-sql-dialect.md`](07-sql-dialect.md).
 - **Consequência:** Sem pushdown de `WHERE`/join neste caminho. Build `-tags duckdb` obrigatório para executar SQL. Parser valida tabelas/colunas/ACL; DuckDB executa o `SELECT` (denylist de I/O).
 

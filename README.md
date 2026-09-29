@@ -2,7 +2,7 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Protocol **0.1.0** — see [planning/](planning/).
+Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Quick start (5 minutes)
 
@@ -148,7 +148,13 @@ tools = await client.get_tools()
 
 Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`.
 
-Requires Go **1.25+** toolchain (deps). `mcp-go` is pinned at **v0.48.0**; with Go 1.25.5+ you can later bump toward `v0.56`.
+Requires Go **1.26+** toolchain (`go.mod`; older 1.25 may still work with an older module graph). `mcp-go` is pinned at **v0.48.0**; with a current toolchain you can later bump toward `v0.56`.
+
+### Experimental sources (0.2.0)
+
+`mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, and `ksql` (pull) are implemented in the binary. They are **not** in `docker-compose.yml` or SQL goldens. Dynamo/Cassandra/ksql need `binding.accessPath` and equality on that key, or the query fails with `UNSUPPORTED`. Connection keys: [planning/04-connectors.md](planning/04-connectors.md).
+
+Secrets in `qllm.env.yaml` should be `${QLLM_…}`; set the same names in the process or compose `environment:`.
 
 ## Dev harness notes
 

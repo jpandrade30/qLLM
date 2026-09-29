@@ -84,7 +84,8 @@
         "resource": {
           "type": "string",
           "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
-        }
+        },
+        "accessPath": { "$ref": "#/$defs/accessPath" }
       },
       "allOf": [
         {
@@ -100,6 +101,24 @@
           "then": { "required": ["resource"] }
         }
       ]
+    },
+    "accessPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Required predicates for dynamodb/cassandra/ksql pull. Missing eq on these fields → UNSUPPORTED (no table scan).",
+      "properties": {
+        "partition": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "pk": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "sort": { "type": "string", "minLength": 1 },
+        "sk": { "type": "string", "minLength": 1 },
+        "ksqlKey": { "type": "string", "minLength": 1 }
+      }
     },
     "field": {
       "type": "object",

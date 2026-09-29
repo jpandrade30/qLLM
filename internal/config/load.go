@@ -329,3 +329,18 @@ func ConnString(conn map[string]any, key, def string) string {
 	}
 	return s
 }
+
+func ConnBool(conn map[string]any, key string, def bool) bool {
+	v, ok := conn[key]
+	if !ok {
+		return def
+	}
+	switch t := v.(type) {
+	case bool:
+		return t
+	case string:
+		return strings.EqualFold(t, "true") || t == "1"
+	default:
+		return def
+	}
+}

@@ -8,7 +8,7 @@
 
 ## Objetivos
 
-1. Subir Postgres, MySQL, MongoDB, API REST e qLLM com `nerdctl compose`
+1. Subir Postgres, MySQL, MongoDB, API REST e qLLM com `nerdctl compose`. Tipos 0.2.0 experimentais (`mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql`) **não** entram no compose.
 2. Seed correlacionado (`customer_id` cruzável) a partir de `fixtures/datasets/v1` via `load_dataset.py` nas portas publicadas (Faker só em `generate_dataset.py --regenerate`)
 3. Queries: container (MCP/HTTP) **ou** host `qllm --config-dir deploy/image/config` com `QLLM_*` em `127.0.0.1` (ver `qllm.env.host.yaml`)
 4. Fail-fast timeout (budget do preset)

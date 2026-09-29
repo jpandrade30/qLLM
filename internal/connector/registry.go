@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	"qLLM/internal/connector/cassandra"
 	"qLLM/internal/connector/def"
+	"qLLM/internal/connector/dynamodb"
+	"qLLM/internal/connector/ksql"
 	"qLLM/internal/connector/mongo"
 	"qLLM/internal/connector/rest"
 	"qLLM/internal/connector/sqldb"
@@ -51,6 +54,12 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 			c, err = sqldb.OpenPostgres(s, maxSourceMs)
 		case protocol.SourceMySQL:
 			c, err = sqldb.OpenMySQL(s, maxSourceMs)
+		case protocol.SourceMSSQL:
+			c, err = sqldb.OpenMSSQL(s, maxSourceMs)
+		case protocol.SourceSQLite:
+			c, err = sqldb.OpenSQLite(s, maxSourceMs)
+		case protocol.SourceClickHouse:
+			c, err = sqldb.OpenClickHouse(s, maxSourceMs)
 		case protocol.SourceMongoDB:
 			c, err = mongo.Open(s)
 		case protocol.SourceREST:
@@ -58,6 +67,12 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 				ReadOnly:             readOnly,
 				MaxResponseBodyBytes: opts.MaxRestResponseBytes,
 			})
+		case protocol.SourceDynamoDB:
+			c, err = dynamodb.Open(s)
+		case protocol.SourceCassandra:
+			c, err = cassandra.Open(s)
+		case protocol.SourceKSQL:
+			c, err = ksql.Open(s)
 		default:
 			err = protocol.NewError(protocol.ErrConfigError, "unknown source type: "+string(s.Type), nil)
 		}

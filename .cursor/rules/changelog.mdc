@@ -1,0 +1,20 @@
+---
+description: Keep CHANGELOG.md current (Keep a Changelog)
+alwaysApply: true
+---
+
+# CHANGELOG.md
+
+Every user-visible or contract change updates [`CHANGELOG.md`](CHANGELOG.md) in the **same** change set (Keep a Changelog, newest first).
+
+Format:
+
+- Top heading `## [Unreleased]` for work not tagged; on a protocol/release bump, add `## [X.Y.Z] - YYYY-MM-DD` and move bullets
+- Groups: `Added`, `Changed`, `Fixed`, `Security`, `Removed` (omit empty)
+- One line per item: **why/effect**, not a file list
+- Protocol bumps (`0.2.0`) get their own dated section
+- Internal-only refactors with no operator/agent impact: skip, or a single `Changed` line if behavior shifted
+
+Do not paste diffs, HMAC internals, or compose passwords.
+
+Example: `Added experimental source types mssql/sqlite/clickhouse/dynamodb/cassandra/ksql (no harness).`

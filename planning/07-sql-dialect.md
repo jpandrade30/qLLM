@@ -1,6 +1,6 @@
 # 07 — SQL dialect (Databricks-like inventory)
 
-Query IR `protocolVersion` **0.1.0** does not change. Rich expressions live on **`POST /v1/sql` / `execute_sql`**, executed in DuckDB after catalog-table fetch (D15). Databricks SQL is a **naming inventory**, not a clone (no Unity Catalog, no Spark `LATERAL VIEW`, no `MERGE`).
+Query IR `protocolVersion` **0.1.0** shape does not change (document **0.2.0** adds source types). Rich expressions live on **`POST /v1/sql` / `execute_sql`**, executed in DuckDB after catalog-table fetch (D15). Databricks SQL is a **naming inventory**, not a clone (no Unity Catalog, no Spark `LATERAL VIEW`, no `MERGE`).
 
 `test` values: `parse+exec` | `reject` | `skip-reason`. Status `sql-1` / `sql-2` requires `parse+exec`. `never` requires `reject`.
 

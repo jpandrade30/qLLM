@@ -14,6 +14,9 @@ type Dialect int
 const (
 	Postgres Dialect = iota
 	MySQL
+	MSSQL
+	SQLite
+	ClickHouse
 )
 
 type Built struct {
@@ -34,6 +37,9 @@ func Build(d Dialect, step def.PushdownStep) (Built, error) {
 	}
 
 	b.WriteString("SELECT ")
+	if d == MSSQL && step.Limit > 0 && step.Offset <= 0 {
+		b.WriteString(fmt.Sprintf("TOP (%d) ", step.Limit))
+	}
 	if len(step.Select) == 0 {
 		b.WriteString("*")
 	} else {
@@ -111,11 +117,24 @@ func Build(d Dialect, step def.PushdownStep) (Built, error) {
 		b.WriteString(strings.Join(parts, ", "))
 	}
 
-	if step.Limit > 0 {
-		b.WriteString(fmt.Sprintf(" LIMIT %d", step.Limit))
-	}
-	if step.Offset > 0 {
-		b.WriteString(fmt.Sprintf(" OFFSET %d", step.Offset))
+	if d == MSSQL {
+		if len(step.OrderBy) == 0 && (step.Offset > 0 || (step.Limit > 0 && step.Offset > 0)) {
+			b.WriteString(" ORDER BY (SELECT NULL)")
+		}
+		if step.Offset > 0 {
+			fetch := step.Limit
+			if fetch <= 0 {
+				fetch = 1
+			}
+			b.WriteString(fmt.Sprintf(" OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", step.Offset, fetch))
+		}
+	} else {
+		if step.Limit > 0 {
+			b.WriteString(fmt.Sprintf(" LIMIT %d", step.Limit))
+		}
+		if step.Offset > 0 {
+			b.WriteString(fmt.Sprintf(" OFFSET %d", step.Offset))
+		}
 	}
 
 	return Built{SQL: b.String(), Args: args}, nil
@@ -129,10 +148,14 @@ func qualifyTable(d Dialect, bind protocol.Binding) string {
 }
 
 func quoteIdent(d Dialect, name string) string {
-	if d == MySQL {
+	switch d {
+	case MySQL, SQLite, ClickHouse:
 		return "`" + strings.ReplaceAll(name, "`", "``") + "`"
+	case MSSQL:
+		return "[" + strings.ReplaceAll(name, "]", "]]") + "]"
+	default:
+		return `"` + strings.ReplaceAll(name, `"`, `""`) + `"`
 	}
-	return `"` + strings.ReplaceAll(name, `"`, `""`) + `"`
 }
 
 func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph func() string) (string, []any, error) {
@@ -213,6 +236,9 @@ func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph f
 		*args = append(*args, escapeLike(fmt.Sprintf("%v", w["value"])))
 		if d == Postgres {
 			return col + " LIKE '%' || " + p + " || '%' ESCAPE '\\'", *args, nil
+		}
+		if d == MSSQL {
+			return col + " LIKE '%' + " + p + " + '%' ESCAPE '\\'", *args, nil
 		}
 		return col + " LIKE CONCAT('%', " + p + ", '%') ESCAPE '\\\\'", *args, nil
 	default:

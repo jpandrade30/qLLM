@@ -169,7 +169,7 @@ func TestEncodeCatalogQuotesProtocolVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(raw), `protocolVersion: "0.1.0"`) {
+	if !strings.Contains(string(raw), `protocolVersion: "`+protocol.ProtocolVersion+`"`) {
 		t.Fatalf("want quoted semver:\n%s", raw)
 	}
 }

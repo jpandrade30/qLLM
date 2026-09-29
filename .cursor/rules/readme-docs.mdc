@@ -1,0 +1,21 @@
+---
+description: Keep README.md in sync with user-visible product changes
+alwaysApply: true
+---
+
+# README.md
+
+After a change a **user or operator** would notice (CLI flags, HTTP/MCP, config files, protocol version, auth, connectors, harness commands, build tags), update [`README.md`](README.md) in the **same** change set.
+
+Do:
+
+- Quick start, env/`*Env`, Docker/compose, auth, MCP tools, protocol version, Go version if `go.mod` moved
+- Link to [`planning/`](planning/) and [`CHANGELOG.md`](CHANGELOG.md); do not duplicate the full spec
+- Harness: `nerdctl compose`, `deploy/image/config`, goldens — only if those paths changed
+
+Do not:
+
+- Dump every internal refactor, test-only helper, or HMAC pepper name
+- Invent APIs that are not in `planning/`
+
+Example: new `sources[].type` → one README sentence + changelog entry; connection keys stay in `03`/`04`.
