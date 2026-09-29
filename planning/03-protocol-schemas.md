@@ -529,10 +529,11 @@ Contrato fechado para LLM/agente (mesmo payload da tool MCP `how_to_use_me`):
 - `workflow`, `never`, `notSupported`
 - `where` (shapes canônicas + anti-exemplo `{and:[…]}` → fix `{op,args}`)
 - `fieldRefRules`, `joinRules`, `aggregateRules`, `orderByRules`, `grammar`
-- `examples` + `invalidExamples`
+- `queryIR` + **`sql`** (dialeto latest `"2"`: rules, supported, dialect2Only, reject, examples)
+- `examples` (Query IR) + `invalidExamples`
 - `project` (entityNames, limits)
 
-Chamar **antes** de inventar queries; depois `GET /v1/catalog` para fields/relations.
+Chamar **antes** de inventar queries; depois `GET /v1/catalog` para fields/relations. SQL rico → `execute_sql` / `POST /v1/sql` (ver `sql.examples`). Inventário: [`07-sql-dialect.md`](07-sql-dialect.md).
 
 ### 4.3 `GET /v1/catalog`
 

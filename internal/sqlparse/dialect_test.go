@@ -88,6 +88,26 @@ func TestDialect2WindowsAndDistinctCount(t *testing.T) {
 	}
 }
 
+func TestWindowAliasesNotCollectedAsColumns(t *testing.T) {
+	sql := `SELECT id, status, total, RANK() OVER (ORDER BY total DESC) AS rnk, LAG(total) OVER (ORDER BY total) AS prev_total FROM invoices LIMIT 50`
+	r, err := sqlparse.Parse(sql)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range r.Columns {
+		if c.Name == "rnk" || c.Name == "prev_total" {
+			t.Fatalf("alias collected as column: %+v", r.Columns)
+		}
+	}
+	found := map[string]bool{}
+	for _, c := range r.Columns {
+		found[c.Name] = true
+	}
+	if !found["id"] || !found["status"] || !found["total"] {
+		t.Fatalf("want real fields, got %v", r.Columns)
+	}
+}
+
 func TestInjectLimitAppends(t *testing.T) {
 	got := sqlparse.InjectLimit(`SELECT id FROM invoices OFFSET 5`, 100)
 	if got != `SELECT id FROM invoices OFFSET 5 LIMIT 100` {

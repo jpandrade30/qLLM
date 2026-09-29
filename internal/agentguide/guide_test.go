@@ -27,8 +27,11 @@ func TestBuildHasLLMContract(t *testing.T) {
 	if !strings.Contains(joined, "Query IR") || !strings.Contains(joined, "Mutations") {
 		t.Fatalf("notSupported should document IR vs SQL: %v", out.NotSupported)
 	}
-	if !strings.Contains(strings.Join(out.Never, " "), "execute_sql") {
-		t.Fatal("never should steer SQL features to execute_sql")
+	if out.SQL.LatestVersion != protocol.SQLDialectLatest || len(out.SQL.Examples) == 0 {
+		t.Fatalf("sql guide incomplete: %+v", out.SQL)
+	}
+	if !strings.Contains(out.Purpose, "execute_sql") {
+		t.Fatal("purpose should mention execute_sql")
 	}
 	if len(out.Where.Shapes) == 0 || out.Where.InvalidExample == nil || out.Where.Fix == nil {
 		t.Fatalf("where guide incomplete: %+v", out.Where)

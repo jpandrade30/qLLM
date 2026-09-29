@@ -483,6 +483,13 @@ func (p *parser) scanExpr(out *Result, until string) *protocol.ProtocolError {
 		if t.kind == 'i' {
 			name := t.val
 			p.i++
+			if strings.EqualFold(name, "AS") {
+				// output alias is not a catalog column to fetch
+				if p.peek().kind == 'i' {
+					p.i++
+				}
+				continue
+			}
 			if p.peek().kind == 'p' && p.peek().val == "(" {
 				if _, bad := bannedFns[strings.ToLower(name)]; bad {
 					return protocol.NewError(protocol.ErrInvalidSQL, "function not allowed: "+name, map[string]any{"fn": name})
@@ -584,6 +591,9 @@ func (p *parser) skipBalancedScan(out *Result) *protocol.ProtocolError {
 					p.i++
 				}
 				continue
+			}
+			if !isSQLKeyword(name) {
+				out.Columns = append(out.Columns, ColUse{Name: name})
 			}
 			continue
 		}

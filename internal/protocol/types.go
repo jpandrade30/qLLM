@@ -260,11 +260,30 @@ type HowToUseMeResponse struct {
 	AggregateRules  []string              `json:"aggregateRules"`
 	OrderByRules    []string              `json:"orderByRules"`
 	QueryIR         HowToQueryIR          `json:"queryIR"`
+	SQL             HowToSQLGuide         `json:"sql"`
 	Rules           []string              `json:"rules"`
 	Examples        []HowToExample        `json:"examples"`
 	InvalidExamples []HowToInvalidExample `json:"invalidExamples"`
 	Errors          []HowToError          `json:"errors"`
 	Project         HowToProject          `json:"project"`
+}
+
+type HowToSQLGuide struct {
+	LatestVersion       string            `json:"latestVersion"`
+	SupportedVersions   []string          `json:"supportedVersions"`
+	Tool                string            `json:"tool"`
+	HTTP                string            `json:"http"`
+	Rules               []string          `json:"rules"`
+	Supported           []string          `json:"supported"`
+	Dialect2Only        []string          `json:"dialect2Only"`
+	Reject              []string          `json:"reject"`
+	Examples            []HowToSQLExample `json:"examples"`
+}
+
+type HowToSQLExample struct {
+	Title   string `json:"title"`
+	SQL     string `json:"sql"`
+	Version string `json:"version,omitempty"`
 }
 
 type HowToWhereGuide struct {

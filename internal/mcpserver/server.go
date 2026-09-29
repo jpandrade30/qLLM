@@ -25,7 +25,7 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	s := server.NewMCPServer("qllm", protocol.ProtocolVersion)
 
 	s.AddTool(mcp.NewTool("how_to_use_me",
-		mcp.WithDescription("Return the Query IR contract and optional SQL dialect for LLMs. Call this BEFORE execute_query or execute_sql."),
+		mcp.WithDescription("Return the LLM guide: Query IR contract + catalog SQL dialect (latest \""+protocol.SQLDialectLatest+"\"). Includes sql.examples. Call BEFORE execute_query or execute_sql."),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		b, err := json.Marshal(agentguide.Build(idx.Preset, idx.CatalogFor(allowFrom(ctx, exec))))
 		if err != nil {
@@ -72,9 +72,9 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	})
 
 	s.AddTool(mcp.NewTool("execute_sql",
-		mcp.WithDescription("Execute catalog SQL (SELECT). Tables are catalog entity names. Call how_to_use_me and describe_catalog first. version omitted = latest dialect."),
-		mcp.WithString("sql", mcp.Required(), mcp.Description("SELECT statement using catalog tables")),
-		mcp.WithString("version", mcp.Description("SQL dialect version; omit for latest")),
+		mcp.WithDescription("Execute catalog SQL SELECT (DuckDB after fetch). Tables = catalog entity names (not schema.table). Supports HAVING, CASE, windows, UNION (dialect 2). version omitted = latest \""+protocol.SQLDialectLatest+"\". Call how_to_use_me → sql section and describe_catalog first."),
+		mcp.WithString("sql", mcp.Required(), mcp.Description("SELECT using catalog entity names; output AS aliases OK")),
+		mcp.WithString("version", mcp.Description("SQL dialect: \"1\" (frozen) or \"2\" (latest). Omit for latest.")),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		sqlStr, err := req.RequireString("sql")
 		if err != nil {

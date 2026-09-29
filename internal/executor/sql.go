@@ -212,7 +212,8 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 			}
 		}
 		if len(hits) == 0 {
-			return nil, protocol.NewError(protocol.ErrUnknownField, "unknown field: "+c.Name, map[string]any{"field": c.Name})
+			// Bare name not on any cited entity: output alias / expression label (e.g. AS rnk).
+			continue
 		}
 		if len(hits) > 1 {
 			return nil, protocol.NewError(protocol.ErrAmbiguousField, "ambiguous field: "+c.Name, map[string]any{"field": c.Name})
