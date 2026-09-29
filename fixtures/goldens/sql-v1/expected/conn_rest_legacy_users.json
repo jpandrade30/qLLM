@@ -1,0 +1,69 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "email",
+      "type": "string"
+    },
+    {
+      "name": "country",
+      "type": "string"
+    }
+  ],
+  "rows": [
+    [
+      "c1",
+      "johnsonjoshua@example.org",
+      "VC"
+    ],
+    [
+      "c10",
+      "joshuawashington@example.net",
+      "NA"
+    ],
+    [
+      "c11",
+      "lauren13@example.org",
+      "RU"
+    ],
+    [
+      "c12",
+      "michellebarrera@example.org",
+      "BG"
+    ],
+    [
+      "c13",
+      "hshaw@example.org",
+      "NL"
+    ],
+    [
+      "c14",
+      "sarah35@example.org",
+      "MG"
+    ],
+    [
+      "c15",
+      "suarezmike@example.org",
+      "VC"
+    ],
+    [
+      "c16",
+      "gracefarrell@example.net",
+      "ST"
+    ],
+    [
+      "c17",
+      "brandi26@example.org",
+      "DK"
+    ],
+    [
+      "c18",
+      "nicolejohnson@example.net",
+      "KM"
+    ]
+  ],
+  "rowCount": 10
+}

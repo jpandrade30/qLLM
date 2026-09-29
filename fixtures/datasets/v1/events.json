@@ -1,0 +1,2212 @@
+[
+  {
+    "id": "ec1_0",
+    "customer_id": "c1",
+    "type": "logout",
+    "ts": "2026-09-29T22:00:10Z",
+    "meta": {
+      "ip": "135.66.189.253",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_8_1) AppleWebKit/536.0 (KHTML, like G"
+    }
+  },
+  {
+    "id": "ec1_1",
+    "customer_id": "c1",
+    "type": "logout",
+    "ts": "2026-09-29T21:55:11Z",
+    "meta": {
+      "ip": "206.102.79.175",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:1.9.7.20) Gecko/3593-12-01 04:56:40 Firefox/3"
+    }
+  },
+  {
+    "id": "ec1_2",
+    "customer_id": "c1",
+    "type": "view",
+    "ts": "2026-09-29T21:59:20Z",
+    "meta": {
+      "ip": "205.8.66.110",
+      "ua": "Opera/8.51.(X11; Linux i686; cy-GB) Presto/2.9.169 Version/10.00"
+    }
+  },
+  {
+    "id": "ec1_3",
+    "customer_id": "c1",
+    "type": "signup",
+    "ts": "2026-09-29T21:56:33Z",
+    "meta": {
+      "ip": "175.34.221.143",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 4_3_5 like Mac OS X) AppleWebKit/533.0 (KHTML"
+    }
+  },
+  {
+    "id": "ec1_4",
+    "customer_id": "c1",
+    "type": "view",
+    "ts": "2026-09-29T21:56:53Z",
+    "meta": {
+      "ip": "221.84.173.205",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_9_7 rv:2.0; pa-IN) AppleWebKit/531.32"
+    }
+  },
+  {
+    "id": "ec2_0",
+    "customer_id": "c2",
+    "type": "refund",
+    "ts": "2026-09-29T21:58:35Z",
+    "meta": {
+      "ip": "97.38.59.197",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 6.2; Trident/4.1)"
+    }
+  },
+  {
+    "id": "ec2_1",
+    "customer_id": "c2",
+    "type": "logout",
+    "ts": "2026-09-29T21:55:44Z",
+    "meta": {
+      "ip": "179.101.219.219",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/3.1)"
+    }
+  },
+  {
+    "id": "ec2_2",
+    "customer_id": "c2",
+    "type": "logout",
+    "ts": "2026-09-29T21:58:28Z",
+    "meta": {
+      "ip": "67.61.29.251",
+      "ua": "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 11.0; Trident/5.1)"
+    }
+  },
+  {
+    "id": "ec2_3",
+    "customer_id": "c2",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:45Z",
+    "meta": {
+      "ip": "26.1.194.184",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/533.1 (KHTM"
+    }
+  },
+  {
+    "id": "ec2_4",
+    "customer_id": "c2",
+    "type": "login",
+    "ts": "2026-09-29T21:57:05Z",
+    "meta": {
+      "ip": "119.52.166.202",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 5.0) AppleWebKit/533.40.6 (KHTML, like Gecko"
+    }
+  },
+  {
+    "id": "ec2_5",
+    "customer_id": "c2",
+    "type": "view",
+    "ts": "2026-09-29T21:57:28Z",
+    "meta": {
+      "ip": "180.196.31.53",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_0 like Mac OS X; mi-NZ) AppleWebKit/535.9."
+    }
+  },
+  {
+    "id": "ec2_6",
+    "customer_id": "c2",
+    "type": "refund",
+    "ts": "2026-09-29T21:55:34Z",
+    "meta": {
+      "ip": "176.218.75.34",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_7_3 rv:2.0; sw-TZ) AppleWebKit/534.17"
+    }
+  },
+  {
+    "id": "ec3_0",
+    "customer_id": "c3",
+    "type": "view",
+    "ts": "2026-09-29T21:58:12Z",
+    "meta": {
+      "ip": "115.67.35.236",
+      "ua": "Opera/9.94.(X11; Linux x86_64; bhb-IN) Presto/2.9.176 Version/10.00"
+    }
+  },
+  {
+    "id": "ec3_1",
+    "customer_id": "c3",
+    "type": "click",
+    "ts": "2026-09-29T21:58:42Z",
+    "meta": {
+      "ip": "213.138.181.222",
+      "ua": "Opera/9.88.(X11; Linux x86_64; si-LK) Presto/2.9.181 Version/12.00"
+    }
+  },
+  {
+    "id": "ec3_2",
+    "customer_id": "c3",
+    "type": "logout",
+    "ts": "2026-09-29T21:58:45Z",
+    "meta": {
+      "ip": "14.59.103.180",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_10_8 rv:4.0; xh-ZA) AppleWebKit/533.1"
+    }
+  },
+  {
+    "id": "ec3_3",
+    "customer_id": "c3",
+    "type": "signup",
+    "ts": "2026-09-29T21:55:52Z",
+    "meta": {
+      "ip": "133.14.209.120",
+      "ua": "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.1)"
+    }
+  },
+  {
+    "id": "ec3_4",
+    "customer_id": "c3",
+    "type": "view",
+    "ts": "2026-09-29T21:56:27Z",
+    "meta": {
+      "ip": "24.173.30.132",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 6.1) AppleWebKit/533.9.1 (KHTML, like Gecko)"
+    }
+  },
+  {
+    "id": "ec4_0",
+    "customer_id": "c4",
+    "type": "logout",
+    "ts": "2026-09-29T21:59:19Z",
+    "meta": {
+      "ip": "119.156.119.58",
+      "ua": "Opera/8.21.(X11; Linux i686; iu-CA) Presto/2.9.169 Version/12.00"
+    }
+  },
+  {
+    "id": "ec4_1",
+    "customer_id": "c4",
+    "type": "signup",
+    "ts": "2026-09-29T22:00:11Z",
+    "meta": {
+      "ip": "209.49.140.22",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_7_0; rv:1.9.4.20) Gecko/5526-05-13 "
+    }
+  },
+  {
+    "id": "ec4_2",
+    "customer_id": "c4",
+    "type": "click",
+    "ts": "2026-09-29T21:55:22Z",
+    "meta": {
+      "ip": "181.233.186.67",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:1.9.6.20) Gecko/5852-11-30 08:59:24 Firefox/3"
+    }
+  },
+  {
+    "id": "ec5_0",
+    "customer_id": "c5",
+    "type": "signup",
+    "ts": "2026-09-29T21:56:44Z",
+    "meta": {
+      "ip": "194.83.213.207",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 6.0) AppleWebKit/534.34.6 (KHTML, like Gecko"
+    }
+  },
+  {
+    "id": "ec5_1",
+    "customer_id": "c5",
+    "type": "purchase",
+    "ts": "2026-09-29T21:58:59Z",
+    "meta": {
+      "ip": "167.65.66.59",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:1.9.5.20) Gecko/5619-07-05 16:46:27 Firefox/1"
+    }
+  },
+  {
+    "id": "ec5_2",
+    "customer_id": "c5",
+    "type": "click",
+    "ts": "2026-09-29T21:59:13Z",
+    "meta": {
+      "ip": "183.32.71.59",
+      "ua": "Mozilla/5.0 (Linux; Android 1.5) AppleWebKit/531.1 (KHTML, like Gecko) Chrome/28"
+    }
+  },
+  {
+    "id": "ec5_3",
+    "customer_id": "c5",
+    "type": "login",
+    "ts": "2026-09-29T21:59:44Z",
+    "meta": {
+      "ip": "202.24.236.26",
+      "ua": "Mozilla/5.0 (X11; Linux i686; rv:1.9.7.20) Gecko/8572-06-21 10:52:23 Firefox/3.8"
+    }
+  },
+  {
+    "id": "ec6_0",
+    "customer_id": "c6",
+    "type": "signup",
+    "ts": "2026-09-29T21:57:11Z",
+    "meta": {
+      "ip": "158.78.33.226",
+      "ua": "Mozilla/5.0 (Windows NT 11.0; lv-LV; rv:1.9.2.20) Gecko/6066-08-18 04:04:14 Fire"
+    }
+  },
+  {
+    "id": "ec6_1",
+    "customer_id": "c6",
+    "type": "purchase",
+    "ts": "2026-09-29T21:56:26Z",
+    "meta": {
+      "ip": "12.240.67.121",
+      "ua": "Opera/9.46.(X11; Linux i686; yo-NG) Presto/2.9.172 Version/10.00"
+    }
+  },
+  {
+    "id": "ec6_2",
+    "customer_id": "c6",
+    "type": "click",
+    "ts": "2026-09-29T21:57:52Z",
+    "meta": {
+      "ip": "187.127.13.231",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 5.0; Trident/5.1)"
+    }
+  },
+  {
+    "id": "ec6_3",
+    "customer_id": "c6",
+    "type": "view",
+    "ts": "2026-09-29T21:58:36Z",
+    "meta": {
+      "ip": "31.6.16.198",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.0; Trident/4.1)"
+    }
+  },
+  {
+    "id": "ec6_4",
+    "customer_id": "c6",
+    "type": "logout",
+    "ts": "2026-09-29T21:55:01Z",
+    "meta": {
+      "ip": "192.210.173.152",
+      "ua": "Mozilla/5.0 (iPad; CPU iPad OS 9_3_5 like Mac OS X) AppleWebKit/533.2 (KHTML, li"
+    }
+  },
+  {
+    "id": "ec6_5",
+    "customer_id": "c6",
+    "type": "login",
+    "ts": "2026-09-29T21:58:48Z",
+    "meta": {
+      "ip": "4.120.72.130",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 3_3 like Mac OS X; mr-IN) AppleWebKit/531.5."
+    }
+  },
+  {
+    "id": "ec6_6",
+    "customer_id": "c6",
+    "type": "signup",
+    "ts": "2026-09-29T22:00:04Z",
+    "meta": {
+      "ip": "197.238.205.17",
+      "ua": "Opera/9.78.(Windows 95; sd-PK) Presto/2.9.160 Version/10.00"
+    }
+  },
+  {
+    "id": "ec6_7",
+    "customer_id": "c6",
+    "type": "purchase",
+    "ts": "2026-09-29T21:57:04Z",
+    "meta": {
+      "ip": "126.220.116.23",
+      "ua": "Mozilla/5.0 (Windows NT 11.0; brx-IN; rv:1.9.0.20) Gecko/3306-04-16 18:23:38 Fir"
+    }
+  },
+  {
+    "id": "ec7_0",
+    "customer_id": "c7",
+    "type": "purchase",
+    "ts": "2026-09-29T21:56:35Z",
+    "meta": {
+      "ip": "7.205.211.24",
+      "ua": "Mozilla/5.0 (compatible; MSIE 5.0; Windows 98; Trident/5.1)"
+    }
+  },
+  {
+    "id": "ec7_1",
+    "customer_id": "c7",
+    "type": "click",
+    "ts": "2026-09-29T21:59:16Z",
+    "meta": {
+      "ip": "200.183.168.180",
+      "ua": "Mozilla/5.0 (compatible; MSIE 5.0; Windows CE; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec7_2",
+    "customer_id": "c7",
+    "type": "signup",
+    "ts": "2026-09-29T21:58:01Z",
+    "meta": {
+      "ip": "107.216.249.95",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_1 rv:5.0; xh-ZA) AppleWebKit/534."
+    }
+  },
+  {
+    "id": "ec7_3",
+    "customer_id": "c7",
+    "type": "click",
+    "ts": "2026-09-29T21:54:53Z",
+    "meta": {
+      "ip": "222.106.232.60",
+      "ua": "Opera/9.20.(Windows NT 5.0; sk-SK) Presto/2.9.173 Version/10.00"
+    }
+  },
+  {
+    "id": "ec7_4",
+    "customer_id": "c7",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:54Z",
+    "meta": {
+      "ip": "161.45.21.88",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2) AppleWebKit/533.0 (KHTML, like"
+    }
+  },
+  {
+    "id": "ec7_5",
+    "customer_id": "c7",
+    "type": "signup",
+    "ts": "2026-09-29T21:59:21Z",
+    "meta": {
+      "ip": "52.195.119.105",
+      "ua": "Opera/8.83.(Windows NT 4.0; mr-IN) Presto/2.9.184 Version/10.00"
+    }
+  },
+  {
+    "id": "ec8_0",
+    "customer_id": "c8",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:04Z",
+    "meta": {
+      "ip": "42.217.29.223",
+      "ua": "Mozilla/5.0 (Android 4.4; Mobile; rv:30.0) Gecko/30.0 Firefox/30.0"
+    }
+  },
+  {
+    "id": "ec8_1",
+    "customer_id": "c8",
+    "type": "logout",
+    "ts": "2026-09-29T21:57:21Z",
+    "meta": {
+      "ip": "191.182.84.245",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_2 like Mac OS X; csb-PL) AppleWebKit/532.2"
+    }
+  },
+  {
+    "id": "ec8_2",
+    "customer_id": "c8",
+    "type": "signup",
+    "ts": "2026-09-29T21:58:53Z",
+    "meta": {
+      "ip": "47.125.70.89",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 6.2; Trident/4.1)"
+    }
+  },
+  {
+    "id": "ec8_3",
+    "customer_id": "c8",
+    "type": "refund",
+    "ts": "2026-09-29T21:55:15Z",
+    "meta": {
+      "ip": "172.250.175.32",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_3 rv:4.0; ayc-PE) AppleWebKit/534.35"
+    }
+  },
+  {
+    "id": "ec8_4",
+    "customer_id": "c8",
+    "type": "signup",
+    "ts": "2026-09-29T21:55:32Z",
+    "meta": {
+      "ip": "78.53.68.7",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 5.1) AppleWebKit/535.36.5 (KHTML, like Gecko"
+    }
+  },
+  {
+    "id": "ec8_5",
+    "customer_id": "c8",
+    "type": "login",
+    "ts": "2026-09-29T21:55:50Z",
+    "meta": {
+      "ip": "157.36.43.122",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:1.9.7.20) Gecko/6164-12-26 20:20:21 Firefox/9"
+    }
+  },
+  {
+    "id": "ec8_6",
+    "customer_id": "c8",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:23Z",
+    "meta": {
+      "ip": "161.0.66.216",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_10_9 rv:5.0; nr-ZA) AppleWebKit/531.3"
+    }
+  },
+  {
+    "id": "ec8_7",
+    "customer_id": "c8",
+    "type": "signup",
+    "ts": "2026-09-29T21:59:54Z",
+    "meta": {
+      "ip": "25.132.171.4",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_10_2 rv:6.0; hne-IN) AppleWebKit/535.6.6"
+    }
+  },
+  {
+    "id": "ec9_0",
+    "customer_id": "c9",
+    "type": "purchase",
+    "ts": "2026-09-29T21:56:13Z",
+    "meta": {
+      "ip": "181.139.35.181",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 3_3 like Mac OS X; nl-NL) AppleWebKit/532.32"
+    }
+  },
+  {
+    "id": "ec9_1",
+    "customer_id": "c9",
+    "type": "view",
+    "ts": "2026-09-29T21:58:49Z",
+    "meta": {
+      "ip": "190.52.8.147",
+      "ua": "Opera/9.14.(Windows 98; sq-AL) Presto/2.9.185 Version/10.00"
+    }
+  },
+  {
+    "id": "ec9_2",
+    "customer_id": "c9",
+    "type": "purchase",
+    "ts": "2026-09-29T21:56:58Z",
+    "meta": {
+      "ip": "42.195.239.145",
+      "ua": "Opera/9.79.(X11; Linux x86_64; sid-ET) Presto/2.9.178 Version/10.00"
+    }
+  },
+  {
+    "id": "ec9_3",
+    "customer_id": "c9",
+    "type": "click",
+    "ts": "2026-09-29T21:57:45Z",
+    "meta": {
+      "ip": "193.21.77.249",
+      "ua": "Opera/8.48.(X11; Linux i686; my-MM) Presto/2.9.183 Version/12.00"
+    }
+  },
+  {
+    "id": "ec9_4",
+    "customer_id": "c9",
+    "type": "purchase",
+    "ts": "2026-09-29T21:54:54Z",
+    "meta": {
+      "ip": "133.145.33.40",
+      "ua": "Opera/9.88.(X11; Linux i686; hi-IN) Presto/2.9.185 Version/12.00"
+    }
+  },
+  {
+    "id": "ec9_5",
+    "customer_id": "c9",
+    "type": "login",
+    "ts": "2026-09-29T22:00:01Z",
+    "meta": {
+      "ip": "136.233.57.195",
+      "ua": "Mozilla/5.0 (Windows 98; Win 9x 4.90; yue-HK; rv:1.9.0.20) Gecko/3891-01-19 07:0"
+    }
+  },
+  {
+    "id": "ec10_0",
+    "customer_id": "c10",
+    "type": "click",
+    "ts": "2026-09-29T21:58:04Z",
+    "meta": {
+      "ip": "203.3.121.237",
+      "ua": "Opera/8.68.(X11; Linux x86_64; ks-IN) Presto/2.9.187 Version/12.00"
+    }
+  },
+  {
+    "id": "ec10_1",
+    "customer_id": "c10",
+    "type": "signup",
+    "ts": "2026-09-29T22:00:03Z",
+    "meta": {
+      "ip": "202.32.108.225",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 11.0) AppleWebKit/534.14.4 (KHTML, like Geck"
+    }
+  },
+  {
+    "id": "ec10_2",
+    "customer_id": "c10",
+    "type": "purchase",
+    "ts": "2026-09-29T21:55:28Z",
+    "meta": {
+      "ip": "195.214.156.154",
+      "ua": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/531.0 (KHTML, like Gecko) Chrome/54.0."
+    }
+  },
+  {
+    "id": "ec10_3",
+    "customer_id": "c10",
+    "type": "login",
+    "ts": "2026-09-29T22:00:38Z",
+    "meta": {
+      "ip": "94.132.0.79",
+      "ua": "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/532.2 (KHTML, like Gecko) Chrome/21.0.8"
+    }
+  },
+  {
+    "id": "ec10_4",
+    "customer_id": "c10",
+    "type": "view",
+    "ts": "2026-09-29T22:00:06Z",
+    "meta": {
+      "ip": "208.69.108.208",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_6_1 rv:3.0; mr-IN) AppleWebKit/532.29.3 "
+    }
+  },
+  {
+    "id": "ec10_5",
+    "customer_id": "c10",
+    "type": "refund",
+    "ts": "2026-09-29T21:55:49Z",
+    "meta": {
+      "ip": "105.89.21.47",
+      "ua": "Mozilla/5.0 (Windows 98; hne-IN; rv:1.9.2.20) Gecko/2240-01-30 00:31:21 Firefox/"
+    }
+  },
+  {
+    "id": "ec10_6",
+    "customer_id": "c10",
+    "type": "click",
+    "ts": "2026-09-29T21:59:38Z",
+    "meta": {
+      "ip": "77.206.187.126",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/531.1 (KHTML, like Gecko) Chrome/18."
+    }
+  },
+  {
+    "id": "ec10_7",
+    "customer_id": "c10",
+    "type": "refund",
+    "ts": "2026-09-29T21:57:16Z",
+    "meta": {
+      "ip": "215.162.234.226",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_5_2) AppleWebKit/532.0 (KHTML, like Ge"
+    }
+  },
+  {
+    "id": "ec11_0",
+    "customer_id": "c11",
+    "type": "login",
+    "ts": "2026-09-29T21:55:38Z",
+    "meta": {
+      "ip": "99.111.65.184",
+      "ua": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Trident/4.0)"
+    }
+  },
+  {
+    "id": "ec11_1",
+    "customer_id": "c11",
+    "type": "view",
+    "ts": "2026-09-29T21:58:52Z",
+    "meta": {
+      "ip": "177.198.40.61",
+      "ua": "Opera/8.39.(X11; Linux i686; lv-LV) Presto/2.9.168 Version/10.00"
+    }
+  },
+  {
+    "id": "ec11_2",
+    "customer_id": "c11",
+    "type": "click",
+    "ts": "2026-09-29T21:58:58Z",
+    "meta": {
+      "ip": "64.201.83.239",
+      "ua": "Mozilla/5.0 (iPad; CPU iPad OS 10_3_3 like Mac OS X) AppleWebKit/531.2 (KHTML, l"
+    }
+  },
+  {
+    "id": "ec11_3",
+    "customer_id": "c11",
+    "type": "signup",
+    "ts": "2026-09-29T21:57:13Z",
+    "meta": {
+      "ip": "207.182.31.50",
+      "ua": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 5.1; Trident/3.0)"
+    }
+  },
+  {
+    "id": "ec11_4",
+    "customer_id": "c11",
+    "type": "refund",
+    "ts": "2026-09-29T21:55:55Z",
+    "meta": {
+      "ip": "2.24.123.238",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_6; rv:1.9.2.20) Gecko/4997-07-29 15:"
+    }
+  },
+  {
+    "id": "ec11_5",
+    "customer_id": "c11",
+    "type": "purchase",
+    "ts": "2026-09-29T21:57:19Z",
+    "meta": {
+      "ip": "186.112.167.35",
+      "ua": "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 4.0; Trident/3.0)"
+    }
+  },
+  {
+    "id": "ec11_6",
+    "customer_id": "c11",
+    "type": "refund",
+    "ts": "2026-09-29T21:56:21Z",
+    "meta": {
+      "ip": "19.124.180.152",
+      "ua": "Mozilla/5.0 (Windows 98; Win 9x 4.90; ca-ES; rv:1.9.1.20) Gecko/4795-06-23 02:49"
+    }
+  },
+  {
+    "id": "ec12_0",
+    "customer_id": "c12",
+    "type": "logout",
+    "ts": "2026-09-29T21:54:44Z",
+    "meta": {
+      "ip": "23.28.252.3",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 3_1_3 like Mac OS X) AppleWebKit/533.0 (KHTML"
+    }
+  },
+  {
+    "id": "ec12_1",
+    "customer_id": "c12",
+    "type": "view",
+    "ts": "2026-09-29T21:59:53Z",
+    "meta": {
+      "ip": "63.237.215.21",
+      "ua": "Opera/8.63.(X11; Linux x86_64; bhb-IN) Presto/2.9.168 Version/11.00"
+    }
+  },
+  {
+    "id": "ec12_2",
+    "customer_id": "c12",
+    "type": "refund",
+    "ts": "2026-09-29T21:56:20Z",
+    "meta": {
+      "ip": "196.255.32.150",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_11_4 rv:3.0; si-LK) AppleWebKit/531"
+    }
+  },
+  {
+    "id": "ec12_3",
+    "customer_id": "c12",
+    "type": "purchase",
+    "ts": "2026-09-29T21:55:07Z",
+    "meta": {
+      "ip": "183.114.201.142",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4_1 like Mac OS X) AppleWebKit/536.0 (KHTM"
+    }
+  },
+  {
+    "id": "ec12_4",
+    "customer_id": "c12",
+    "type": "logout",
+    "ts": "2026-09-29T21:58:42Z",
+    "meta": {
+      "ip": "97.156.153.91",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_6 like Mac OS X) AppleWebKit/532.2 (KHTML"
+    }
+  },
+  {
+    "id": "ec12_5",
+    "customer_id": "c12",
+    "type": "click",
+    "ts": "2026-09-29T21:57:58Z",
+    "meta": {
+      "ip": "218.46.213.58",
+      "ua": "Mozilla/5.0 (Windows; U; Windows CE) AppleWebKit/532.41.5 (KHTML, like Gecko) Ve"
+    }
+  },
+  {
+    "id": "ec12_6",
+    "customer_id": "c12",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:45Z",
+    "meta": {
+      "ip": "216.54.138.183",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_8_2) AppleWebKit/536.0 (KHTML, like G"
+    }
+  },
+  {
+    "id": "ec12_7",
+    "customer_id": "c12",
+    "type": "view",
+    "ts": "2026-09-29T21:56:05Z",
+    "meta": {
+      "ip": "132.204.214.242",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_1 like Mac OS X; nb-NO) AppleWebKit/531.22"
+    }
+  },
+  {
+    "id": "ec13_0",
+    "customer_id": "c13",
+    "type": "click",
+    "ts": "2026-09-29T21:59:21Z",
+    "meta": {
+      "ip": "197.15.161.145",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows CE; Trident/3.0)"
+    }
+  },
+  {
+    "id": "ec13_1",
+    "customer_id": "c13",
+    "type": "refund",
+    "ts": "2026-09-29T21:57:59Z",
+    "meta": {
+      "ip": "207.237.118.74",
+      "ua": "Mozilla/5.0 (Android 3.2.2; Mobile; rv:62.0) Gecko/62.0 Firefox/62.0"
+    }
+  },
+  {
+    "id": "ec13_2",
+    "customer_id": "c13",
+    "type": "click",
+    "ts": "2026-09-29T21:56:52Z",
+    "meta": {
+      "ip": "17.248.243.34",
+      "ua": "Mozilla/5.0 (X11; Linux i686; rv:1.9.5.20) Gecko/2703-09-04 11:04:50 Firefox/3.6"
+    }
+  },
+  {
+    "id": "ec13_3",
+    "customer_id": "c13",
+    "type": "refund",
+    "ts": "2026-09-29T21:59:42Z",
+    "meta": {
+      "ip": "132.73.236.129",
+      "ua": "Mozilla/5.0 (Linux; Android 2.3.1) AppleWebKit/534.2 (KHTML, like Gecko) Chrome/"
+    }
+  },
+  {
+    "id": "ec14_0",
+    "customer_id": "c14",
+    "type": "click",
+    "ts": "2026-09-29T21:56:53Z",
+    "meta": {
+      "ip": "191.35.50.171",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_9_5) AppleWebKit/532.1 (KHTML, like G"
+    }
+  },
+  {
+    "id": "ec14_1",
+    "customer_id": "c14",
+    "type": "refund",
+    "ts": "2026-09-29T21:58:24Z",
+    "meta": {
+      "ip": "154.172.103.133",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 11.0) AppleWebKit/531.13.4 (KHTML, like Geck"
+    }
+  },
+  {
+    "id": "ec14_2",
+    "customer_id": "c14",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:20Z",
+    "meta": {
+      "ip": "93.54.116.125",
+      "ua": "Mozilla/5.0 (Linux; Android 4.4.3) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/"
+    }
+  },
+  {
+    "id": "ec14_3",
+    "customer_id": "c14",
+    "type": "click",
+    "ts": "2026-09-29T21:55:03Z",
+    "meta": {
+      "ip": "22.219.178.165",
+      "ua": "Mozilla/5.0 (Windows NT 11.0; li-NL; rv:1.9.1.20) Gecko/4004-07-16 04:53:36 Fire"
+    }
+  },
+  {
+    "id": "ec14_4",
+    "customer_id": "c14",
+    "type": "login",
+    "ts": "2026-09-29T21:57:30Z",
+    "meta": {
+      "ip": "184.220.61.200",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows CE; Trident/3.0)"
+    }
+  },
+  {
+    "id": "ec14_5",
+    "customer_id": "c14",
+    "type": "click",
+    "ts": "2026-09-29T21:55:07Z",
+    "meta": {
+      "ip": "218.58.11.222",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_7_5; rv:1.9.2.20) Gecko/2245-04-09 "
+    }
+  },
+  {
+    "id": "ec14_6",
+    "customer_id": "c14",
+    "type": "click",
+    "ts": "2026-09-29T21:56:51Z",
+    "meta": {
+      "ip": "211.196.221.166",
+      "ua": "Opera/8.97.(Windows NT 11.0; tr-CY) Presto/2.9.175 Version/10.00"
+    }
+  },
+  {
+    "id": "ec15_0",
+    "customer_id": "c15",
+    "type": "purchase",
+    "ts": "2026-09-29T21:57:53Z",
+    "meta": {
+      "ip": "209.186.224.43",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_11_6; rv:1.9.5.20) Gecko/7044-01-14 0"
+    }
+  },
+  {
+    "id": "ec15_1",
+    "customer_id": "c15",
+    "type": "refund",
+    "ts": "2026-09-29T21:59:09Z",
+    "meta": {
+      "ip": "64.67.144.153",
+      "ua": "Mozilla/5.0 (Android 1.5; Mobile; rv:26.0) Gecko/26.0 Firefox/26.0"
+    }
+  },
+  {
+    "id": "ec16_0",
+    "customer_id": "c16",
+    "type": "login",
+    "ts": "2026-09-29T22:00:05Z",
+    "meta": {
+      "ip": "160.199.3.30",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_3 like Mac OS X; xh-ZA) AppleWebKit/531.43"
+    }
+  },
+  {
+    "id": "ec16_1",
+    "customer_id": "c16",
+    "type": "view",
+    "ts": "2026-09-29T22:00:29Z",
+    "meta": {
+      "ip": "221.119.199.107",
+      "ua": "Mozilla/5.0 (Linux; Android 4.4.4) AppleWebKit/536.2 (KHTML, like Gecko) Chrome/"
+    }
+  },
+  {
+    "id": "ec16_2",
+    "customer_id": "c16",
+    "type": "purchase",
+    "ts": "2026-09-29T21:56:24Z",
+    "meta": {
+      "ip": "197.82.137.193",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_0; rv:1.9.2.20) Gecko/2011-05-17 02:"
+    }
+  },
+  {
+    "id": "ec16_3",
+    "customer_id": "c16",
+    "type": "click",
+    "ts": "2026-09-29T21:55:25Z",
+    "meta": {
+      "ip": "162.237.8.125",
+      "ua": "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/534.1 (KHTML, like Gecko) Chrome/59.0.8"
+    }
+  },
+  {
+    "id": "ec16_4",
+    "customer_id": "c16",
+    "type": "logout",
+    "ts": "2026-09-29T21:58:45Z",
+    "meta": {
+      "ip": "154.82.123.57",
+      "ua": "Opera/8.95.(Windows 98; hy-AM) Presto/2.9.160 Version/12.00"
+    }
+  },
+  {
+    "id": "ec17_0",
+    "customer_id": "c17",
+    "type": "purchase",
+    "ts": "2026-09-29T21:57:31Z",
+    "meta": {
+      "ip": "204.195.14.79",
+      "ua": "Opera/9.29.(X11; Linux i686; pa-PK) Presto/2.9.181 Version/12.00"
+    }
+  },
+  {
+    "id": "ec17_1",
+    "customer_id": "c17",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:23Z",
+    "meta": {
+      "ip": "213.5.140.142",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8 rv:3.0; kok-IN) AppleWebKit/534"
+    }
+  },
+  {
+    "id": "ec18_0",
+    "customer_id": "c18",
+    "type": "signup",
+    "ts": "2026-09-29T21:58:25Z",
+    "meta": {
+      "ip": "223.243.90.78",
+      "ua": "Opera/9.14.(Windows 98; pt-BR) Presto/2.9.163 Version/11.00"
+    }
+  },
+  {
+    "id": "ec18_1",
+    "customer_id": "c18",
+    "type": "logout",
+    "ts": "2026-09-29T21:59:23Z",
+    "meta": {
+      "ip": "210.232.157.199",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 11.0) AppleWebKit/535.41.3 (KHTML, like Geck"
+    }
+  },
+  {
+    "id": "ec18_2",
+    "customer_id": "c18",
+    "type": "logout",
+    "ts": "2026-09-29T22:00:15Z",
+    "meta": {
+      "ip": "86.186.152.212",
+      "ua": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 5.2; Trident/4.0)"
+    }
+  },
+  {
+    "id": "ec18_3",
+    "customer_id": "c18",
+    "type": "logout",
+    "ts": "2026-09-29T21:55:01Z",
+    "meta": {
+      "ip": "125.163.8.37",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/533.2 (KHTML,"
+    }
+  },
+  {
+    "id": "ec18_4",
+    "customer_id": "c18",
+    "type": "refund",
+    "ts": "2026-09-29T21:58:19Z",
+    "meta": {
+      "ip": "213.171.164.114",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_11_9 rv:3.0; ur-PK) AppleWebKit/532.4"
+    }
+  },
+  {
+    "id": "ec18_5",
+    "customer_id": "c18",
+    "type": "view",
+    "ts": "2026-09-29T21:55:46Z",
+    "meta": {
+      "ip": "116.200.89.35",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_7_2 rv:6.0; gez-ET) AppleWebKit/533"
+    }
+  },
+  {
+    "id": "ec18_6",
+    "customer_id": "c18",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:36Z",
+    "meta": {
+      "ip": "199.213.191.170",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_2 like Mac OS X; mai-IN) AppleWebKit/533.2"
+    }
+  },
+  {
+    "id": "ec19_0",
+    "customer_id": "c19",
+    "type": "view",
+    "ts": "2026-09-29T21:57:09Z",
+    "meta": {
+      "ip": "34.17.78.203",
+      "ua": "Mozilla/5.0 (compatible; MSIE 8.0; Windows 98; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec19_1",
+    "customer_id": "c19",
+    "type": "purchase",
+    "ts": "2026-09-29T22:00:09Z",
+    "meta": {
+      "ip": "217.52.85.251",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.1 (KHTML, like Gecko) Chrome/25."
+    }
+  },
+  {
+    "id": "ec19_2",
+    "customer_id": "c19",
+    "type": "refund",
+    "ts": "2026-09-29T21:56:13Z",
+    "meta": {
+      "ip": "39.163.126.43",
+      "ua": "Opera/9.10.(Windows NT 5.01; is-IS) Presto/2.9.164 Version/10.00"
+    }
+  },
+  {
+    "id": "ec19_3",
+    "customer_id": "c19",
+    "type": "logout",
+    "ts": "2026-09-29T21:57:27Z",
+    "meta": {
+      "ip": "180.244.43.20",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_6_8) AppleWebKit/532.1 (KHTML, like Geck"
+    }
+  },
+  {
+    "id": "ec19_4",
+    "customer_id": "c19",
+    "type": "purchase",
+    "ts": "2026-09-29T21:57:42Z",
+    "meta": {
+      "ip": "158.100.15.101",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_11_1 rv:5.0; tt-RU) AppleWebKit/531"
+    }
+  },
+  {
+    "id": "ec19_5",
+    "customer_id": "c19",
+    "type": "refund",
+    "ts": "2026-09-29T21:59:01Z",
+    "meta": {
+      "ip": "209.103.59.153",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.0; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec20_0",
+    "customer_id": "c20",
+    "type": "refund",
+    "ts": "2026-09-29T21:55:27Z",
+    "meta": {
+      "ip": "12.15.3.86",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/532.2 (KHTML, like G"
+    }
+  },
+  {
+    "id": "ec20_1",
+    "customer_id": "c20",
+    "type": "purchase",
+    "ts": "2026-09-29T21:58:06Z",
+    "meta": {
+      "ip": "153.226.121.244",
+      "ua": "Opera/8.84.(Windows 95; mhr-RU) Presto/2.9.177 Version/10.00"
+    }
+  },
+  {
+    "id": "ec20_2",
+    "customer_id": "c20",
+    "type": "click",
+    "ts": "2026-09-29T21:55:01Z",
+    "meta": {
+      "ip": "192.75.114.71",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_1 like Mac OS X; byn-ER) AppleWebKit/531.1"
+    }
+  },
+  {
+    "id": "ec20_3",
+    "customer_id": "c20",
+    "type": "refund",
+    "ts": "2026-09-29T21:57:58Z",
+    "meta": {
+      "ip": "212.156.68.77",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows 95; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec20_4",
+    "customer_id": "c20",
+    "type": "purchase",
+    "ts": "2026-09-29T21:55:41Z",
+    "meta": {
+      "ip": "89.56.162.112",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 3_0 like Mac OS X; mr-IN) AppleWebKit/535.6."
+    }
+  },
+  {
+    "id": "ec21_0",
+    "customer_id": "c21",
+    "type": "login",
+    "ts": "2026-09-29T21:58:34Z",
+    "meta": {
+      "ip": "206.83.65.180",
+      "ua": "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/533.0 (KHTML, like Gecko) Chrome/17.0.8"
+    }
+  },
+  {
+    "id": "ec21_1",
+    "customer_id": "c21",
+    "type": "signup",
+    "ts": "2026-09-29T21:54:40Z",
+    "meta": {
+      "ip": "142.45.122.38",
+      "ua": "Opera/9.71.(Windows NT 11.0; lo-LA) Presto/2.9.181 Version/12.00"
+    }
+  },
+  {
+    "id": "ec21_2",
+    "customer_id": "c21",
+    "type": "login",
+    "ts": "2026-09-29T21:58:34Z",
+    "meta": {
+      "ip": "147.140.217.145",
+      "ua": "Opera/8.78.(X11; Linux i686; ff-SN) Presto/2.9.186 Version/11.00"
+    }
+  },
+  {
+    "id": "ec21_3",
+    "customer_id": "c21",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:18Z",
+    "meta": {
+      "ip": "178.114.97.58",
+      "ua": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/531.2 (KHTML, like Gecko) Chrome/48.0."
+    }
+  },
+  {
+    "id": "ec21_4",
+    "customer_id": "c21",
+    "type": "refund",
+    "ts": "2026-09-29T22:00:17Z",
+    "meta": {
+      "ip": "21.78.151.33",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_1 like Mac OS X; ln-CD) AppleWebKit/532.29"
+    }
+  },
+  {
+    "id": "ec21_5",
+    "customer_id": "c21",
+    "type": "logout",
+    "ts": "2026-09-29T21:57:42Z",
+    "meta": {
+      "ip": "157.24.224.215",
+      "ua": "Mozilla/5.0 (iPad; CPU iPad OS 17_2_1 like Mac OS X) AppleWebKit/531.2 (KHTML, l"
+    }
+  },
+  {
+    "id": "ec21_6",
+    "customer_id": "c21",
+    "type": "refund",
+    "ts": "2026-09-29T21:55:49Z",
+    "meta": {
+      "ip": "132.239.3.113",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_3 like Mac OS X; tg-TJ) AppleWebKit/533.14"
+    }
+  },
+  {
+    "id": "ec21_7",
+    "customer_id": "c21",
+    "type": "click",
+    "ts": "2026-09-29T21:56:00Z",
+    "meta": {
+      "ip": "193.11.126.12",
+      "ua": "Mozilla/5.0 (Android 3.2; Mobile; rv:48.0) Gecko/48.0 Firefox/48.0"
+    }
+  },
+  {
+    "id": "ec22_0",
+    "customer_id": "c22",
+    "type": "click",
+    "ts": "2026-09-29T21:57:55Z",
+    "meta": {
+      "ip": "76.243.71.85",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_1 rv:5.0; ce-RU) AppleWebKit/535.44."
+    }
+  },
+  {
+    "id": "ec22_1",
+    "customer_id": "c22",
+    "type": "signup",
+    "ts": "2026-09-29T21:57:47Z",
+    "meta": {
+      "ip": "59.116.4.252",
+      "ua": "Mozilla/5.0 (Android 4.3.1; Mobile; rv:57.0) Gecko/57.0 Firefox/57.0"
+    }
+  },
+  {
+    "id": "ec22_2",
+    "customer_id": "c22",
+    "type": "refund",
+    "ts": "2026-09-29T22:00:11Z",
+    "meta": {
+      "ip": "221.141.208.242",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_3 like Mac OS X; mr-IN) AppleWebKit/533.40"
+    }
+  },
+  {
+    "id": "ec22_3",
+    "customer_id": "c22",
+    "type": "refund",
+    "ts": "2026-09-29T21:56:35Z",
+    "meta": {
+      "ip": "162.150.182.123",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_6 like Mac OS X) AppleWebKit/532.2 (KHTM"
+    }
+  },
+  {
+    "id": "ec22_4",
+    "customer_id": "c22",
+    "type": "view",
+    "ts": "2026-09-29T21:57:04Z",
+    "meta": {
+      "ip": "199.29.107.203",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:1.9.7.20) Gecko/6317-04-24 09:53:38 Firefox/1"
+    }
+  },
+  {
+    "id": "ec22_5",
+    "customer_id": "c22",
+    "type": "purchase",
+    "ts": "2026-09-29T21:58:30Z",
+    "meta": {
+      "ip": "184.90.254.34",
+      "ua": "Mozilla/5.0 (Android 1.1; Mobile; rv:38.0) Gecko/38.0 Firefox/38.0"
+    }
+  },
+  {
+    "id": "ec22_6",
+    "customer_id": "c22",
+    "type": "login",
+    "ts": "2026-09-29T22:00:22Z",
+    "meta": {
+      "ip": "193.38.237.63",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 3_1 like Mac OS X; fil-PH) AppleWebKit/532.3"
+    }
+  },
+  {
+    "id": "ec23_0",
+    "customer_id": "c23",
+    "type": "signup",
+    "ts": "2026-09-29T21:57:40Z",
+    "meta": {
+      "ip": "19.214.11.105",
+      "ua": "Mozilla/5.0 (Linux; Android 4.0) AppleWebKit/536.2 (KHTML, like Gecko) Chrome/61"
+    }
+  },
+  {
+    "id": "ec23_1",
+    "customer_id": "c23",
+    "type": "login",
+    "ts": "2026-09-29T21:59:14Z",
+    "meta": {
+      "ip": "126.201.149.67",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:1.9.5.20) Gecko/4794-08-29 15:01:10 Firefox/3"
+    }
+  },
+  {
+    "id": "ec23_2",
+    "customer_id": "c23",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:22Z",
+    "meta": {
+      "ip": "163.35.19.47",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_9_5; rv:1.9.4.20) Gecko/6286-07-15 "
+    }
+  },
+  {
+    "id": "ec23_3",
+    "customer_id": "c23",
+    "type": "view",
+    "ts": "2026-09-29T22:00:25Z",
+    "meta": {
+      "ip": "213.149.210.116",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 5.0; Trident/5.1)"
+    }
+  },
+  {
+    "id": "ec23_4",
+    "customer_id": "c23",
+    "type": "login",
+    "ts": "2026-09-29T21:58:26Z",
+    "meta": {
+      "ip": "100.36.172.205",
+      "ua": "Opera/9.19.(X11; Linux i686; eu-FR) Presto/2.9.173 Version/12.00"
+    }
+  },
+  {
+    "id": "ec23_5",
+    "customer_id": "c23",
+    "type": "signup",
+    "ts": "2026-09-29T21:55:18Z",
+    "meta": {
+      "ip": "98.130.2.226",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 6.2; Trident/4.1)"
+    }
+  },
+  {
+    "id": "ec23_6",
+    "customer_id": "c23",
+    "type": "purchase",
+    "ts": "2026-09-29T21:56:56Z",
+    "meta": {
+      "ip": "165.207.133.238",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3 rv:3.0; da-DK) AppleWebKit/535."
+    }
+  },
+  {
+    "id": "ec23_7",
+    "customer_id": "c23",
+    "type": "click",
+    "ts": "2026-09-29T21:59:18Z",
+    "meta": {
+      "ip": "89.104.167.50",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 4.0) AppleWebKit/531.7.3 (KHTML, like Gecko)"
+    }
+  },
+  {
+    "id": "ec24_0",
+    "customer_id": "c24",
+    "type": "click",
+    "ts": "2026-09-29T22:00:17Z",
+    "meta": {
+      "ip": "165.52.6.75",
+      "ua": "Opera/8.99.(Windows NT 11.0; shs-CA) Presto/2.9.177 Version/11.00"
+    }
+  },
+  {
+    "id": "ec24_1",
+    "customer_id": "c24",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:14Z",
+    "meta": {
+      "ip": "61.56.1.230",
+      "ua": "Mozilla/5.0 (Windows; U; Windows NT 10.0) AppleWebKit/534.34.6 (KHTML, like Geck"
+    }
+  },
+  {
+    "id": "ec24_2",
+    "customer_id": "c24",
+    "type": "view",
+    "ts": "2026-09-29T21:54:38Z",
+    "meta": {
+      "ip": "193.69.201.44",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec24_3",
+    "customer_id": "c24",
+    "type": "signup",
+    "ts": "2026-09-29T22:00:30Z",
+    "meta": {
+      "ip": "175.232.132.69",
+      "ua": "Mozilla/5.0 (compatible; MSIE 5.0; Windows NT 10.0; Trident/4.1)"
+    }
+  },
+  {
+    "id": "ec24_4",
+    "customer_id": "c24",
+    "type": "refund",
+    "ts": "2026-09-29T21:59:43Z",
+    "meta": {
+      "ip": "27.244.228.2",
+      "ua": "Mozilla/5.0 (X11; Linux i686; rv:1.9.5.20) Gecko/9688-10-02 14:24:06 Firefox/12."
+    }
+  },
+  {
+    "id": "ec24_5",
+    "customer_id": "c24",
+    "type": "click",
+    "ts": "2026-09-29T21:55:03Z",
+    "meta": {
+      "ip": "211.69.211.12",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows 98; Win 9x 4.90; Trident/5.1)"
+    }
+  },
+  {
+    "id": "ec24_6",
+    "customer_id": "c24",
+    "type": "purchase",
+    "ts": "2026-09-29T21:54:42Z",
+    "meta": {
+      "ip": "64.241.64.127",
+      "ua": "Opera/9.69.(Windows NT 5.0; mt-MT) Presto/2.9.185 Version/11.00"
+    }
+  },
+  {
+    "id": "ec25_0",
+    "customer_id": "c25",
+    "type": "click",
+    "ts": "2026-09-29T22:00:34Z",
+    "meta": {
+      "ip": "97.43.48.24",
+      "ua": "Mozilla/5.0 (Linux; Android 3.2.4) AppleWebKit/533.1 (KHTML, like Gecko) Chrome/"
+    }
+  },
+  {
+    "id": "ec25_1",
+    "customer_id": "c25",
+    "type": "logout",
+    "ts": "2026-09-29T21:57:57Z",
+    "meta": {
+      "ip": "199.165.104.137",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_10_1; rv:1.9.3.20) Gecko/8357-04-30 07:5"
+    }
+  },
+  {
+    "id": "ec26_0",
+    "customer_id": "c26",
+    "type": "login",
+    "ts": "2026-09-29T22:00:08Z",
+    "meta": {
+      "ip": "38.223.129.64",
+      "ua": "Mozilla/5.0 (iPad; CPU iPad OS 13_5_1 like Mac OS X) AppleWebKit/534.2 (KHTML, l"
+    }
+  },
+  {
+    "id": "ec26_1",
+    "customer_id": "c26",
+    "type": "view",
+    "ts": "2026-09-29T21:57:45Z",
+    "meta": {
+      "ip": "152.66.63.243",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_6 like Mac OS X) AppleWebKit/536.0 (KHTM"
+    }
+  },
+  {
+    "id": "ec26_2",
+    "customer_id": "c26",
+    "type": "view",
+    "ts": "2026-09-29T21:59:57Z",
+    "meta": {
+      "ip": "204.100.135.1",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 6.0; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec26_3",
+    "customer_id": "c26",
+    "type": "purchase",
+    "ts": "2026-09-29T21:54:44Z",
+    "meta": {
+      "ip": "37.30.3.39",
+      "ua": "Opera/8.88.(X11; Linux i686; lo-LA) Presto/2.9.186 Version/11.00"
+    }
+  },
+  {
+    "id": "ec26_4",
+    "customer_id": "c26",
+    "type": "view",
+    "ts": "2026-09-29T21:56:54Z",
+    "meta": {
+      "ip": "210.64.158.154",
+      "ua": "Mozilla/5.0 (compatible; MSIE 5.0; Windows CE; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec27_0",
+    "customer_id": "c27",
+    "type": "click",
+    "ts": "2026-09-29T21:55:29Z",
+    "meta": {
+      "ip": "220.84.161.221",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_10_6; rv:1.9.5.20) Gecko/8482-10-20"
+    }
+  },
+  {
+    "id": "ec27_1",
+    "customer_id": "c27",
+    "type": "login",
+    "ts": "2026-09-29T21:57:42Z",
+    "meta": {
+      "ip": "153.105.238.140",
+      "ua": "Mozilla/5.0 (Windows CE) AppleWebKit/536.0 (KHTML, like Gecko) Chrome/33.0.802.0"
+    }
+  },
+  {
+    "id": "ec27_2",
+    "customer_id": "c27",
+    "type": "click",
+    "ts": "2026-09-29T21:56:49Z",
+    "meta": {
+      "ip": "153.150.75.96",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0 rv:6.0; ff-SN) AppleWebKit/532.47."
+    }
+  },
+  {
+    "id": "ec28_0",
+    "customer_id": "c28",
+    "type": "signup",
+    "ts": "2026-09-29T21:58:20Z",
+    "meta": {
+      "ip": "169.30.219.190",
+      "ua": "Mozilla/5.0 (iPad; CPU iPad OS 4_3_5 like Mac OS X) AppleWebKit/535.0 (KHTML, li"
+    }
+  },
+  {
+    "id": "ec28_1",
+    "customer_id": "c28",
+    "type": "click",
+    "ts": "2026-09-29T21:58:20Z",
+    "meta": {
+      "ip": "212.80.220.127",
+      "ua": "Opera/8.81.(X11; Linux i686; pap-AW) Presto/2.9.180 Version/12.00"
+    }
+  },
+  {
+    "id": "ec28_2",
+    "customer_id": "c28",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:53Z",
+    "meta": {
+      "ip": "205.240.66.229",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/533.1 (KHTML, like Ge"
+    }
+  },
+  {
+    "id": "ec28_3",
+    "customer_id": "c28",
+    "type": "click",
+    "ts": "2026-09-29T21:55:57Z",
+    "meta": {
+      "ip": "192.35.152.140",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 2_2_1 like Mac OS X) AppleWebKit/532.2 (KHTML"
+    }
+  },
+  {
+    "id": "ec28_4",
+    "customer_id": "c28",
+    "type": "signup",
+    "ts": "2026-09-29T21:55:00Z",
+    "meta": {
+      "ip": "146.45.71.34",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_5_3; rv:1.9.6.20) Gecko/2455-03-25 06:"
+    }
+  },
+  {
+    "id": "ec28_5",
+    "customer_id": "c28",
+    "type": "login",
+    "ts": "2026-09-29T22:00:28Z",
+    "meta": {
+      "ip": "147.89.80.13",
+      "ua": "Mozilla/5.0 (X11; Linux i686; rv:1.9.6.20) Gecko/2528-10-22 05:19:56 Firefox/3.6"
+    }
+  },
+  {
+    "id": "ec28_6",
+    "customer_id": "c28",
+    "type": "logout",
+    "ts": "2026-09-29T21:58:18Z",
+    "meta": {
+      "ip": "42.29.117.2",
+      "ua": "Mozilla/5.0 (compatible; MSIE 5.0; Windows NT 5.2; Trident/5.0)"
+    }
+  },
+  {
+    "id": "ec28_7",
+    "customer_id": "c28",
+    "type": "login",
+    "ts": "2026-09-29T21:56:12Z",
+    "meta": {
+      "ip": "162.84.15.191",
+      "ua": "Mozilla/5.0 (Linux; Android 1.6) AppleWebKit/533.1 (KHTML, like Gecko) Chrome/35"
+    }
+  },
+  {
+    "id": "ec29_0",
+    "customer_id": "c29",
+    "type": "purchase",
+    "ts": "2026-09-29T22:00:10Z",
+    "meta": {
+      "ip": "152.204.38.59",
+      "ua": "Opera/9.11.(Windows 98; Win 9x 4.90; et-EE) Presto/2.9.167 Version/10.00"
+    }
+  },
+  {
+    "id": "ec29_1",
+    "customer_id": "c29",
+    "type": "signup",
+    "ts": "2026-09-29T21:56:56Z",
+    "meta": {
+      "ip": "140.251.57.172",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_11_0; rv:1.9.6.20) Gecko/7436-01-01 17:3"
+    }
+  },
+  {
+    "id": "ec30_0",
+    "customer_id": "c30",
+    "type": "login",
+    "ts": "2026-09-29T21:57:04Z",
+    "meta": {
+      "ip": "146.215.197.210",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_9 rv:6.0; ug-CN) AppleWebKit/531.45."
+    }
+  },
+  {
+    "id": "ec30_1",
+    "customer_id": "c30",
+    "type": "logout",
+    "ts": "2026-09-29T21:54:50Z",
+    "meta": {
+      "ip": "121.157.142.134",
+      "ua": "Opera/8.21.(Windows NT 4.0; kok-IN) Presto/2.9.182 Version/12.00"
+    }
+  },
+  {
+    "id": "ec31_0",
+    "customer_id": "c31",
+    "type": "logout",
+    "ts": "2026-09-29T21:55:36Z",
+    "meta": {
+      "ip": "219.157.59.119",
+      "ua": "Mozilla/5.0 (Windows 98; Win 9x 4.90) AppleWebKit/535.2 (KHTML, like Gecko) Chro"
+    }
+  },
+  {
+    "id": "ec31_1",
+    "customer_id": "c31",
+    "type": "signup",
+    "ts": "2026-09-29T21:55:38Z",
+    "meta": {
+      "ip": "12.7.60.65",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_0 like Mac OS X; th-TH) AppleWebKit/533.1."
+    }
+  },
+  {
+    "id": "ec31_2",
+    "customer_id": "c31",
+    "type": "signup",
+    "ts": "2026-09-29T21:57:00Z",
+    "meta": {
+      "ip": "200.212.158.243",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_7_4) AppleWebKit/532.0 (KHTML, like Geck"
+    }
+  },
+  {
+    "id": "ec31_3",
+    "customer_id": "c31",
+    "type": "purchase",
+    "ts": "2026-09-29T21:57:23Z",
+    "meta": {
+      "ip": "170.69.74.105",
+      "ua": "Opera/9.52.(X11; Linux i686; iw-IL) Presto/2.9.164 Version/10.00"
+    }
+  },
+  {
+    "id": "ec31_4",
+    "customer_id": "c31",
+    "type": "click",
+    "ts": "2026-09-29T21:59:07Z",
+    "meta": {
+      "ip": "182.176.139.174",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_1 like Mac OS X; xh-ZA) AppleWebKit/531.7."
+    }
+  },
+  {
+    "id": "ec31_5",
+    "customer_id": "c31",
+    "type": "click",
+    "ts": "2026-09-29T22:00:01Z",
+    "meta": {
+      "ip": "139.131.153.156",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_0 like Mac OS X; cv-RU) AppleWebKit/532.46"
+    }
+  },
+  {
+    "id": "ec32_0",
+    "customer_id": "c32",
+    "type": "view",
+    "ts": "2026-09-29T22:00:04Z",
+    "meta": {
+      "ip": "76.224.64.7",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 10.0; Trident/3.1)"
+    }
+  },
+  {
+    "id": "ec32_1",
+    "customer_id": "c32",
+    "type": "signup",
+    "ts": "2026-09-29T21:57:11Z",
+    "meta": {
+      "ip": "204.12.142.140",
+      "ua": "Mozilla/5.0 (iPad; CPU iPad OS 17_1 like Mac OS X) AppleWebKit/536.1 (KHTML, lik"
+    }
+  },
+  {
+    "id": "ec32_2",
+    "customer_id": "c32",
+    "type": "view",
+    "ts": "2026-09-29T21:57:11Z",
+    "meta": {
+      "ip": "203.208.196.203",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_6 rv:6.0; bho-IN) AppleWebKit/535.2"
+    }
+  },
+  {
+    "id": "ec32_3",
+    "customer_id": "c32",
+    "type": "click",
+    "ts": "2026-09-29T21:57:19Z",
+    "meta": {
+      "ip": "221.62.107.101",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_2_1 like Mac OS X) AppleWebKit/534.0 (KHTM"
+    }
+  },
+  {
+    "id": "ec32_4",
+    "customer_id": "c32",
+    "type": "click",
+    "ts": "2026-09-29T21:57:16Z",
+    "meta": {
+      "ip": "134.73.192.233",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_3 like Mac OS X; sa-IN) AppleWebKit/532.14"
+    }
+  },
+  {
+    "id": "ec32_5",
+    "customer_id": "c32",
+    "type": "logout",
+    "ts": "2026-09-29T22:00:15Z",
+    "meta": {
+      "ip": "217.253.19.27",
+      "ua": "Mozilla/5.0 (Windows NT 5.2; li-NL; rv:1.9.1.20) Gecko/3687-11-24 06:50:50 Firef"
+    }
+  },
+  {
+    "id": "ec32_6",
+    "customer_id": "c32",
+    "type": "signup",
+    "ts": "2026-09-29T21:55:32Z",
+    "meta": {
+      "ip": "155.75.54.254",
+      "ua": "Opera/9.52.(Windows NT 6.2; tcy-IN) Presto/2.9.179 Version/11.00"
+    }
+  },
+  {
+    "id": "ec33_0",
+    "customer_id": "c33",
+    "type": "login",
+    "ts": "2026-09-29T21:56:19Z",
+    "meta": {
+      "ip": "194.80.110.66",
+      "ua": "Opera/9.97.(X11; Linux i686; ca-IT) Presto/2.9.163 Version/11.00"
+    }
+  },
+  {
+    "id": "ec33_1",
+    "customer_id": "c33",
+    "type": "refund",
+    "ts": "2026-09-29T22:00:07Z",
+    "meta": {
+      "ip": "195.225.214.199",
+      "ua": "Mozilla/5.0 (Android 2.2.2; Mobile; rv:43.0) Gecko/43.0 Firefox/43.0"
+    }
+  },
+  {
+    "id": "ec33_2",
+    "customer_id": "c33",
+    "type": "signup",
+    "ts": "2026-09-29T21:56:40Z",
+    "meta": {
+      "ip": "213.22.177.182",
+      "ua": "Opera/9.65.(Windows 98; lb-LU) Presto/2.9.186 Version/12.00"
+    }
+  },
+  {
+    "id": "ec33_3",
+    "customer_id": "c33",
+    "type": "view",
+    "ts": "2026-09-29T21:59:28Z",
+    "meta": {
+      "ip": "183.142.147.130",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_5_2; rv:1.9.3.20) Gecko/7006-07-27 21:15"
+    }
+  },
+  {
+    "id": "ec33_4",
+    "customer_id": "c33",
+    "type": "signup",
+    "ts": "2026-09-29T21:57:11Z",
+    "meta": {
+      "ip": "195.55.219.253",
+      "ua": "Opera/9.26.(X11; Linux x86_64; byn-ER) Presto/2.9.179 Version/12.00"
+    }
+  },
+  {
+    "id": "ec33_5",
+    "customer_id": "c33",
+    "type": "purchase",
+    "ts": "2026-09-29T21:57:08Z",
+    "meta": {
+      "ip": "101.27.51.128",
+      "ua": "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.2 (KHTML, like Gecko) Chrome/37.0.8"
+    }
+  },
+  {
+    "id": "ec33_6",
+    "customer_id": "c33",
+    "type": "login",
+    "ts": "2026-09-29T21:57:05Z",
+    "meta": {
+      "ip": "208.95.12.191",
+      "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.0 (KHTML, like Gecko) Chrome/42."
+    }
+  },
+  {
+    "id": "ec34_0",
+    "customer_id": "c34",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:33Z",
+    "meta": {
+      "ip": "163.201.186.84",
+      "ua": "Mozilla/5.0 (iPod; U; CPU iPhone OS 3_1 like Mac OS X; ayc-PE) AppleWebKit/533.2"
+    }
+  },
+  {
+    "id": "ec34_1",
+    "customer_id": "c34",
+    "type": "logout",
+    "ts": "2026-09-29T21:55:18Z",
+    "meta": {
+      "ip": "196.90.145.174",
+      "ua": "Mozilla/5.0 (Windows NT 10.0; ja-JP; rv:1.9.0.20) Gecko/7519-05-22 11:31:40 Fire"
+    }
+  },
+  {
+    "id": "ec34_2",
+    "customer_id": "c34",
+    "type": "signup",
+    "ts": "2026-09-29T21:55:42Z",
+    "meta": {
+      "ip": "216.228.35.41",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 6.0; Trident/4.1)"
+    }
+  },
+  {
+    "id": "ec34_3",
+    "customer_id": "c34",
+    "type": "signup",
+    "ts": "2026-09-29T21:56:49Z",
+    "meta": {
+      "ip": "43.44.223.136",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_5_5 rv:2.0; yue-HK) AppleWebKit/532.43.4"
+    }
+  },
+  {
+    "id": "ec34_4",
+    "customer_id": "c34",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:39Z",
+    "meta": {
+      "ip": "213.90.98.109",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_1; rv:1.9.6.20) Gecko/9190-02-18 "
+    }
+  },
+  {
+    "id": "ec34_5",
+    "customer_id": "c34",
+    "type": "refund",
+    "ts": "2026-09-29T21:55:28Z",
+    "meta": {
+      "ip": "188.132.84.231",
+      "ua": "Opera/8.50.(X11; Linux i686; wa-BE) Presto/2.9.176 Version/11.00"
+    }
+  },
+  {
+    "id": "ec34_6",
+    "customer_id": "c34",
+    "type": "purchase",
+    "ts": "2026-09-29T21:59:18Z",
+    "meta": {
+      "ip": "36.89.83.44",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/534.0 (KHTML"
+    }
+  },
+  {
+    "id": "ec35_0",
+    "customer_id": "c35",
+    "type": "click",
+    "ts": "2026-09-29T21:56:12Z",
+    "meta": {
+      "ip": "48.54.167.31",
+      "ua": "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/3.1)"
+    }
+  },
+  {
+    "id": "ec35_1",
+    "customer_id": "c35",
+    "type": "purchase",
+    "ts": "2026-09-29T21:56:59Z",
+    "meta": {
+      "ip": "186.89.83.157",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 10.0; Trident/3.1)"
+    }
+  },
+  {
+    "id": "ec36_0",
+    "customer_id": "c36",
+    "type": "click",
+    "ts": "2026-09-29T21:55:09Z",
+    "meta": {
+      "ip": "131.216.0.60",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows 98; Win 9x 4.90; Trident/4.0)"
+    }
+  },
+  {
+    "id": "ec36_1",
+    "customer_id": "c36",
+    "type": "purchase",
+    "ts": "2026-09-29T21:58:49Z",
+    "meta": {
+      "ip": "43.107.152.176",
+      "ua": "Opera/8.66.(Windows 98; Win 9x 4.90; shs-CA) Presto/2.9.166 Version/12.00"
+    }
+  },
+  {
+    "id": "ec36_2",
+    "customer_id": "c36",
+    "type": "login",
+    "ts": "2026-09-29T21:56:50Z",
+    "meta": {
+      "ip": "68.129.162.181",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_9_2 rv:4.0; unm-US) AppleWebKit/533.5"
+    }
+  },
+  {
+    "id": "ec36_3",
+    "customer_id": "c36",
+    "type": "signup",
+    "ts": "2026-09-29T21:58:04Z",
+    "meta": {
+      "ip": "194.71.200.54",
+      "ua": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_11_0 rv:2.0; sr-RS) AppleWebKit/532"
+    }
+  },
+  {
+    "id": "ec36_4",
+    "customer_id": "c36",
+    "type": "purchase",
+    "ts": "2026-09-29T22:00:09Z",
+    "meta": {
+      "ip": "66.132.102.235",
+      "ua": "Opera/9.72.(X11; Linux i686; ka-GE) Presto/2.9.188 Version/10.00"
+    }
+  },
+  {
+    "id": "ec36_5",
+    "customer_id": "c36",
+    "type": "logout",
+    "ts": "2026-09-29T21:55:21Z",
+    "meta": {
+      "ip": "214.16.23.218",
+      "ua": "Mozilla/5.0 (Windows CE; unm-US; rv:1.9.2.20) Gecko/2607-04-28 19:37:04 Firefox/"
+    }
+  },
+  {
+    "id": "ec37_0",
+    "customer_id": "c37",
+    "type": "refund",
+    "ts": "2026-09-29T21:56:06Z",
+    "meta": {
+      "ip": "217.213.181.26",
+      "ua": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.2 (KHTML, like Gecko) Chrome/17.0."
+    }
+  },
+  {
+    "id": "ec37_1",
+    "customer_id": "c37",
+    "type": "refund",
+    "ts": "2026-09-29T21:56:58Z",
+    "meta": {
+      "ip": "42.193.88.89",
+      "ua": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/4.0)"
+    }
+  },
+  {
+    "id": "ec38_0",
+    "customer_id": "c38",
+    "type": "login",
+    "ts": "2026-09-29T21:59:35Z",
+    "meta": {
+      "ip": "88.18.135.248",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/536.2 (KHTML,"
+    }
+  },
+  {
+    "id": "ec38_1",
+    "customer_id": "c38",
+    "type": "click",
+    "ts": "2026-09-29T21:57:43Z",
+    "meta": {
+      "ip": "207.182.182.225",
+      "ua": "Mozilla/5.0 (X11; Linux i686; rv:1.9.7.20) Gecko/2456-12-05 01:10:47 Firefox/7.0"
+    }
+  },
+  {
+    "id": "ec38_2",
+    "customer_id": "c38",
+    "type": "logout",
+    "ts": "2026-09-29T22:00:24Z",
+    "meta": {
+      "ip": "135.12.106.188",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows 98; Trident/3.1)"
+    }
+  },
+  {
+    "id": "ec38_3",
+    "customer_id": "c38",
+    "type": "click",
+    "ts": "2026-09-29T21:56:20Z",
+    "meta": {
+      "ip": "170.75.75.95",
+      "ua": "Opera/9.32.(X11; Linux x86_64; ber-MA) Presto/2.9.164 Version/10.00"
+    }
+  },
+  {
+    "id": "ec38_4",
+    "customer_id": "c38",
+    "type": "click",
+    "ts": "2026-09-29T21:57:56Z",
+    "meta": {
+      "ip": "140.109.8.194",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows CE; Trident/4.0)"
+    }
+  },
+  {
+    "id": "ec39_0",
+    "customer_id": "c39",
+    "type": "login",
+    "ts": "2026-09-29T21:54:54Z",
+    "meta": {
+      "ip": "206.62.173.100",
+      "ua": "Mozilla/5.0 (Android 3.0; Mobile; rv:5.0) Gecko/5.0 Firefox/5.0"
+    }
+  },
+  {
+    "id": "ec39_1",
+    "customer_id": "c39",
+    "type": "login",
+    "ts": "2026-09-29T21:58:56Z",
+    "meta": {
+      "ip": "118.79.34.167",
+      "ua": "Opera/8.98.(X11; Linux i686; nl-BE) Presto/2.9.167 Version/10.00"
+    }
+  },
+  {
+    "id": "ec39_2",
+    "customer_id": "c39",
+    "type": "refund",
+    "ts": "2026-09-29T21:58:06Z",
+    "meta": {
+      "ip": "82.238.58.248",
+      "ua": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10_6_9; rv:1.9.4.20) Gecko/6052-09-06 06:36"
+    }
+  },
+  {
+    "id": "ec39_3",
+    "customer_id": "c39",
+    "type": "purchase",
+    "ts": "2026-09-29T21:58:36Z",
+    "meta": {
+      "ip": "219.185.209.179",
+      "ua": "Mozilla/5.0 (Android 2.2.1; Mobile; rv:29.0) Gecko/29.0 Firefox/29.0"
+    }
+  },
+  {
+    "id": "ec39_4",
+    "customer_id": "c39",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:09Z",
+    "meta": {
+      "ip": "174.78.203.70",
+      "ua": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_10_6) AppleWebKit/532.1 (KHTML, like "
+    }
+  },
+  {
+    "id": "ec39_5",
+    "customer_id": "c39",
+    "type": "logout",
+    "ts": "2026-09-29T21:58:08Z",
+    "meta": {
+      "ip": "218.113.26.37",
+      "ua": "Opera/9.31.(X11; Linux x86_64; nr-ZA) Presto/2.9.178 Version/10.00"
+    }
+  },
+  {
+    "id": "ec40_0",
+    "customer_id": "c40",
+    "type": "view",
+    "ts": "2026-09-29T21:56:51Z",
+    "meta": {
+      "ip": "125.39.15.210",
+      "ua": "Mozilla/5.0 (Windows NT 11.0) AppleWebKit/532.1 (KHTML, like Gecko) Chrome/58.0."
+    }
+  },
+  {
+    "id": "ec40_1",
+    "customer_id": "c40",
+    "type": "logout",
+    "ts": "2026-09-29T21:59:25Z",
+    "meta": {
+      "ip": "218.36.103.63",
+      "ua": "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.0; Trident/4.0)"
+    }
+  },
+  {
+    "id": "ec40_2",
+    "customer_id": "c40",
+    "type": "login",
+    "ts": "2026-09-29T21:59:11Z",
+    "meta": {
+      "ip": "129.152.95.229",
+      "ua": "Opera/8.10.(X11; Linux x86_64; el-CY) Presto/2.9.189 Version/11.00"
+    }
+  },
+  {
+    "id": "ec40_3",
+    "customer_id": "c40",
+    "type": "refund",
+    "ts": "2026-09-29T21:59:17Z",
+    "meta": {
+      "ip": "217.117.51.175",
+      "ua": "Opera/9.53.(X11; Linux x86_64; ss-ZA) Presto/2.9.185 Version/12.00"
+    }
+  },
+  {
+    "id": "ec40_4",
+    "customer_id": "c40",
+    "type": "refund",
+    "ts": "2026-09-29T22:00:30Z",
+    "meta": {
+      "ip": "34.144.175.143",
+      "ua": "Mozilla/5.0 (Android 14; Mobile; rv:12.0) Gecko/12.0 Firefox/12.0"
+    }
+  },
+  {
+    "id": "ec40_5",
+    "customer_id": "c40",
+    "type": "view",
+    "ts": "2026-09-29T21:57:47Z",
+    "meta": {
+      "ip": "146.55.182.47",
+      "ua": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 4.0; Trident/4.0)"
+    }
+  },
+  {
+    "id": "ec40_6",
+    "customer_id": "c40",
+    "type": "logout",
+    "ts": "2026-09-29T21:56:28Z",
+    "meta": {
+      "ip": "197.169.149.155",
+      "ua": "Opera/8.28.(Windows 98; Win 9x 4.90; my-MM) Presto/2.9.164 Version/12.00"
+    }
+  },
+  {
+    "id": "ec40_7",
+    "customer_id": "c40",
+    "type": "view",
+    "ts": "2026-09-29T21:56:24Z",
+    "meta": {
+      "ip": "149.119.119.206",
+      "ua": "Mozilla/5.0 (Linux; Android 2.0.1) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/"
+    }
+  }
+]

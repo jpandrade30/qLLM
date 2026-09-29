@@ -1,0 +1,4 @@
+{
+  "expect": "reject",
+  "errorCode": "INVALID_SQL"
+}

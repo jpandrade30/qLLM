@@ -21,10 +21,11 @@ type ColUse struct {
 }
 
 type Result struct {
-	Tables  []TableUse
-	Columns []ColUse
-	Star    bool
-	Limit   *int
+	Tables   []TableUse
+	Columns  []ColUse
+	Star     bool
+	Limit    *int
+	CTENames []string
 }
 
 var bannedFns = map[string]struct{}{
@@ -168,6 +169,7 @@ func (p *parser) skipWith(out *Result) *protocol.ProtocolError {
 		if p.peek().kind != 'i' {
 			return protocol.NewError(protocol.ErrInvalidSQL, "WITH requires a name", nil)
 		}
+		cteName := p.peek().val
 		p.i++
 		if p.peek().kind == 'p' && p.peek().val == "(" {
 			if err := p.skipBalanced(); err != nil {
@@ -185,6 +187,7 @@ func (p *parser) skipWith(out *Result) *protocol.ProtocolError {
 			return err
 		}
 		merge(out, inner)
+		out.CTENames = append(out.CTENames, cteName)
 		if p.peek().kind == 'p' && p.peek().val == "," {
 			p.i++
 			continue
@@ -394,8 +397,16 @@ func (p *parser) parseTableRef(out *Result) *protocol.ProtocolError {
 		if err != nil {
 			return err
 		}
+		start := len(out.Tables)
 		merge(out, inner)
-		p.optionalAlias()
+		alias := p.optionalAlias()
+		if alias != "" {
+			for i := start; i < len(out.Tables); i++ {
+				if out.Tables[i].Alias == "" {
+					out.Tables[i].Alias = alias
+				}
+			}
+		}
 		return nil
 	}
 	if p.peek().kind != 'i' {
@@ -413,8 +424,21 @@ func (p *parser) parseTableRef(out *Result) *protocol.ProtocolError {
 		return protocol.NewError(protocol.ErrInvalidSQL, "schema-qualified tables are not allowed", map[string]any{"table": name})
 	}
 	alias := p.optionalAlias()
+	if cteNamed(out, name) {
+		return nil
+	}
 	out.Tables = append(out.Tables, TableUse{Name: name, Alias: alias})
 	return nil
+}
+
+func cteNamed(out *Result, name string) bool {
+	want := strings.ToLower(name)
+	for _, n := range out.CTENames {
+		if strings.ToLower(n) == want {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *parser) optionalAlias() string {
@@ -608,8 +632,12 @@ func (p *parser) skipBalancedScan(out *Result) *protocol.ProtocolError {
 func merge(dst, src *Result) {
 	dst.Tables = append(dst.Tables, src.Tables...)
 	dst.Columns = append(dst.Columns, src.Columns...)
+	dst.CTENames = append(dst.CTENames, src.CTENames...)
 	if src.Star {
 		dst.Star = true
+	}
+	if src.Limit != nil {
+		dst.Limit = src.Limit
 	}
 }
 

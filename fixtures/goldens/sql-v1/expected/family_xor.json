@@ -1,0 +1,94 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "device",
+      "type": "string"
+    },
+    {
+      "name": "active",
+      "type": "boolean"
+    }
+  ],
+  "rows": [
+    [
+      "sessc11_0",
+      "android",
+      true
+    ],
+    [
+      "sessc11_2",
+      "ios",
+      true
+    ],
+    [
+      "sessc12_0",
+      "web",
+      false
+    ],
+    [
+      "sessc15_1",
+      "web",
+      false
+    ],
+    [
+      "sessc17_1",
+      "web",
+      false
+    ],
+    [
+      "sessc18_1",
+      "web",
+      false
+    ],
+    [
+      "sessc21_0",
+      "ios",
+      true
+    ],
+    [
+      "sessc22_0",
+      "web",
+      false
+    ],
+    [
+      "sessc26_0",
+      "android",
+      true
+    ],
+    [
+      "sessc26_1",
+      "web",
+      false
+    ],
+    [
+      "sessc27_0",
+      "web",
+      false
+    ],
+    [
+      "sessc28_0",
+      "web",
+      false
+    ],
+    [
+      "sessc30_0",
+      "web",
+      false
+    ],
+    [
+      "sessc31_1",
+      "web",
+      false
+    ],
+    [
+      "sessc34_0",
+      "ios",
+      true
+    ]
+  ],
+  "rowCount": 15
+}

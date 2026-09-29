@@ -1,0 +1,35 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": "string"
+    }
+  ],
+  "rows": [
+    [
+      "i10_0",
+      "paid"
+    ],
+    [
+      "i10_1",
+      "open"
+    ],
+    [
+      "i10_2",
+      "open"
+    ],
+    [
+      "i11_0",
+      "void"
+    ],
+    [
+      "i11_1",
+      "open"
+    ]
+  ],
+  "rowCount": 5
+}

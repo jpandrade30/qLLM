@@ -1,0 +1,34 @@
+{
+  "columns": [
+    {
+      "name": "n",
+      "type": "number"
+    },
+    {
+      "name": "s",
+      "type": "number"
+    },
+    {
+      "name": "a",
+      "type": "number"
+    },
+    {
+      "name": "mn",
+      "type": "number"
+    },
+    {
+      "name": "mx",
+      "type": "number"
+    }
+  ],
+  "rows": [
+    [
+      87,
+      15857743,
+      182272.908045977,
+      1110,
+      583003
+    ]
+  ],
+  "rowCount": 1
+}

@@ -1,0 +1,359 @@
+required_covers:
+  - postgres
+  - mysql
+  - mongodb
+  - rest
+  - filter
+  - having
+  - distinct
+  - case
+  - like
+  - between
+  - cte
+  - subquery
+  - arithmetic
+  - join
+  - agg
+  - coalesce
+  - string
+  - numeric
+  - cast
+  - json
+  - array
+  - datetime
+  - extra-agg
+  - set-ops
+  - qualify
+  - window
+  - xor
+  - count-distinct
+  - reject
+
+cases:
+  - id: conn_postgres_customers
+    version: "1"
+    expect: ok
+    covers: [postgres, filter]
+    sql: |
+      SELECT id, email, country FROM customers ORDER BY id LIMIT 10
+
+  - id: conn_mysql_invoices
+    version: "1"
+    expect: ok
+    covers: [mysql, filter]
+    sql: |
+      SELECT id, total, status FROM invoices ORDER BY id LIMIT 10
+
+  - id: conn_mongo_events
+    version: "1"
+    expect: ok
+    covers: [mongodb]
+    sql: |
+      SELECT id, customer_id, type FROM events ORDER BY id LIMIT 10
+
+  - id: conn_rest_legacy_users
+    version: "1"
+    expect: ok
+    covers: [rest]
+    sql: |
+      SELECT id, email, country FROM legacy_users ORDER BY id LIMIT 10
+
+  - id: family_filter
+    version: "1"
+    expect: ok
+    covers: [filter, mysql]
+    sql: |
+      SELECT id, total, status FROM invoices
+      WHERE status = 'paid' AND total >= 500
+      ORDER BY id LIMIT 20
+
+  - id: family_having
+    version: "1"
+    expect: ok
+    covers: [having, agg, postgres]
+    sql: |
+      SELECT country, COUNT(*) AS n FROM customers
+      GROUP BY country
+      HAVING COUNT(*) >= 1
+      ORDER BY n DESC, country LIMIT 20
+
+  - id: family_distinct
+    version: "1"
+    expect: ok
+    covers: [distinct, mysql]
+    sql: |
+      SELECT DISTINCT status FROM invoices ORDER BY status LIMIT 20
+
+  - id: family_case
+    version: "1"
+    expect: ok
+    covers: [case, mysql]
+    sql: |
+      SELECT id,
+        CASE WHEN total > 50000 THEN 'high' WHEN total > 10000 THEN 'mid' ELSE 'low' END AS band
+      FROM invoices ORDER BY id LIMIT 15
+
+  - id: family_like
+    version: "1"
+    expect: ok
+    covers: [like, mysql]
+    sql: |
+      SELECT id, status FROM invoices WHERE status LIKE 'p%' ORDER BY id LIMIT 20
+
+  - id: family_between
+    version: "1"
+    expect: ok
+    covers: [between, mysql]
+    sql: |
+      SELECT id, total FROM invoices WHERE total BETWEEN 1000 AND 200000 ORDER BY id LIMIT 20
+
+  - id: family_cte
+    version: "1"
+    expect: ok
+    covers: [cte, postgres]
+    sql: |
+      WITH t AS (SELECT id, country FROM customers WHERE country IS NOT NULL)
+      SELECT id, country FROM t ORDER BY id LIMIT 10
+
+  - id: family_subquery
+    version: "1"
+    expect: ok
+    covers: [subquery, postgres]
+    sql: |
+      SELECT s.id, s.country FROM (SELECT id, country FROM customers) s
+      ORDER BY s.id LIMIT 10
+
+  - id: family_arithmetic
+    version: "1"
+    expect: ok
+    covers: [arithmetic, mysql]
+    sql: |
+      SELECT id, total + 1 AS plus, total * 2 AS twice FROM invoices ORDER BY id LIMIT 10
+
+  - id: family_join_left
+    version: "1"
+    expect: ok
+    covers: [join, postgres]
+    sql: |
+      SELECT c.id, s.plan
+      FROM customers c
+      LEFT JOIN subscriptions s ON s.customer_id = c.id
+      ORDER BY c.id LIMIT 15
+
+  - id: family_agg
+    version: "1"
+    expect: ok
+    covers: [agg, mysql]
+    sql: |
+      SELECT COUNT(*) AS n, SUM(total) AS s, AVG(total) AS a, MIN(total) AS mn, MAX(total) AS mx
+      FROM invoices LIMIT 1
+
+  - id: family_coalesce
+    version: "1"
+    expect: ok
+    covers: [coalesce, postgres]
+    sql: |
+      SELECT id, COALESCE(phone, 'none') AS phone, NULLIF(country, '') AS country
+      FROM customers ORDER BY id LIMIT 10
+
+  - id: family_string
+    version: "1"
+    expect: ok
+    covers: [string, postgres]
+    sql: |
+      SELECT id, LOWER(email) AS e, UPPER(country) AS c, CONCAT(id, '-', country) AS tag
+      FROM customers ORDER BY id LIMIT 10
+
+  - id: family_numeric
+    version: "1"
+    expect: ok
+    covers: [numeric, mysql]
+    sql: |
+      SELECT id, ABS(total) AS a, ROUND(SQRT(ABS(total) + 1), 2) AS r
+      FROM invoices WHERE total >= 0 ORDER BY id LIMIT 10
+
+  - id: family_cast
+    version: "1"
+    expect: ok
+    covers: [cast, mysql]
+    sql: |
+      SELECT id, CAST(total AS VARCHAR) AS t FROM invoices ORDER BY id LIMIT 10
+
+  - id: family_json
+    version: "1"
+    expect: ok
+    covers: [json, postgres]
+    sql: |
+      SELECT id, json_extract('{"k": 1}', '$.k') AS k FROM customers ORDER BY id LIMIT 5
+
+  - id: family_array
+    version: "1"
+    expect: ok
+    covers: [array, postgres]
+    sql: |
+      SELECT id, list_contains(list_value('open', 'pending', 'closed'), status) AS known
+      FROM support_tickets ORDER BY id LIMIT 10
+
+  - id: family_datetime
+    version: "1"
+    expect: ok
+    covers: [datetime, mysql]
+    sql: |
+      SELECT id, date_trunc('year', issued_at) AS y FROM invoices ORDER BY id LIMIT 10
+
+  - id: family_extra_agg
+    version: "1"
+    expect: ok
+    covers: [extra-agg, mysql]
+    sql: |
+      SELECT COUNT(*) FILTER (WHERE status = 'paid') AS paid_n,
+             stddev(total) AS sd
+      FROM invoices LIMIT 1
+
+  - id: family_set_ops
+    version: "2"
+    expect: ok
+    covers: [set-ops, postgres, rest]
+    sql: |
+      SELECT customers.id AS id, customers.email AS email FROM customers
+      UNION ALL
+      SELECT legacy_users.id AS id, legacy_users.email AS email FROM legacy_users
+      ORDER BY id, email LIMIT 20
+
+  - id: family_qualify
+    version: "2"
+    expect: ok
+    covers: [qualify, window, mysql]
+    sql: |
+      SELECT id, total, ROW_NUMBER() OVER (ORDER BY total DESC, id) AS rn
+      FROM invoices
+      QUALIFY ROW_NUMBER() OVER (ORDER BY total DESC, id) <= 5
+      ORDER BY rn LIMIT 5
+
+  - id: family_window
+    version: "2"
+    expect: ok
+    covers: [window, mysql]
+    sql: |
+      SELECT id, total,
+        RANK() OVER (ORDER BY total DESC, id) AS rnk,
+        LAG(total) OVER (ORDER BY id) AS prev_total
+      FROM invoices
+      ORDER BY id LIMIT 15
+
+  - id: family_xor
+    version: "2"
+    expect: ok
+    covers: [xor, mongodb]
+    sql: |
+      SELECT id, device, active FROM sessions
+      WHERE active <> (device = 'web')
+      ORDER BY id LIMIT 15
+
+  - id: family_count_distinct
+    version: "2"
+    expect: ok
+    covers: [count-distinct, mysql]
+    sql: |
+      SELECT COUNT(DISTINCT status) AS n FROM invoices LIMIT 1
+
+  - id: chain_join_agg_window
+    version: "2"
+    expect: ok
+    covers: [postgres, join, agg, having, window, qualify, filter]
+    sql: |
+      SELECT c.id, COUNT(t.id) AS ticket_count,
+        RANK() OVER (ORDER BY COUNT(t.id) DESC, c.id) AS rnk
+      FROM customers c
+      LEFT JOIN subscriptions s ON s.customer_id = c.id
+      LEFT JOIN support_tickets t ON t.customer_id = c.id
+      WHERE c.country IS NOT NULL
+      GROUP BY c.id
+      HAVING COUNT(t.id) >= 0
+      QUALIFY RANK() OVER (ORDER BY COUNT(t.id) DESC, c.id) <= 8
+      ORDER BY rnk, c.id
+      LIMIT 20
+
+  - id: chain_cross_source
+    version: "2"
+    expect: ok
+    covers: [mysql, postgres, join, agg, case, datetime]
+    sql: |
+      SELECT c.country,
+        SUM(i.total) AS revenue,
+        CASE WHEN SUM(i.total) > 100000 THEN 'high' ELSE 'low' END AS band,
+        date_trunc('year', MIN(i.issued_at)) AS y
+      FROM invoices i
+      INNER JOIN customers c ON c.id = i.customer_id
+      GROUP BY c.country
+      ORDER BY revenue DESC, c.country
+      LIMIT 20
+
+  - id: chain_union_pg_mysql
+    version: "2"
+    expect: ok
+    covers: [set-ops, postgres, mysql]
+    sql: |
+      SELECT customers.id AS k FROM customers
+      UNION ALL
+      SELECT invoices.id AS k FROM invoices
+      ORDER BY k LIMIT 15
+
+  - id: chain_mongo_lag
+    version: "2"
+    expect: ok
+    covers: [mongodb, postgres, join, window]
+    sql: |
+      SELECT e.customer_id, e.type, e.ts,
+        LAG(e.type) OVER (PARTITION BY e.customer_id ORDER BY e.ts, e.id) AS prev_type
+      FROM events e
+      INNER JOIN customers c ON c.id = e.customer_id
+      ORDER BY e.customer_id, e.ts, e.id
+      LIMIT 30
+
+  - id: ok_trailing_semicolon
+    version: "1"
+    expect: ok
+    covers: [filter, mysql]
+    sql: |
+      SELECT id, status FROM invoices ORDER BY id LIMIT 5;
+
+  - id: reject_insert
+    version: "1"
+    expect: reject
+    error_code: INVALID_SQL
+    covers: [reject]
+    sql: |
+      INSERT INTO customers (id) VALUES ('x')
+
+  - id: reject_schema_qualified
+    version: "1"
+    expect: reject
+    error_code: INVALID_SQL
+    covers: [reject]
+    sql: |
+      SELECT id FROM public.customers LIMIT 5
+
+  - id: reject_read_csv
+    version: "1"
+    expect: reject
+    error_code: INVALID_SQL
+    covers: [reject]
+    sql: |
+      SELECT * FROM read_csv('x.csv') LIMIT 5
+
+  - id: reject_multi_statement
+    version: "1"
+    expect: reject
+    error_code: INVALID_SQL
+    covers: [reject]
+    sql: |
+      SELECT id FROM customers LIMIT 1; SELECT id FROM invoices LIMIT 1
+
+  - id: reject_union_dialect1
+    version: "1"
+    expect: reject
+    error_code: INVALID_SQL
+    covers: [reject, set-ops]
+    sql: |
+      SELECT id FROM customers UNION ALL SELECT id FROM invoices LIMIT 5

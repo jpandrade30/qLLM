@@ -1,0 +1,55 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "known",
+      "type": "boolean"
+    }
+  ],
+  "rows": [
+    [
+      "tc12_0",
+      true
+    ],
+    [
+      "tc12_1",
+      true
+    ],
+    [
+      "tc12_2",
+      true
+    ],
+    [
+      "tc13_0",
+      true
+    ],
+    [
+      "tc15_0",
+      true
+    ],
+    [
+      "tc15_1",
+      true
+    ],
+    [
+      "tc19_0",
+      true
+    ],
+    [
+      "tc19_1",
+      true
+    ],
+    [
+      "tc19_2",
+      true
+    ],
+    [
+      "tc21_0",
+      true
+    ]
+  ],
+  "rowCount": 10
+}

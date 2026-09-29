@@ -215,16 +215,16 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 			// Bare name not on any cited entity: output alias / expression label (e.g. AS rnk).
 			continue
 		}
-		if len(hits) > 1 {
-			return nil, protocol.NewError(protocol.ErrAmbiguousField, "ambiguous field: "+c.Name, map[string]any{"field": c.Name})
+		// UNION (and similar) cites the same logical name on more than one entity.
+		// Fetch the column from each; DuckDB still executes the original SQL.
+		for _, ent := range hits {
+			m := need[ent.Name]
+			if m == nil {
+				m = map[string]struct{}{}
+				need[ent.Name] = m
+			}
+			m[c.Name] = struct{}{}
 		}
-		ent := hits[0]
-		m := need[ent.Name]
-		if m == nil {
-			m = map[string]struct{}{}
-			need[ent.Name] = m
-		}
-		m[c.Name] = struct{}{}
 	}
 
 	out := make([]sqlScan, 0, len(order))

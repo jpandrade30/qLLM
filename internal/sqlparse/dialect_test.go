@@ -1,6 +1,7 @@
 package sqlparse_test
 
 import (
+	"strings"
 	"testing"
 
 	"qLLM/internal/protocol"
@@ -34,6 +35,20 @@ func TestDialect1FeaturesParse(t *testing.T) {
 		for _, want := range tc.tables {
 			if !names[want] {
 				t.Fatalf("sql=%q tables=%v want %q", tc.sql, r.Tables, want)
+			}
+		}
+		if strings.Contains(strings.ToUpper(tc.sql), "WITH T AS") && names["t"] {
+			t.Fatalf("sql=%q should not treat CTE t as a catalog table: %v", tc.sql, r.Tables)
+		}
+		if strings.Contains(tc.sql, ") s ") {
+			found := false
+			for _, tb := range r.Tables {
+				if tb.Alias == "s" && tb.Name == "invoices" {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("sql=%q want subquery alias s on invoices: %v", tc.sql, r.Tables)
 			}
 		}
 	}
@@ -71,6 +86,17 @@ func TestDialect2SetOpsParse(t *testing.T) {
 	}
 	if !got["invoices"] || !got["customers"] {
 		t.Fatalf("tables=%v", r.Tables)
+	}
+}
+
+func TestDialect2UnionTrailingLimit(t *testing.T) {
+	sql := `SELECT customers.id AS id FROM customers UNION ALL SELECT invoices.id AS id FROM invoices ORDER BY id LIMIT 20`
+	r, err := sqlparse.ParseWithVersion(sql, protocol.SQLDialect2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Limit == nil || *r.Limit != 20 {
+		t.Fatalf("limit=%v", r.Limit)
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 
 	"qLLM/internal/protocol"
 	"qLLM/internal/result"
@@ -57,11 +58,11 @@ func (e *duckEngine) Materialize(ctx context.Context, table string, tab *protoco
 		placeholders[i] = "?"
 	}
 	insert := "INSERT INTO " + name + " VALUES (" + strings.Join(placeholders, ", ") + ")"
-	for _, row := range tab.Rows {
+		for _, row := range tab.Rows {
 		args := make([]any, len(tab.Columns))
-		for i := range tab.Columns {
+		for i, col := range tab.Columns {
 			if i < len(row) {
-				args[i] = row[i]
+				args[i] = coerceDuckCell(col.Type, row[i])
 			}
 		}
 		if _, err := e.db.ExecContext(ctx, insert, args...); err != nil {
@@ -141,4 +142,27 @@ func scanDuckRows(rows *sql.Rows, spec QuerySpec) (*protocol.TabularResult, erro
 		return nil, err
 	}
 	return result.New(columns, out, false), nil
+}
+
+func coerceDuckCell(t protocol.LogicalType, v any) any {
+	if v == nil || t != protocol.TypeTimestamp {
+		return v
+	}
+	switch x := v.(type) {
+	case time.Time:
+		return x.UTC().Format(time.RFC3339)
+	case string:
+		return x
+	case int64:
+		if x > 1_000_000_000_000 {
+			return time.UnixMilli(x).UTC().Format(time.RFC3339)
+		}
+		return time.Unix(x, 0).UTC().Format(time.RFC3339)
+	case int:
+		return coerceDuckCell(t, int64(x))
+	case float64:
+		return coerceDuckCell(t, int64(x))
+	default:
+		return v
+	}
 }

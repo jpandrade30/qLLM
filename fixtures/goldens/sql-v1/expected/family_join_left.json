@@ -1,0 +1,75 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "plan",
+      "type": "string"
+    }
+  ],
+  "rows": [
+    [
+      "c1",
+      null
+    ],
+    [
+      "c10",
+      "pro"
+    ],
+    [
+      "c11",
+      "enterprise"
+    ],
+    [
+      "c12",
+      null
+    ],
+    [
+      "c13",
+      null
+    ],
+    [
+      "c14",
+      "business"
+    ],
+    [
+      "c15",
+      null
+    ],
+    [
+      "c16",
+      "enterprise"
+    ],
+    [
+      "c17",
+      "pro"
+    ],
+    [
+      "c18",
+      "free"
+    ],
+    [
+      "c19",
+      "pro"
+    ],
+    [
+      "c2",
+      null
+    ],
+    [
+      "c20",
+      "free"
+    ],
+    [
+      "c21",
+      "free"
+    ],
+    [
+      "c22",
+      "pro"
+    ]
+  ],
+  "rowCount": 15
+}

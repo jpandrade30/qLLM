@@ -13,6 +13,7 @@ import (
 	"qLLM/internal/result"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -282,6 +283,8 @@ func normalize(v any) any {
 	switch t := v.(type) {
 	case time.Time:
 		return t.UTC().Format(time.RFC3339)
+	case primitive.DateTime:
+		return t.Time().UTC().Format(time.RFC3339)
 	default:
 		return t
 	}

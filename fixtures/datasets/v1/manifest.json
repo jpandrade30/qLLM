@@ -1,0 +1,23 @@
+{
+  "version": "v1",
+  "seed": 42,
+  "n_customers": 40,
+  "generated_at": "2026-09-29T22:00:38Z",
+  "files": {
+    "customers.json": "98617356a9e50fb1a45e5f08750a2df1a32777f3120f897a693d62955831ebc8",
+    "addresses.json": "a7caee3a1eb0a30fa582fc61c5fa211e9553cb61b6126a9d9f5365019b37cdfa",
+    "support_tickets.json": "140a91b8b1b35cbb510196752dfb31f7fb6409f8098269667a442bcd97d213de",
+    "subscriptions.json": "36ff025a237ae4d4a951e418fbb5234f28f12d699cba725a87e7f39463c9abba",
+    "products.json": "073298ec6e295dc924073fbe37b2f9ed7d182c16d7c17bc2569cfb0fc0145fb1",
+    "invoices.json": "16271e031e489f3a533727a18eecc51d0f526ae52c7efccc53174a8a8939c162",
+    "invoice_items.json": "5c2a4b9af8fb104f01a65fb9f5fea477d7e359af9dfa26a3c0f85363a2fb1f85",
+    "payments.json": "48cb49292f1f659b8b15f9fbcf984532c17e68f10c5439162c69cf80a0216410",
+    "events.json": "c411267e9edf9569c794617d56e0372189c6ba4bcd826d88203348953d0a025a",
+    "sessions.json": "e355bae255ff4a95b54fc9b48bded54e4dbd13da4304b03d14b51637f18aee64",
+    "notifications.json": "9879649292f2519e267fd787a91804bc64b70172f10baa29ef813c22cd6ac64e",
+    "audit_logs.json": "3294a7ccd323db2150e302644201519ab8ec6d31e72437e7c83eb57c221b05c7",
+    "legacy_users.json": "32ce5f81d741ade1cd8c17b2f6cfa7b080e60419ec5a761400dc88d372023027",
+    "api_products.json": "073298ec6e295dc924073fbe37b2f9ed7d182c16d7c17bc2569cfb0fc0145fb1",
+    "api_tickets.json": "8bc836248d0cc8a42860485954758db9ea30567e81d77b020c6a9b9fe23fbe7b"
+  }
+}

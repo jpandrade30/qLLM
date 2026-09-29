@@ -94,7 +94,16 @@ $env:QLLM_BILLING_MYSQL_USER = if ($env:QLLM_BILLING_MYSQL_USER) { $env:QLLM_BIL
 $env:QLLM_BILLING_MYSQL_PASSWORD = if ($env:QLLM_BILLING_MYSQL_PASSWORD) { $env:QLLM_BILLING_MYSQL_PASSWORD } else { "qllm" }
 $env:QLLM_EVENTS_MONGO_URI = if ($env:QLLM_EVENTS_MONGO_URI) { $env:QLLM_EVENTS_MONGO_URI } else { "mongodb://127.0.0.1:27017" }
 
-$customers = if ($args.Count -gt 0) { $args[0] } else { 200 }
-& $VenvPy (Join-Path $SeedDir "generate_and_load.py") --customers $customers --seed 42
-if ($LASTEXITCODE -ne 0) { throw "generate_and_load.py failed" }
-Write-Host "fake data loaded (rebuild/restart compose test-api if data.json changed)"
+$regenerate = $false
+$customers = 40
+foreach ($a in $args) {
+    if ($a -eq "--regenerate") { $regenerate = $true }
+    elseif ($a -match '^\d+$') { $customers = [int]$a }
+}
+if ($regenerate) {
+    & $VenvPy (Join-Path $SeedDir "generate_dataset.py") --customers $customers --seed 42
+    if ($LASTEXITCODE -ne 0) { throw "generate_dataset.py failed" }
+}
+& $VenvPy (Join-Path $SeedDir "load_dataset.py")
+if ($LASTEXITCODE -ne 0) { throw "load_dataset.py failed" }
+Write-Host "dataset loaded from fixtures/datasets/v1 (rebuild/restart compose test-api if data.json changed)"

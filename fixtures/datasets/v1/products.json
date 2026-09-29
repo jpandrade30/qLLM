@@ -1,0 +1,282 @@
+[
+  {
+    "id": "p1",
+    "sku": "SKU-0001",
+    "name": "Optional background definition",
+    "price": 11289,
+    "category": "hardware"
+  },
+  {
+    "id": "p2",
+    "sku": "SKU-0002",
+    "name": "Organized grid-enabled algorithm",
+    "price": 641,
+    "category": "hardware"
+  },
+  {
+    "id": "p3",
+    "sku": "SKU-0003",
+    "name": "Operative actuating infrastructure",
+    "price": 17880,
+    "category": "hardware"
+  },
+  {
+    "id": "p4",
+    "sku": "SKU-0004",
+    "name": "Profit-focused holistic encoding",
+    "price": 19194,
+    "category": "hardware"
+  },
+  {
+    "id": "p5",
+    "sku": "SKU-0005",
+    "name": "Networked attitude-oriented hub",
+    "price": 46151,
+    "category": "hardware"
+  },
+  {
+    "id": "p6",
+    "sku": "SKU-0006",
+    "name": "Face-to-face 4thgeneration functionalities",
+    "price": 10644,
+    "category": "addon"
+  },
+  {
+    "id": "p7",
+    "sku": "SKU-0007",
+    "name": "Cross-platform transitional projection",
+    "price": 19945,
+    "category": "addon"
+  },
+  {
+    "id": "p8",
+    "sku": "SKU-0008",
+    "name": "Managed client-server challenge",
+    "price": 4332,
+    "category": "software"
+  },
+  {
+    "id": "p9",
+    "sku": "SKU-0009",
+    "name": "Automated executive leverage",
+    "price": 49519,
+    "category": "support"
+  },
+  {
+    "id": "p10",
+    "sku": "SKU-0010",
+    "name": "Total client-driven task-force",
+    "price": 4246,
+    "category": "software"
+  },
+  {
+    "id": "p11",
+    "sku": "SKU-0011",
+    "name": "Triple-buffered methodical knowledge user",
+    "price": 38784,
+    "category": "hardware"
+  },
+  {
+    "id": "p12",
+    "sku": "SKU-0012",
+    "name": "Seamless 24hour artificial intelligence",
+    "price": 33454,
+    "category": "addon"
+  },
+  {
+    "id": "p13",
+    "sku": "SKU-0013",
+    "name": "Ameliorated eco-centric data-warehouse",
+    "price": 4227,
+    "category": "software"
+  },
+  {
+    "id": "p14",
+    "sku": "SKU-0014",
+    "name": "Distributed neutral superstructure",
+    "price": 12678,
+    "category": "software"
+  },
+  {
+    "id": "p15",
+    "sku": "SKU-0015",
+    "name": "Robust multi-tasking interface",
+    "price": 39496,
+    "category": "software"
+  },
+  {
+    "id": "p16",
+    "sku": "SKU-0016",
+    "name": "Customizable zero-defect forecast",
+    "price": 44750,
+    "category": "addon"
+  },
+  {
+    "id": "p17",
+    "sku": "SKU-0017",
+    "name": "Front-line exuding capability",
+    "price": 26961,
+    "category": "software"
+  },
+  {
+    "id": "p18",
+    "sku": "SKU-0018",
+    "name": "Business-focused disintermediate instruction set",
+    "price": 37834,
+    "category": "addon"
+  },
+  {
+    "id": "p19",
+    "sku": "SKU-0019",
+    "name": "Sharable regional knowledgebase",
+    "price": 38440,
+    "category": "software"
+  },
+  {
+    "id": "p20",
+    "sku": "SKU-0020",
+    "name": "Cloned bifurcated methodology",
+    "price": 41091,
+    "category": "software"
+  },
+  {
+    "id": "p21",
+    "sku": "SKU-0021",
+    "name": "Right-sized national adapter",
+    "price": 27974,
+    "category": "support"
+  },
+  {
+    "id": "p22",
+    "sku": "SKU-0022",
+    "name": "Self-enabling multimedia orchestration",
+    "price": 17589,
+    "category": "addon"
+  },
+  {
+    "id": "p23",
+    "sku": "SKU-0023",
+    "name": "Front-line transitional circuit",
+    "price": 44391,
+    "category": "support"
+  },
+  {
+    "id": "p24",
+    "sku": "SKU-0024",
+    "name": "Implemented interactive ability",
+    "price": 16142,
+    "category": "support"
+  },
+  {
+    "id": "p25",
+    "sku": "SKU-0025",
+    "name": "Seamless heuristic encoding",
+    "price": 26438,
+    "category": "addon"
+  },
+  {
+    "id": "p26",
+    "sku": "SKU-0026",
+    "name": "Re-engineered intangible contingency",
+    "price": 44519,
+    "category": "support"
+  },
+  {
+    "id": "p27",
+    "sku": "SKU-0027",
+    "name": "Synchronized static artificial intelligence",
+    "price": 30464,
+    "category": "support"
+  },
+  {
+    "id": "p28",
+    "sku": "SKU-0028",
+    "name": "Progressive high-level architecture",
+    "price": 49774,
+    "category": "software"
+  },
+  {
+    "id": "p29",
+    "sku": "SKU-0029",
+    "name": "Progressive needs-based middleware",
+    "price": 1110,
+    "category": "hardware"
+  },
+  {
+    "id": "p30",
+    "sku": "SKU-0030",
+    "name": "Profit-focused neutral adapter",
+    "price": 41208,
+    "category": "software"
+  },
+  {
+    "id": "p31",
+    "sku": "SKU-0031",
+    "name": "Networked methodical analyzer",
+    "price": 5301,
+    "category": "addon"
+  },
+  {
+    "id": "p32",
+    "sku": "SKU-0032",
+    "name": "Sharable human-resource hub",
+    "price": 33653,
+    "category": "support"
+  },
+  {
+    "id": "p33",
+    "sku": "SKU-0033",
+    "name": "Function-based value-added adapter",
+    "price": 9180,
+    "category": "support"
+  },
+  {
+    "id": "p34",
+    "sku": "SKU-0034",
+    "name": "Multi-channeled zero tolerance architecture",
+    "price": 5008,
+    "category": "addon"
+  },
+  {
+    "id": "p35",
+    "sku": "SKU-0035",
+    "name": "Monitored disintermediate superstructure",
+    "price": 24717,
+    "category": "support"
+  },
+  {
+    "id": "p36",
+    "sku": "SKU-0036",
+    "name": "Switchable responsive benchmark",
+    "price": 10838,
+    "category": "hardware"
+  },
+  {
+    "id": "p37",
+    "sku": "SKU-0037",
+    "name": "Visionary optimal support",
+    "price": 36100,
+    "category": "support"
+  },
+  {
+    "id": "p38",
+    "sku": "SKU-0038",
+    "name": "Versatile full-range challenge",
+    "price": 40586,
+    "category": "software"
+  },
+  {
+    "id": "p39",
+    "sku": "SKU-0039",
+    "name": "Balanced heuristic moratorium",
+    "price": 44269,
+    "category": "support"
+  },
+  {
+    "id": "p40",
+    "sku": "SKU-0040",
+    "name": "Mandatory secondary conglomeration",
+    "price": 43975,
+    "category": "software"
+  }
+]

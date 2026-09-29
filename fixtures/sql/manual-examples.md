@@ -6,7 +6,7 @@ Tables and fields are **catalog entity names** from [`deploy/image/config/qllm.c
 
 Omit `version` (latest = `"2"`). Dialeto `"1"` rejects `UNION` / `QUALIFY`.
 
-**Prereq:** compose up + seed (`generate_and_load.py` or `dev-seed-fake.ps1`). Rebuild qllm if you just pulled dialect-2 code.
+**Prereq:** compose up + seed (`load_dataset.py` or `dev-seed-fake.ps1`). Rebuild qllm if you just pulled dialect-2 code.
 
 ```bash
 # HTTP smoke

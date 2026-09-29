@@ -1,0 +1,14 @@
+{
+  "columns": [
+    {
+      "name": "n",
+      "type": "number"
+    }
+  ],
+  "rows": [
+    [
+      3
+    ]
+  ],
+  "rowCount": 1
+}

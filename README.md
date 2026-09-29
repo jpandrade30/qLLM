@@ -85,7 +85,7 @@ Image `/config` is copied **only** from [`deploy/image/config`](deploy/image/con
 nerdctl compose up --build
 ```
 
-HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` (localhost ports). Rebuild `test-api` if `fixtures/test-api/data.json` changed.
+HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Rebuild `test-api` if `fixtures/test-api/data.json` changed. SQL MCP goldens: `pytest fixtures/sqlcheck`.
 
 Standalone image (same compose network / `--network`):
 

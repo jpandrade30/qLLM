@@ -9,7 +9,7 @@
 ## Objetivos
 
 1. Subir Postgres, MySQL, MongoDB, API REST e qLLM com `nerdctl compose`
-2. Seed correlacionado (`customer_id` cruzável) via `generate_and_load.py` nas portas publicadas
+2. Seed correlacionado (`customer_id` cruzável) a partir de `fixtures/datasets/v1` via `load_dataset.py` nas portas publicadas (Faker só em `generate_dataset.py --regenerate`)
 3. Queries: container (MCP/HTTP) **ou** host `qllm --config-dir deploy/image/config` com `QLLM_*` em `127.0.0.1` (ver `qllm.env.host.yaml`)
 4. Fail-fast timeout (budget do preset)
 
@@ -25,7 +25,11 @@ deploy/image/config/
   qllm.env.yaml             # compose DNS + token (container)
   qllm.env.host.yaml        # documentação: localhost no host (não é qllm.env.yaml)
 fixtures/
-  seed/generate_and_load.py
+  datasets/v1/              # JSON lógico congelado + manifest hashes
+  goldens/sql-v1/           # cases.yaml + expected/
+  sqlcheck/                 # oracle DuckDB-python + MCP compare
+  seed/generate_dataset.py  # Faker → datasets/v1
+  seed/load_dataset.py      # datasets/v1 → DBs + test-api (sem Faker)
   test-api/                 # compose build context
   queries/                  # Query IR golden (testes, não schema)
   sql/manual-examples.md
@@ -41,10 +45,25 @@ scripts/dev-seed-fake.ps1
 nerdctl compose up --build
 # DBs: localhost 5432/3306/27017; test-api 18080; qllm 8088/8089
 
-# seed (host → published ports)
+# seed from frozen fixtures/datasets/v1 (host → published ports)
 .\scripts\dev-seed-fake.ps1
+# only when the generator changed:
+.\scripts\dev-seed-fake.ps1 --regenerate
 # se data.json mudou: nerdctl compose up --build -d test-api
+
+# SQL goldens (oracle, no compose):
+python fixtures/sqlcheck/__main__.py oracle          # regenerate expected/ (do not run in CI)
+python fixtures/sqlcheck/__main__.py coverage
+python fixtures/sqlcheck/__main__.py check-oracle
+# after compose + seed — log per query (SQL, columns, rows, OK/FAIL):
+$env:QLLM_SQLCHECK_REQUIRE_MCP = "1"
+python fixtures/sqlcheck/__main__.py mcp
+# or pytest -v -s (each case is its own test node)
+pytest fixtures/sqlcheck
 ```
+
+MCP gate: Streamable HTTP `http://127.0.0.1:8089/mcp` Bearer `change-me`. Compare `execute_sql` rows to `fixtures/goldens/sql-v1/expected`. Matrix tags in `cases.yaml` must cover every connector and every dialect-07 family (including composed statements); CI fails if a required tag is missing. CI must not regenerate goldens.
+
 
 HTTP: `Authorization: Bearer change-me` (valor em `deploy/image/config/qllm.env.yaml`).
 
@@ -65,6 +84,7 @@ Credenciais de dev **fixas só no harness**.
 ## Critérios de aceite
 
 - [x] Um comando sobe backends + qllm (`compose up --build`)
-- [x] Seed via Python fake (idempotente no gerador)
+- [x] Seed via frozen `fixtures/datasets/v1` (`load_dataset.py`; Faker only on regenerate)
 - [x] IRs em `fixtures/queries/` + SQL em `fixtures/sql/manual-examples.md`
+- [x] MCP `execute_sql` vs DuckDB-python goldens (`fixtures/sqlcheck`)
 - [ ] TIMEOUT forçado (API sleep > budget) — ainda desejável

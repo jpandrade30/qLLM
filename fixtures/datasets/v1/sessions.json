@@ -1,0 +1,555 @@
+[
+  {
+    "id": "sessc14_0",
+    "customer_id": "c14",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:35Z",
+    "active": false
+  },
+  {
+    "id": "sessc14_1",
+    "customer_id": "c14",
+    "device": "ios",
+    "started_at": "2026-09-29T21:57:44Z",
+    "active": false
+  },
+  {
+    "id": "sessc14_2",
+    "customer_id": "c14",
+    "device": "web",
+    "started_at": "2026-09-29T21:57:38Z",
+    "active": true
+  },
+  {
+    "id": "sessc15_0",
+    "customer_id": "c15",
+    "device": "ios",
+    "started_at": "2026-09-29T21:58:17Z",
+    "active": false
+  },
+  {
+    "id": "sessc15_1",
+    "customer_id": "c15",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:45Z",
+    "active": false
+  },
+  {
+    "id": "sessc22_0",
+    "customer_id": "c22",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:54Z",
+    "active": false
+  },
+  {
+    "id": "sessc22_1",
+    "customer_id": "c22",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:21Z",
+    "active": false
+  },
+  {
+    "id": "sessc10_0",
+    "customer_id": "c10",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:20Z",
+    "active": true
+  },
+  {
+    "id": "sessc1_0",
+    "customer_id": "c1",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:38Z",
+    "active": false
+  },
+  {
+    "id": "sessc1_1",
+    "customer_id": "c1",
+    "device": "ios",
+    "started_at": "2026-09-29T21:58:09Z",
+    "active": false
+  },
+  {
+    "id": "sessc1_2",
+    "customer_id": "c1",
+    "device": "android",
+    "started_at": "2026-09-29T22:00:25Z",
+    "active": false
+  },
+  {
+    "id": "sessc18_0",
+    "customer_id": "c18",
+    "device": "android",
+    "started_at": "2026-09-29T22:00:28Z",
+    "active": false
+  },
+  {
+    "id": "sessc18_1",
+    "customer_id": "c18",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:51Z",
+    "active": false
+  },
+  {
+    "id": "sessc37_0",
+    "customer_id": "c37",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:24Z",
+    "active": false
+  },
+  {
+    "id": "sessc9_0",
+    "customer_id": "c9",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:23Z",
+    "active": false
+  },
+  {
+    "id": "sessc9_1",
+    "customer_id": "c9",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:43Z",
+    "active": false
+  },
+  {
+    "id": "sessc9_2",
+    "customer_id": "c9",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:34Z",
+    "active": false
+  },
+  {
+    "id": "sessc17_0",
+    "customer_id": "c17",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:23Z",
+    "active": false
+  },
+  {
+    "id": "sessc17_1",
+    "customer_id": "c17",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:40Z",
+    "active": false
+  },
+  {
+    "id": "sessc26_0",
+    "customer_id": "c26",
+    "device": "android",
+    "started_at": "2026-09-29T21:57:45Z",
+    "active": true
+  },
+  {
+    "id": "sessc26_1",
+    "customer_id": "c26",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:08Z",
+    "active": false
+  },
+  {
+    "id": "sessc6_0",
+    "customer_id": "c6",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:48Z",
+    "active": true
+  },
+  {
+    "id": "sessc6_1",
+    "customer_id": "c6",
+    "device": "web",
+    "started_at": "2026-09-29T21:59:44Z",
+    "active": true
+  },
+  {
+    "id": "sessc4_0",
+    "customer_id": "c4",
+    "device": "android",
+    "started_at": "2026-09-29T21:57:55Z",
+    "active": false
+  },
+  {
+    "id": "sessc38_0",
+    "customer_id": "c38",
+    "device": "android",
+    "started_at": "2026-09-29T22:00:11Z",
+    "active": true
+  },
+  {
+    "id": "sessc36_0",
+    "customer_id": "c36",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:10Z",
+    "active": false
+  },
+  {
+    "id": "sessc36_1",
+    "customer_id": "c36",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:06Z",
+    "active": false
+  },
+  {
+    "id": "sessc36_2",
+    "customer_id": "c36",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:41Z",
+    "active": false
+  },
+  {
+    "id": "sessc5_0",
+    "customer_id": "c5",
+    "device": "android",
+    "started_at": "2026-09-29T22:00:02Z",
+    "active": true
+  },
+  {
+    "id": "sessc5_1",
+    "customer_id": "c5",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:29Z",
+    "active": false
+  },
+  {
+    "id": "sessc27_0",
+    "customer_id": "c27",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:44Z",
+    "active": false
+  },
+  {
+    "id": "sessc27_1",
+    "customer_id": "c27",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:18Z",
+    "active": true
+  },
+  {
+    "id": "sessc12_0",
+    "customer_id": "c12",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:33Z",
+    "active": false
+  },
+  {
+    "id": "sessc12_1",
+    "customer_id": "c12",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:39Z",
+    "active": false
+  },
+  {
+    "id": "sessc8_0",
+    "customer_id": "c8",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:35Z",
+    "active": false
+  },
+  {
+    "id": "sessc8_1",
+    "customer_id": "c8",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:08Z",
+    "active": true
+  },
+  {
+    "id": "sessc19_0",
+    "customer_id": "c19",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:13Z",
+    "active": false
+  },
+  {
+    "id": "sessc19_1",
+    "customer_id": "c19",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:49Z",
+    "active": false
+  },
+  {
+    "id": "sessc11_0",
+    "customer_id": "c11",
+    "device": "android",
+    "started_at": "2026-09-29T22:00:05Z",
+    "active": true
+  },
+  {
+    "id": "sessc11_1",
+    "customer_id": "c11",
+    "device": "android",
+    "started_at": "2026-09-29T21:57:42Z",
+    "active": false
+  },
+  {
+    "id": "sessc11_2",
+    "customer_id": "c11",
+    "device": "ios",
+    "started_at": "2026-09-29T21:58:44Z",
+    "active": true
+  },
+  {
+    "id": "sessc25_0",
+    "customer_id": "c25",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:19Z",
+    "active": false
+  },
+  {
+    "id": "sessc25_1",
+    "customer_id": "c25",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:06Z",
+    "active": false
+  },
+  {
+    "id": "sessc30_0",
+    "customer_id": "c30",
+    "device": "web",
+    "started_at": "2026-09-29T21:57:52Z",
+    "active": false
+  },
+  {
+    "id": "sessc33_0",
+    "customer_id": "c33",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:15Z",
+    "active": true
+  },
+  {
+    "id": "sessc33_1",
+    "customer_id": "c33",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:59Z",
+    "active": false
+  },
+  {
+    "id": "sessc2_0",
+    "customer_id": "c2",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:36Z",
+    "active": false
+  },
+  {
+    "id": "sessc31_0",
+    "customer_id": "c31",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:35Z",
+    "active": false
+  },
+  {
+    "id": "sessc31_1",
+    "customer_id": "c31",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:12Z",
+    "active": false
+  },
+  {
+    "id": "sessc24_0",
+    "customer_id": "c24",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:09Z",
+    "active": false
+  },
+  {
+    "id": "sessc24_1",
+    "customer_id": "c24",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:19Z",
+    "active": false
+  },
+  {
+    "id": "sessc24_2",
+    "customer_id": "c24",
+    "device": "web",
+    "started_at": "2026-09-29T21:57:51Z",
+    "active": true
+  },
+  {
+    "id": "sessc7_0",
+    "customer_id": "c7",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:47Z",
+    "active": false
+  },
+  {
+    "id": "sessc7_1",
+    "customer_id": "c7",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:10Z",
+    "active": false
+  },
+  {
+    "id": "sessc7_2",
+    "customer_id": "c7",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:25Z",
+    "active": false
+  },
+  {
+    "id": "sessc35_0",
+    "customer_id": "c35",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:20Z",
+    "active": true
+  },
+  {
+    "id": "sessc35_1",
+    "customer_id": "c35",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:09Z",
+    "active": true
+  },
+  {
+    "id": "sessc32_0",
+    "customer_id": "c32",
+    "device": "web",
+    "started_at": "2026-09-29T21:57:50Z",
+    "active": true
+  },
+  {
+    "id": "sessc32_1",
+    "customer_id": "c32",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:52Z",
+    "active": false
+  },
+  {
+    "id": "sessc39_0",
+    "customer_id": "c39",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:52Z",
+    "active": false
+  },
+  {
+    "id": "sessc39_1",
+    "customer_id": "c39",
+    "device": "web",
+    "started_at": "2026-09-29T21:59:53Z",
+    "active": false
+  },
+  {
+    "id": "sessc39_2",
+    "customer_id": "c39",
+    "device": "android",
+    "started_at": "2026-09-29T22:00:21Z",
+    "active": true
+  },
+  {
+    "id": "sessc23_0",
+    "customer_id": "c23",
+    "device": "ios",
+    "started_at": "2026-09-29T21:57:57Z",
+    "active": false
+  },
+  {
+    "id": "sessc34_0",
+    "customer_id": "c34",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:49Z",
+    "active": true
+  },
+  {
+    "id": "sessc28_0",
+    "customer_id": "c28",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:27Z",
+    "active": false
+  },
+  {
+    "id": "sessc16_0",
+    "customer_id": "c16",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:18Z",
+    "active": true
+  },
+  {
+    "id": "sessc16_1",
+    "customer_id": "c16",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:24Z",
+    "active": false
+  },
+  {
+    "id": "sessc40_0",
+    "customer_id": "c40",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:02Z",
+    "active": false
+  },
+  {
+    "id": "sessc40_1",
+    "customer_id": "c40",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:11Z",
+    "active": true
+  },
+  {
+    "id": "sessc40_2",
+    "customer_id": "c40",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:20Z",
+    "active": true
+  },
+  {
+    "id": "sessc20_0",
+    "customer_id": "c20",
+    "device": "ios",
+    "started_at": "2026-09-29T21:59:57Z",
+    "active": false
+  },
+  {
+    "id": "sessc29_0",
+    "customer_id": "c29",
+    "device": "android",
+    "started_at": "2026-09-29T21:59:00Z",
+    "active": false
+  },
+  {
+    "id": "sessc29_1",
+    "customer_id": "c29",
+    "device": "ios",
+    "started_at": "2026-09-29T21:58:58Z",
+    "active": false
+  },
+  {
+    "id": "sessc3_0",
+    "customer_id": "c3",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:33Z",
+    "active": true
+  },
+  {
+    "id": "sessc3_1",
+    "customer_id": "c3",
+    "device": "web",
+    "started_at": "2026-09-29T21:58:55Z",
+    "active": false
+  },
+  {
+    "id": "sessc13_0",
+    "customer_id": "c13",
+    "device": "android",
+    "started_at": "2026-09-29T21:58:47Z",
+    "active": false
+  },
+  {
+    "id": "sessc21_0",
+    "customer_id": "c21",
+    "device": "ios",
+    "started_at": "2026-09-29T22:00:33Z",
+    "active": true
+  },
+  {
+    "id": "sessc21_1",
+    "customer_id": "c21",
+    "device": "web",
+    "started_at": "2026-09-29T22:00:36Z",
+    "active": true
+  },
+  {
+    "id": "sessc21_2",
+    "customer_id": "c21",
+    "device": "android",
+    "started_at": "2026-09-29T22:00:34Z",
+    "active": false
+  }
+]

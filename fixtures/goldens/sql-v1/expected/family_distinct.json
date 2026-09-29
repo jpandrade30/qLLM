@@ -1,0 +1,20 @@
+{
+  "columns": [
+    {
+      "name": "status",
+      "type": "string"
+    }
+  ],
+  "rows": [
+    [
+      "open"
+    ],
+    [
+      "paid"
+    ],
+    [
+      "void"
+    ]
+  ],
+  "rowCount": 3
+}

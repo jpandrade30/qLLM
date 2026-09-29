@@ -1,0 +1,19 @@
+{
+  "columns": [
+    {
+      "name": "paid_n",
+      "type": "number"
+    },
+    {
+      "name": "sd",
+      "type": "number"
+    }
+  ],
+  "rows": [
+    [
+      38,
+      127451.64259249989
+    ]
+  ],
+  "rowCount": 1
+}

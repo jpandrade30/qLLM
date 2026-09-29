@@ -1,0 +1,218 @@
+[
+  {
+    "id": "sc4",
+    "customer_id": "c4",
+    "plan": "free",
+    "status": "active",
+    "mrr": 0,
+    "started_at": "2026-01-12T02:14:03Z"
+  },
+  {
+    "id": "sc7",
+    "customer_id": "c7",
+    "plan": "enterprise",
+    "status": "active",
+    "mrr": 49900,
+    "started_at": "2025-01-14T22:25:34Z"
+  },
+  {
+    "id": "sc9",
+    "customer_id": "c9",
+    "plan": "pro",
+    "status": "active",
+    "mrr": 2900,
+    "started_at": "2026-08-08T12:25:33Z"
+  },
+  {
+    "id": "sc10",
+    "customer_id": "c10",
+    "plan": "pro",
+    "status": "past_due",
+    "mrr": 2900,
+    "started_at": "2025-04-11T14:53:17Z"
+  },
+  {
+    "id": "sc11",
+    "customer_id": "c11",
+    "plan": "enterprise",
+    "status": "active",
+    "mrr": 49900,
+    "started_at": "2024-11-08T23:11:33Z"
+  },
+  {
+    "id": "sc14",
+    "customer_id": "c14",
+    "plan": "business",
+    "status": "past_due",
+    "mrr": 9900,
+    "started_at": "2026-02-09T10:56:02Z"
+  },
+  {
+    "id": "sc16",
+    "customer_id": "c16",
+    "plan": "enterprise",
+    "status": "canceled",
+    "mrr": 49900,
+    "started_at": "2025-10-07T17:20:58Z"
+  },
+  {
+    "id": "sc17",
+    "customer_id": "c17",
+    "plan": "pro",
+    "status": "active",
+    "mrr": 2900,
+    "started_at": "2026-08-09T09:12:41Z"
+  },
+  {
+    "id": "sc18",
+    "customer_id": "c18",
+    "plan": "free",
+    "status": "canceled",
+    "mrr": 0,
+    "started_at": "2025-07-14T18:23:08Z"
+  },
+  {
+    "id": "sc19",
+    "customer_id": "c19",
+    "plan": "pro",
+    "status": "active",
+    "mrr": 2900,
+    "started_at": "2025-12-04T03:52:45Z"
+  },
+  {
+    "id": "sc20",
+    "customer_id": "c20",
+    "plan": "free",
+    "status": "active",
+    "mrr": 0,
+    "started_at": "2026-09-25T02:59:05Z"
+  },
+  {
+    "id": "sc21",
+    "customer_id": "c21",
+    "plan": "free",
+    "status": "past_due",
+    "mrr": 0,
+    "started_at": "2024-12-18T02:54:06Z"
+  },
+  {
+    "id": "sc22",
+    "customer_id": "c22",
+    "plan": "pro",
+    "status": "past_due",
+    "mrr": 2900,
+    "started_at": "2026-04-04T23:57:57Z"
+  },
+  {
+    "id": "sc23",
+    "customer_id": "c23",
+    "plan": "pro",
+    "status": "canceled",
+    "mrr": 2900,
+    "started_at": "2026-07-18T11:03:55Z"
+  },
+  {
+    "id": "sc24",
+    "customer_id": "c24",
+    "plan": "enterprise",
+    "status": "active",
+    "mrr": 49900,
+    "started_at": "2025-11-04T03:44:18Z"
+  },
+  {
+    "id": "sc27",
+    "customer_id": "c27",
+    "plan": "free",
+    "status": "canceled",
+    "mrr": 0,
+    "started_at": "2026-07-22T13:22:32Z"
+  },
+  {
+    "id": "sc28",
+    "customer_id": "c28",
+    "plan": "enterprise",
+    "status": "past_due",
+    "mrr": 49900,
+    "started_at": "2025-01-04T06:39:09Z"
+  },
+  {
+    "id": "sc29",
+    "customer_id": "c29",
+    "plan": "free",
+    "status": "canceled",
+    "mrr": 0,
+    "started_at": "2025-05-08T20:27:01Z"
+  },
+  {
+    "id": "sc30",
+    "customer_id": "c30",
+    "plan": "free",
+    "status": "active",
+    "mrr": 0,
+    "started_at": "2024-12-03T14:02:10Z"
+  },
+  {
+    "id": "sc31",
+    "customer_id": "c31",
+    "plan": "business",
+    "status": "active",
+    "mrr": 9900,
+    "started_at": "2026-05-15T04:01:09Z"
+  },
+  {
+    "id": "sc32",
+    "customer_id": "c32",
+    "plan": "pro",
+    "status": "canceled",
+    "mrr": 2900,
+    "started_at": "2025-01-31T22:55:44Z"
+  },
+  {
+    "id": "sc33",
+    "customer_id": "c33",
+    "plan": "enterprise",
+    "status": "active",
+    "mrr": 49900,
+    "started_at": "2025-04-29T07:41:20Z"
+  },
+  {
+    "id": "sc34",
+    "customer_id": "c34",
+    "plan": "pro",
+    "status": "active",
+    "mrr": 2900,
+    "started_at": "2025-09-13T10:24:28Z"
+  },
+  {
+    "id": "sc35",
+    "customer_id": "c35",
+    "plan": "free",
+    "status": "active",
+    "mrr": 0,
+    "started_at": "2026-09-02T14:37:17Z"
+  },
+  {
+    "id": "sc36",
+    "customer_id": "c36",
+    "plan": "free",
+    "status": "active",
+    "mrr": 0,
+    "started_at": "2025-11-02T04:04:45Z"
+  },
+  {
+    "id": "sc39",
+    "customer_id": "c39",
+    "plan": "enterprise",
+    "status": "past_due",
+    "mrr": 49900,
+    "started_at": "2025-01-21T21:16:06Z"
+  },
+  {
+    "id": "sc40",
+    "customer_id": "c40",
+    "plan": "enterprise",
+    "status": "active",
+    "mrr": 49900,
+    "started_at": "2026-07-06T22:19:27Z"
+  }
+]
