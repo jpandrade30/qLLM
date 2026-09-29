@@ -49,6 +49,8 @@ my-app/                         # projeto que USA o qLLM
   qllm.project.yaml             # opcional: aponta preset + catalog
   qllm.preset.yaml              # sources, auth env, limits
   qllm.catalog.yaml             # entidades lógicas → bindings físicos
+  qllm.config.yaml              # opcional: bind, Bearer auth, CORS, body caps
+  qllm.access.yaml              # opcional: apps, keys (${ENV} ou literal), tabelas
 ```
 
 Resolução (ordem):
@@ -58,23 +60,28 @@ Resolução (ordem):
 3. `--config-dir DIR` → `DIR/qllm.preset.yaml` + `DIR/qllm.catalog.yaml` (também aceita `.json`)
 4. CWD: `./qllm.preset.yaml` + `./qllm.catalog.yaml`
 
+`qllm.config.*` (opcional): `--runtime-config PATH`, ou ao lado do preset em `--config-dir` / CWD. Precedência serve: defaults seguros → arquivo → flags.
+
 ```bash
 qllm serve --http --config-dir ./config
 qllm serve --http --preset ./p.yaml --catalog ./c.yaml
 qllm query --config-dir ./config -f ./ir.json
 ```
 
-Detalhes normativos: [03-protocol-schemas.md](03-protocol-schemas.md) § Project layout.
+Detalhes normativos: [03-protocol-schemas.md](03-protocol-schemas.md) § Project layout (D14).
 
 ## Modos de serving
 
 | Modo | Uso |
 |------|-----|
-| `qllm serve --http --config-dir …` | API atrás de ingress / local |
+| `qllm serve --http --config-dir …` | API local (default `127.0.0.1:8088`) |
 | `qllm serve --mcp --config-dir …` | Agente local via stdio (sem ingress) |
-| `qllm serve --mcp-http --mcp-addr :8089 …` | MCP Streamable HTTP `/mcp` + SSE `/sse` (Jupyter/LangChain) |
+| `qllm serve --mcp-http …` | MCP Streamable HTTP `/mcp` + SSE (default `127.0.0.1:8089`) |
 | `qllm serve --http --mcp-http …` | REST `/v1` e MCP HTTP em portas distintas |
 | `qllm query --config-dir … -f ir.json` | CLI one-shot (dev) |
+| `qllm sql --config-dir … -f query.sql` | CLI SQL (dialeto `"2"` default; DuckDB) |
+
+Auth (Bearer via `authTokenEnv`, ou keys em `qllm.access.yaml`) aplica-se a HTTP `/v1` e MCP HTTP, não a MCP stdio. Com access file, stdio exige `--app` / `QLLM_APP`. CORS allowlist aplica-se **só** a MCP HTTP (REST `/v1` não envia headers CORS).
 
 ## Layout de repo (alvo)
 
@@ -99,4 +106,4 @@ qLLM/
 | Validar IR, pushdown básico, fail-fast, tabular uniforme | Indexar banco alheio |
 | Mapear lógico→físico via catalog | Modelar domínio do cliente |
 | Cancelar ao estourar budget | Jobs ETL de horas |
-| Expor catalog ao agente | Gerar SQL livre sem IR |
+| Expor catalog ao agente | SQL fora do sandbox D15 (qualquer statement, scan de arquivo, schema físico) |

@@ -5,20 +5,23 @@ const ProtocolVersion = "0.1.0"
 type ErrorCode string
 
 const (
-	ErrInvalidIR      ErrorCode = "INVALID_IR"
-	ErrUnknownEntity  ErrorCode = "UNKNOWN_ENTITY"
-	ErrUnknownField   ErrorCode = "UNKNOWN_FIELD"
-	ErrAmbiguousField ErrorCode = "AMBIGUOUS_FIELD"
-	ErrAmbiguousAlias ErrorCode = "AMBIGUOUS_ALIAS"
-	ErrLimitExceeded  ErrorCode = "LIMIT_EXCEEDED"
-	ErrForbidden      ErrorCode = "FORBIDDEN"
-	ErrUnsupported    ErrorCode = "UNSUPPORTED"
-	ErrConfigError    ErrorCode = "CONFIG_ERROR"
-	ErrTimeout        ErrorCode = "TIMEOUT"
-	ErrSourceError    ErrorCode = "SOURCE_ERROR"
-	ErrNotReady       ErrorCode = "NOT_READY"
-	ErrNotFound       ErrorCode = "NOT_FOUND"
-	ErrInternal       ErrorCode = "INTERNAL"
+	ErrInvalidIR          ErrorCode = "INVALID_IR"
+	ErrUnknownEntity      ErrorCode = "UNKNOWN_ENTITY"
+	ErrUnknownField       ErrorCode = "UNKNOWN_FIELD"
+	ErrAmbiguousField     ErrorCode = "AMBIGUOUS_FIELD"
+	ErrAmbiguousAlias     ErrorCode = "AMBIGUOUS_ALIAS"
+	ErrLimitExceeded      ErrorCode = "LIMIT_EXCEEDED"
+	ErrForbidden          ErrorCode = "FORBIDDEN"
+	ErrUnauthorized       ErrorCode = "UNAUTHORIZED"
+	ErrUnsupported        ErrorCode = "UNSUPPORTED"
+	ErrUnsupportedVersion ErrorCode = "UNSUPPORTED_VERSION"
+	ErrInvalidSQL         ErrorCode = "INVALID_SQL"
+	ErrConfigError        ErrorCode = "CONFIG_ERROR"
+	ErrTimeout            ErrorCode = "TIMEOUT"
+	ErrSourceError        ErrorCode = "SOURCE_ERROR"
+	ErrNotReady           ErrorCode = "NOT_READY"
+	ErrNotFound           ErrorCode = "NOT_FOUND"
+	ErrInternal           ErrorCode = "INTERNAL"
 )
 
 type ProtocolError struct {
@@ -41,11 +44,11 @@ type ErrorResponse struct {
 }
 
 type Limits struct {
-	MaxSyncMs     int  `json:"maxSyncMs" yaml:"maxSyncMs"`
-	MaxSourceMs   int  `json:"maxSourceMs" yaml:"maxSourceMs"`
-	DefaultLimit  int  `json:"defaultLimit" yaml:"defaultLimit"`
-	MaxLimit      int  `json:"maxLimit" yaml:"maxLimit"`
-	ReadOnly      bool `json:"readOnly" yaml:"readOnly"`
+	MaxSyncMs    int  `json:"maxSyncMs" yaml:"maxSyncMs"`
+	MaxSourceMs  int  `json:"maxSourceMs" yaml:"maxSourceMs"`
+	DefaultLimit int  `json:"defaultLimit" yaml:"defaultLimit"`
+	MaxLimit     int  `json:"maxLimit" yaml:"maxLimit"`
+	ReadOnly     bool `json:"readOnly" yaml:"readOnly"`
 }
 
 type SourceType string
@@ -152,17 +155,17 @@ type OrderExpr struct {
 // SelectItem is either a field ref string or an agg object.
 // Unmarshaled via custom logic in validate/query parsing.
 type QueryIR struct {
-	ProtocolVersion string          `json:"protocolVersion,omitempty" yaml:"protocolVersion,omitempty"`
-	From            string          `json:"from" yaml:"from"`
-	As              string          `json:"as,omitempty" yaml:"as,omitempty"`
-	Joins           []Join          `json:"joins,omitempty" yaml:"joins,omitempty"`
-	Select          []any           `json:"select" yaml:"select"`
-	Where           map[string]any  `json:"where,omitempty" yaml:"where,omitempty"`
-	GroupBy         []string        `json:"groupBy,omitempty" yaml:"groupBy,omitempty"`
-	OrderBy         []OrderExpr     `json:"orderBy,omitempty" yaml:"orderBy,omitempty"`
-	Limit           *int            `json:"limit,omitempty" yaml:"limit,omitempty"`
-	Offset          *int            `json:"offset,omitempty" yaml:"offset,omitempty"`
-	Mode            string          `json:"mode,omitempty" yaml:"mode,omitempty"`
+	ProtocolVersion string         `json:"protocolVersion,omitempty" yaml:"protocolVersion,omitempty"`
+	From            string         `json:"from" yaml:"from"`
+	As              string         `json:"as,omitempty" yaml:"as,omitempty"`
+	Joins           []Join         `json:"joins,omitempty" yaml:"joins,omitempty"`
+	Select          []any          `json:"select" yaml:"select"`
+	Where           map[string]any `json:"where,omitempty" yaml:"where,omitempty"`
+	GroupBy         []string       `json:"groupBy,omitempty" yaml:"groupBy,omitempty"`
+	OrderBy         []OrderExpr    `json:"orderBy,omitempty" yaml:"orderBy,omitempty"`
+	Limit           *int           `json:"limit,omitempty" yaml:"limit,omitempty"`
+	Offset          *int           `json:"offset,omitempty" yaml:"offset,omitempty"`
+	Mode            string         `json:"mode,omitempty" yaml:"mode,omitempty"`
 }
 
 type Column struct {
@@ -171,10 +174,10 @@ type Column struct {
 }
 
 type TabularResult struct {
-	Columns  []Column `json:"columns"`
-	Rows     [][]any  `json:"rows"`
-	RowCount int      `json:"rowCount"`
-	Truncated bool    `json:"truncated"`
+	Columns   []Column `json:"columns"`
+	Rows      [][]any  `json:"rows"`
+	RowCount  int      `json:"rowCount"`
+	Truncated bool     `json:"truncated"`
 }
 
 type PlanStepMeta struct {
@@ -191,6 +194,7 @@ type PlanMeta struct {
 type QueryMeta struct {
 	ElapsedMs int64     `json:"elapsedMs"`
 	Mode      string    `json:"mode"`
+	App       string    `json:"app,omitempty"`
 	Plan      *PlanMeta `json:"plan,omitempty"`
 }
 
@@ -243,24 +247,24 @@ type HealthResponse struct {
 
 // HowToUseMeResponse is an LLM-oriented guide for querying this runtime.
 type HowToUseMeResponse struct {
-	ProtocolVersion string               `json:"protocolVersion"`
-	Purpose         string               `json:"purpose"`
-	Workflow        []string             `json:"workflow"`
-	Never           []string             `json:"never"`
-	NotSupported    []string             `json:"notSupported"`
-	Endpoints       []HowToEndpoint      `json:"endpoints"`
-	Grammar         string               `json:"grammar"`
-	Where           HowToWhereGuide      `json:"where"`
-	FieldRefRules   []string             `json:"fieldRefRules"`
-	JoinRules       []string             `json:"joinRules"`
-	AggregateRules  []string             `json:"aggregateRules"`
-	OrderByRules    []string             `json:"orderByRules"`
-	QueryIR         HowToQueryIR         `json:"queryIR"`
-	Rules           []string             `json:"rules"`
-	Examples        []HowToExample       `json:"examples"`
+	ProtocolVersion string                `json:"protocolVersion"`
+	Purpose         string                `json:"purpose"`
+	Workflow        []string              `json:"workflow"`
+	Never           []string              `json:"never"`
+	NotSupported    []string              `json:"notSupported"`
+	Endpoints       []HowToEndpoint       `json:"endpoints"`
+	Grammar         string                `json:"grammar"`
+	Where           HowToWhereGuide       `json:"where"`
+	FieldRefRules   []string              `json:"fieldRefRules"`
+	JoinRules       []string              `json:"joinRules"`
+	AggregateRules  []string              `json:"aggregateRules"`
+	OrderByRules    []string              `json:"orderByRules"`
+	QueryIR         HowToQueryIR          `json:"queryIR"`
+	Rules           []string              `json:"rules"`
+	Examples        []HowToExample        `json:"examples"`
 	InvalidExamples []HowToInvalidExample `json:"invalidExamples"`
-	Errors          []HowToError         `json:"errors"`
-	Project         HowToProject         `json:"project"`
+	Errors          []HowToError          `json:"errors"`
+	Project         HowToProject          `json:"project"`
 }
 
 type HowToWhereGuide struct {

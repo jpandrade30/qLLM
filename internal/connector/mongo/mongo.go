@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -33,7 +34,8 @@ func Open(src protocol.Source) (*Connector, error) {
 	defer cancel()
 	cli, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		return nil, protocol.NewError(protocol.ErrSourceError, err.Error(), nil)
+		return nil, protocol.NewError(protocol.ErrSourceError,
+			fmt.Sprintf("source %s connect failed", src.ID), map[string]any{"source": src.ID})
 	}
 	return &Connector{
 		id:  src.ID,
@@ -259,7 +261,7 @@ func whereBSON(e *protocol.Entity, w map[string]any) (bson.M, error) {
 	case "nin":
 		return bson.M{phys: bson.M{"$nin": w["value"]}}, nil
 	case "contains":
-		return bson.M{phys: bson.M{"$regex": fmt.Sprint(w["value"])}}, nil
+		return bson.M{phys: bson.M{"$regex": regexp.QuoteMeta(fmt.Sprint(w["value"]))}}, nil
 	case "is_null":
 		return bson.M{phys: nil}, nil
 	case "not_null":
@@ -290,5 +292,6 @@ func mapErr(id string, ctx context.Context, err error) error {
 		return protocol.NewError(protocol.ErrTimeout,
 			fmt.Sprintf("source %s exceeded timeout", id), map[string]any{"source": id})
 	}
-	return protocol.NewError(protocol.ErrSourceError, err.Error(), map[string]any{"source": id})
+	return protocol.NewError(protocol.ErrSourceError,
+		fmt.Sprintf("source %s query failed", id), map[string]any{"source": id})
 }

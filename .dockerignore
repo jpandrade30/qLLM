@@ -1,0 +1,6 @@
+.git
+tmp
+*.exe
+*.log
+fixtures/seed/.venv
+**/.DS_Store

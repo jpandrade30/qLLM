@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qllm.dev/schemas/sql-request.schema.json",
+  "title": "qLLM SQL Request",
+  "description": "SQL dialect request (alongside Query IR). version omitted = latest dialect.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sql"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "SQL dialect version. Omitted = latest (currently \"2\"). \"1\" is frozen (no set ops / QUALIFY)."
+    },
+    "sql": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

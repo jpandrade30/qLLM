@@ -7,5 +7,6 @@ import (
 )
 
 func (s *Server) howToUseMe(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, agentguide.Build(s.Idx.Preset, s.Idx.Catalog))
+	cat := s.Idx.CatalogFor(s.allow(r))
+	writeJSON(w, http.StatusOK, agentguide.Build(s.Idx.Preset, cat))
 }

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qllm.dev/schemas/runtime-config.schema.json",
+  "title": "qLLM Runtime Config",
+  "description": "Optional serve/runtime settings (not part of the Query IR data-plane). Secrets via *Env only.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "serve": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "addr": {
+          "type": "string",
+          "minLength": 1,
+          "description": "HTTP /v1 listen address (default 127.0.0.1:8088)"
+        },
+        "mcpAddr": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MCP HTTP listen address (default 127.0.0.1:8089)"
+        },
+        "authTokenEnv": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Env var name holding Bearer token for HTTP and MCP HTTP"
+        },
+        "insecureBind": {
+          "type": "boolean",
+          "description": "Allow non-loopback bind without auth (default false)"
+        },
+        "maxBodyBytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "description": "Max HTTP request body bytes for POST /v1/queries"
+        },
+        "maxRestResponseBytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "description": "Max REST connector response body bytes"
+        },
+        "cors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "origins": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "description": "Allowlist of Origins; empty disables CORS. Wildcard * is rejected."
+            },
+            "allowHeaders": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "allowMethods": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

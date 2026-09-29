@@ -1,0 +1,10 @@
+# Baked into the runtime image (K8s/compose override env, not this layout).
+serve:
+  addr: "0.0.0.0:8088"
+  mcpAddr: "0.0.0.0:8089"
+  authTokenEnv: "QLLM_AUTH_TOKEN"
+  insecureBind: false
+  maxBodyBytes: 1048576
+  maxRestResponseBytes: 10485760
+  cors:
+    origins: []

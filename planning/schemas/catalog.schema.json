@@ -69,10 +69,22 @@
           "type": "string",
           "enum": ["table", "collection", "rest_resource"]
         },
-        "schema": { "type": "string" },
-        "table": { "type": "string" },
-        "collection": { "type": "string" },
-        "resource": { "type": "string" }
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "table": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "collection": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "resource": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        }
       },
       "allOf": [
         {
@@ -99,7 +111,11 @@
           "pattern": "^[a-z][a-z0-9_]*$"
         },
         "type": { "$ref": "#/$defs/logicalType" },
-        "physical": { "type": "string", "minLength": 1 },
+        "physical": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$",
+          "description": "Physical column/key; optional dotted path for nested docs"
+        },
         "description": { "type": "string" }
       }
     },

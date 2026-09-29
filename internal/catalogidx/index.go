@@ -5,10 +5,10 @@ import (
 )
 
 type Index struct {
-	Preset   *protocol.Preset
-	Catalog  *protocol.Catalog
-	byName   map[string]*protocol.Entity // name + aliases
-	sources  map[string]*protocol.Source
+	Preset  *protocol.Preset
+	Catalog *protocol.Catalog
+	byName  map[string]*protocol.Entity // name + aliases
+	sources map[string]*protocol.Source
 }
 
 func New(preset *protocol.Preset, catalog *protocol.Catalog) (*Index, *protocol.ProtocolError) {
@@ -99,8 +99,31 @@ func DefaultCapabilities(t protocol.SourceType) protocol.Capabilities {
 }
 
 func (idx *Index) CatalogResponse() protocol.CatalogResponse {
+	return idx.CatalogResponseFor(nil)
+}
+
+func (idx *Index) CatalogResponseFor(allow map[string]struct{}) protocol.CatalogResponse {
+	ents := idx.Catalog.Entities
+	if allow != nil {
+		filtered := make([]protocol.Entity, 0, len(ents))
+		for _, e := range ents {
+			if _, ok := allow[e.Name]; ok {
+				filtered = append(filtered, e)
+			}
+		}
+		ents = filtered
+	}
+	srcIDs := map[string]struct{}{}
+	for _, e := range ents {
+		srcIDs[e.Source] = struct{}{}
+	}
 	sources := make([]protocol.SourceInfo, 0, len(idx.Preset.Sources))
 	for _, s := range idx.Preset.Sources {
+		if allow != nil {
+			if _, ok := srcIDs[s.ID]; !ok {
+				continue
+			}
+		}
 		sources = append(sources, protocol.SourceInfo{
 			ID:           s.ID,
 			Type:         s.Type,
@@ -110,7 +133,21 @@ func (idx *Index) CatalogResponse() protocol.CatalogResponse {
 	return protocol.CatalogResponse{
 		ProtocolVersion: protocol.ProtocolVersion,
 		Project:         idx.Catalog.Project,
-		Entities:        idx.Catalog.Entities,
+		Entities:        ents,
 		Sources:         sources,
 	}
+}
+
+func (idx *Index) CatalogFor(allow map[string]struct{}) *protocol.Catalog {
+	if allow == nil {
+		return idx.Catalog
+	}
+	cp := *idx.Catalog
+	cp.Entities = nil
+	for _, e := range idx.Catalog.Entities {
+		if _, ok := allow[e.Name]; ok {
+			cp.Entities = append(cp.Entities, e)
+		}
+	}
+	return &cp
 }

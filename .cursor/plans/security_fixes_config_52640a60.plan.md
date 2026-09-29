@@ -4,25 +4,25 @@ overview: Implement the full security backlog (serve lockdown, readOnly/timeouts
 todos:
   - id: spec-runtime-config
     content: Add D14 + runtime-config.schema.json + planning/README docs for qllm.config.yaml
-    status: pending
+    status: completed
   - id: load-merge-serve
     content: Load/merge runtime config in internal/config; wire serve CLI defaults, flags, bind policy
-    status: pending
+    status: completed
   - id: auth-cors-middleware
     content: Bearer auth + config-driven CORS for HTTP and MCP HTTP; update tests
-    status: pending
+    status: completed
   - id: readonly-timeouts-bodies
     content: Enforce readOnly/FORBIDDEN, statementTimeoutMs, maxBodyBytes / maxRestResponseBytes
-    status: pending
+    status: completed
   - id: connector-harden
     content: Safe DSN builders, error scrubbing, TLS default require, Mongo QuoteMeta, LIKE escape
-    status: pending
+    status: completed
   - id: path-catalog-deps
     content: Project path confinement, catalog identifier patterns, remove unused duckdb-go
-    status: pending
+    status: completed
   - id: docs-fixtures
     content: README + optional fixture qllm.config.yaml; adjust MCP CORS tests
-    status: pending
+    status: completed
 isProject: false
 ---
 

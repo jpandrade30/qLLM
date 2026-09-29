@@ -52,6 +52,23 @@
 - [x] Logs estruturados HTTP (`queryId`, `elapsedMs`, `error.code`)
 - [x] README quickstart
 
+## Fase 5b — SQL dialeto + ACL por app
+
+- [x] `qllm.access.yaml` (`${ENV}` só em `key`)
+- [x] Parser `SELECT` + `POST /v1/sql` + MCP `execute_sql`
+- [x] Fetch colunas citadas → DuckDB `ExecSQL` (`enable_external_access=false`)
+- [x] Dockerfile multi-stage (`-tags duckdb`), sem Compose
+- [x] Dialeto `"2"` (default): set ops, `QUALIFY`, windows; `"1"` congelado
+- [x] Inventário Databricks-like + testes parse/DuckDB/reject — [`07-sql-dialect.md`](07-sql-dialect.md)
+
+**Exit:** SQL e IR respeitam a mesma allowlist; expressões ricas só no SQL (IR 0.1.0 unchanged); testes = contrato do dialeto.
+
+## Fase 5c — SQL expressiveness (done)
+
+- [x] Query IR **não** ganha HAVING/UNION/CASE/LIKE — agents usam `execute_sql`
+- [x] Funções extras via DuckDB + denylist (não lista allow de centenas de nomes no schema IR)
+- [x] Golden + table-driven tests em `internal/sqlparse`, `internal/duckdblocal` (`-tags duckdb`), `internal/validate` (llmlint)
+
 ## Fase 6 — Clients (depois)
 
 - [ ] Python thin client
@@ -62,4 +79,4 @@
 
 ## Nota de implementação
 
-Motor local de join: pure Go em `internal/duckdblocal` para evitar CGO no Windows. API estável para trocar por DuckDB embutido depois.
+Motor local de join: **default** pure Go em `internal/duckdblocal` (sem CGO). Interface `Engine` estável; build `go build -tags duckdb` (CGO) troca por DuckDB embutido (`engine_duckdb.go`). SQL gerado via `BuildDuckSQL` (parameterized). Caminho `execute_sql` exige DuckDB (`ExecSQL`). Ver README § Local join engine.

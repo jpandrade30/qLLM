@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qllm.dev/schemas/env-file.schema.json",
+  "title": "qLLM Env File",
+  "description": "Optional qllm.env.yaml: seed process env from YAML. Existing process env wins (K8s Secret). Not Query IR. Do not log values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["env"],
+  "properties": {
+    "env": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "propertyNames": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" }
+    }
+  }
+}

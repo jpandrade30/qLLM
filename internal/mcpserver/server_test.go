@@ -13,7 +13,7 @@ import (
 	"qLLM/internal/querystore"
 )
 
-func testMCP(t *testing.T) http.Handler {
+func testMCP(t *testing.T, opts mcpserver.HTTPOptions) http.Handler {
 	t.Helper()
 	preset := &protocol.Preset{
 		ProtocolVersion: protocol.ProtocolVersion,
@@ -35,24 +35,38 @@ func testMCP(t *testing.T) http.Handler {
 	}
 	store := querystore.New(time.Minute)
 	exec := executor.New(idx, nil, store)
-	return mcpserver.Handler(mcpserver.New(idx, exec, store))
+	return mcpserver.Handler(mcpserver.New(idx, exec, store), opts)
 }
 
-func TestMCPHTTPOptionsCORS(t *testing.T) {
-	h := testMCP(t)
+func TestMCPHTTPOptionsNoCORSByDefault(t *testing.T) {
+	h := testMCP(t, mcpserver.HTTPOptions{})
 	req := httptest.NewRequest(http.MethodOptions, "/mcp", nil)
+	req.Header.Set("Origin", "http://evil.example")
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 	if rec.Code != http.StatusNoContent {
 		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
 	}
-	if rec.Header().Get("Access-Control-Allow-Origin") != "*" {
-		t.Fatal("missing CORS origin")
+	if rec.Header().Get("Access-Control-Allow-Origin") != "" {
+		t.Fatal("CORS should be disabled by default")
+	}
+}
+
+func TestMCPHTTPOptionsCORSAllowlist(t *testing.T) {
+	h := testMCP(t, mcpserver.HTTPOptions{
+		CORS: protocol.CORSConfig{Origins: []string{"http://ok.example"}},
+	})
+	req := httptest.NewRequest(http.MethodOptions, "/mcp", nil)
+	req.Header.Set("Origin", "http://ok.example")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Header().Get("Access-Control-Allow-Origin") != "http://ok.example" {
+		t.Fatalf("got %q", rec.Header().Get("Access-Control-Allow-Origin"))
 	}
 }
 
 func TestMCPHTTPUnknownPath(t *testing.T) {
-	h := testMCP(t)
+	h := testMCP(t, mcpserver.HTTPOptions{})
 	req := httptest.NewRequest(http.MethodGet, "/nope", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)

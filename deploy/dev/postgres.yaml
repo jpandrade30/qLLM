@@ -1,3 +1,4 @@
+# Dev-only credentials — do not expose this namespace beyond localhost.
 apiVersion: v1
 kind: Secret
 metadata:

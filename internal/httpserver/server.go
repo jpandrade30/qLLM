@@ -2,22 +2,29 @@ package httpserver
 
 import (
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
+	"qLLM/internal/access"
+	"qLLM/internal/appctx"
 	"qLLM/internal/catalogidx"
 	"qLLM/internal/executor"
 	"qLLM/internal/protocol"
 	"qLLM/internal/querystore"
+	"qLLM/internal/serveauth"
 )
 
 type Server struct {
-	Idx   *catalogidx.Index
-	Exec  *executor.Executor
-	Store *querystore.Store
-	Log   *slog.Logger
+	Idx          *catalogidx.Index
+	Exec         *executor.Executor
+	Store        *querystore.Store
+	Log          *slog.Logger
+	AuthToken    string
+	ACL          *access.Registry
+	MaxBodyBytes int64
 }
 
 func (s *Server) logger() *slog.Logger {
@@ -33,9 +40,16 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/howtouseme", s.howToUseMe)
 	mux.HandleFunc("GET /v1/catalog", s.catalog)
 	mux.HandleFunc("POST /v1/queries", s.createQuery)
+	mux.HandleFunc("POST /v1/sql", s.createSQL)
 	mux.HandleFunc("GET /v1/queries/{id}", s.getQuery)
 	mux.HandleFunc("GET /v1/queries/{id}/result", s.getResult)
-	return s.logMiddleware(mux)
+	var h http.Handler = s.logMiddleware(mux)
+	if s.ACL != nil {
+		h = serveauth.AppsMiddleware(s.ACL, h)
+	} else {
+		h = serveauth.Middleware(s.AuthToken, h)
+	}
+	return h
 }
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
@@ -43,13 +57,63 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, s.Idx.CatalogResponse())
+	writeJSON(w, http.StatusOK, s.Idx.CatalogResponseFor(s.allow(r)))
+}
+
+func (s *Server) allow(r *http.Request) map[string]struct{} {
+	if s.ACL == nil {
+		return nil
+	}
+	if app := appctx.App(r.Context()); app != nil {
+		return app.TableSet()
+	}
+	return map[string]struct{}{}
+}
+
+func (s *Server) createSQL(w http.ResponseWriter, r *http.Request) {
+	max := s.MaxBodyBytes
+	if max <= 0 {
+		max = protocol.DefaultMaxBodyBytes
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, max)
+	var req protocol.SQLRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		msg := err.Error()
+		if err == io.EOF {
+			msg = "empty body"
+		}
+		writeErr(w, http.StatusBadRequest, protocol.NewError(protocol.ErrInvalidSQL, msg, nil))
+		return
+	}
+	resp := s.Exec.ExecuteSQL(r.Context(), &req)
+	status := http.StatusOK
+	if resp.Status == protocol.StatusFailed && resp.Error != nil {
+		status = httpStatus(resp.Error.Code)
+	}
+	attrs := []any{"queryId", resp.QueryID, "status", string(resp.Status)}
+	if resp.Meta != nil {
+		attrs = append(attrs, "elapsedMs", resp.Meta.ElapsedMs, "app", resp.Meta.App)
+	}
+	if resp.Error != nil {
+		attrs = append(attrs, "error.code", string(resp.Error.Code))
+	}
+	s.logger().Info("execute_sql", attrs...)
+	writeJSON(w, status, resp)
 }
 
 func (s *Server) createQuery(w http.ResponseWriter, r *http.Request) {
+	max := s.MaxBodyBytes
+	if max <= 0 {
+		max = protocol.DefaultMaxBodyBytes
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, max)
 	var q protocol.QueryIR
 	if err := json.NewDecoder(r.Body).Decode(&q); err != nil {
-		writeErr(w, http.StatusBadRequest, protocol.NewError(protocol.ErrInvalidIR, err.Error(), nil))
+		msg := err.Error()
+		if err == io.EOF {
+			msg = "empty body"
+		}
+		writeErr(w, http.StatusBadRequest, protocol.NewError(protocol.ErrInvalidIR, msg, nil))
 		return
 	}
 	resp := s.Exec.Execute(r.Context(), &q)
@@ -106,10 +170,12 @@ func httpStatus(code protocol.ErrorCode) int {
 	switch code {
 	case protocol.ErrInvalidIR, protocol.ErrUnknownEntity, protocol.ErrUnknownField,
 		protocol.ErrAmbiguousField, protocol.ErrAmbiguousAlias, protocol.ErrLimitExceeded,
-		protocol.ErrUnsupported:
+		protocol.ErrUnsupported, protocol.ErrUnsupportedVersion, protocol.ErrInvalidSQL:
 		return http.StatusBadRequest
 	case protocol.ErrForbidden:
 		return http.StatusForbidden
+	case protocol.ErrUnauthorized:
+		return http.StatusUnauthorized
 	case protocol.ErrTimeout:
 		return http.StatusGatewayTimeout
 	case protocol.ErrSourceError:

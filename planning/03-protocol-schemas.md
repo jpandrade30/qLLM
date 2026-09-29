@@ -17,6 +17,9 @@ As specs de **onde estão os bancos/APIs** e **o que se pode consultar** são ar
 | `qllm.preset.yaml` (ou `.json`) | sim | sources, connection/`*Env`, limits |
 | `qllm.catalog.yaml` (ou `.json`) | sim | entidades lógicas → source + binding + fields |
 | `qllm.project.yaml` (ou `.json`) | não | ponteiro para preset/catalog |
+| `qllm.config.yaml` (ou `.json`) | não | serve: bind, authTokenEnv, CORS, body caps (D14) |
+| `qllm.access.yaml` (ou `.json`) | não | apps, keys, tabelas (D16); ausente = Bearer único / catalog inteiro |
+| `qllm.env.yaml` (ou `.json`) | não | mapa `env:` nome→valor; preenche variáveis **vazias** no processo (preset `*Env` / `authTokenEnv`). Env já setado (K8s Secret) ganha. |
 
 ### `qllm.project.yaml` (opcional)
 
@@ -35,7 +38,7 @@ Ordem de precedência:
 
 1. `--preset PATH` **e** `--catalog PATH`
 2. `--project PATH` → lê `preset`/`catalog` do project file
-3. `--config-dir DIR` → `DIR/qllm.preset.{yaml,yml,json}` + `DIR/qllm.catalog.{yaml,yml,json}`
+3. `--config-dir DIR` → `DIR/qllm.preset.{yaml,yml,json}` + `DIR/qllm.catalog.{yaml,yml,json}` (+ opcional `qllm.config.*`, `qllm.access.*`, `qllm.env.*`)
 4. Working directory atual com os nomes default `qllm.preset.*` + `qllm.catalog.*`
 
 ```bash
@@ -44,9 +47,60 @@ qllm validate --project ./qllm.project.yaml
 qllm query --preset ./p.yaml --catalog ./c.yaml -f ./ir.json
 ```
 
-- `serve`: carrega preset+catalog **no startup**; falha rápido se inválidos.
-- Segredos continuam só via env referenciado no preset (`passwordEnv`, `uriEnv`, …).
+- `serve`: carrega preset+catalog **no startup**; falha rápido se inválidos. Runtime serve settings: defaults → `qllm.config.*` → flags CLI.
+- Segredos continuam só via env (`passwordEnv`, `uriEnv`, `authTokenEnv`, …).
 - O harness de dev usa o mesmo mecanismo (`fixtures/presets/` + `--config-dir`).
+
+### `qllm.config.yaml` (opcional — serve/runtime)
+
+Não faz parte do data-plane Query IR. JSON Schema: [`schemas/runtime-config.schema.json`](schemas/runtime-config.schema.json).
+
+```yaml
+serve:
+  addr: "127.0.0.1:8088"
+  mcpAddr: "127.0.0.1:8089"
+  authTokenEnv: "QLLM_AUTH_TOKEN"
+  insecureBind: false
+  maxBodyBytes: 1048576
+  maxRestResponseBytes: 10485760
+  cors:
+    origins: []   # vazio = CORS desligado; "*" rejeitado
+```
+
+Defaults seguros: loopback, CORS off. Se `authTokenEnv` estiver definido, o env **deve** resolver token não-vazio (senão `CONFIG_ERROR` no startup). Bind não-loopback sem auth exige `insecureBind: true` / `--insecure-bind`.
+
+### `qllm.access.yaml` (opcional — ACL por app)
+
+JSON Schema: [`schemas/access.schema.json`](schemas/access.schema.json). Arquivo presente **substitui** o Bearer único.
+
+```yaml
+apps:
+  - name: crm-agent
+    key: ${QLLM_CRM_AGENT_KEY}
+    tables: [customers, addresses, invoices]
+  - name: billing-dev
+    key: dev-only-literal
+    tables: [invoices, products]
+```
+
+- `key`: literal **ou** placeholder exato `${ENV_NAME}` (um token; sem texto em volta). Env vazio = `CONFIG_ERROR` no startup.
+- Cada entrada de `tables` deve existir no catalog no startup.
+- HTTP e MCP HTTP: `Authorization: Bearer` casa com uma `key`; o app filtra catalog, IR e SQL. `GET /v1/health` continua aberto.
+- MCP stdio: `--app NAME` ou env `QLLM_APP`. Sem app, recusa `execute_query` / `execute_sql`.
+
+### `qllm.env.yaml` (opcional — seed de env)
+
+JSON Schema: [`schemas/env-file.schema.json`](schemas/env-file.schema.json). Valores para `*Env` do preset / `authTokenEnv` sem `ENV` no Dockerfile.
+
+```yaml
+env:
+  QLLM_AUTH_TOKEN: change-me
+  QLLM_CRM_PG_HOST: postgres
+  QLLM_CRM_PG_USER: qllm
+  QLLM_CRM_PG_PASSWORD: qllm
+```
+
+Processo já tem a variável (Secret do Kubernetes) → YAML **não** sobrescreve. Valores nunca vão para log.
 
 ---
 
@@ -434,7 +488,7 @@ Runtime fonte: **`GET /v1/howtouseme`** (HTTP) ou tool MCP **`how_to_use_me`**. 
 - Inventar entity/field/FK — só o catalog.
 - Escrever `where` como `{"and":[...]}` — forma canônica: `{"op":"and","args":[...]}`.
 - Usar operadores SQL (`=`, `>=`, `LIKE`) — usar `eq`, `gte`, `contains`, …
-- Assumir HAVING, DISTINCT, UNION, CASE, subquery, expressões aritméticas.
+- Colocar HAVING/UNION/CASE/subquery no Query IR — usar `execute_sql` (ver [`07-sql-dialect.md`](07-sql-dialect.md)).
 
 **Where — válido vs inválido**
 
@@ -555,6 +609,23 @@ Request body = Query IR.
 
 Nota: mesmo em async, o job respeita `maxSyncMs` / budget; status final será `succeeded` ou `failed` rapidamente.
 
+### 4.4b `POST /v1/sql`
+
+JSON Schema: [`schemas/sql-request.schema.json`](schemas/sql-request.schema.json).
+
+```json
+{ "version": "1", "sql": "SELECT c.id, i.total FROM customers c INNER JOIN invoices i ON i.customer_id = c.id LIMIT 100" }
+```
+
+- `version` opcional; omitido = dialeto mais novo (`"2"`). `"1"` e `"2"` suportados. Desconhecido = `UNSUPPORTED_VERSION`. Ver [`07-sql-dialect.md`](07-sql-dialect.md).
+- Resposta tabular igual a `POST /v1/queries` (`query-response.schema.json`). `meta.app` = nome do app quando ACL está ativo.
+- Dialeto `"1"`: uma statement `SELECT` (WITH, HAVING, DISTINCT, CASE, LIKE, BETWEEN, subquery, aritmética). Sem `UNION`/`INTERSECT`/`EXCEPT`/`QUALIFY`.
+- Dialeto `"2"`: inclui set ops, `QUALIFY`, windows/`XOR`/`COUNT(DISTINCT …)` quando DuckDB aceita. Ambos recusam DML/DDL, multi-statement, schema físico, `read_csv` / `read_parquet` / `read_json` / `postgres_scan` / `httpfs` / `glob` e afins.
+- Runtime: parser lista tabelas/colunas; connectors fazem scan (sem `WHERE` pushdown); DuckDB materializa nomes lógicos e executa o SQL com `enable_external_access=false`. Sem `LIMIT` no SELECT externo, aplica `defaultLimit`. `LIMIT` > `maxLimit` = `LIMIT_EXCEEDED`.
+- Sem build `-tags duckdb`: `UNSUPPORTED`.
+
+CLI: `qllm sql --config-dir … -f query.sql` (`--version` opcional).
+
 ### 4.5 `GET /v1/queries/{queryId}`
 
 ```json
@@ -609,8 +680,11 @@ Todo erro de API:
 | `AMBIGUOUS_FIELD` | 400 | field sem qualificar com >1 entidade |
 | `AMBIGUOUS_ALIAS` | 400 | `as`/binding repetido na query |
 | `LIMIT_EXCEEDED` | 400 | limit > maxLimit |
-| `FORBIDDEN` | 403 | entidade/fonte não allowlisted |
+| `FORBIDDEN` | 403 | `readOnly` / método REST mutável / tabela fora da allowlist do app |
+| `UNAUTHORIZED` | 401 | Bearer token ausente ou inválido (HTTP/MCP HTTP) |
 | `UNSUPPORTED` | 400 | op não suportada e não degradável |
+| `UNSUPPORTED_VERSION` | 400 | `version` SQL desconhecida |
+| `INVALID_SQL` | 400 | SQL fora do dialeto solicitado (`"1"` ou `"2"`) |
 | `CONFIG_ERROR` | 500 | preset/catalog ausente ou inválido no startup |
 | `TIMEOUT` | 504 | budget/fonte |
 | `SOURCE_ERROR` | 502 | erro da fonte (msg sanitizada) |
@@ -627,6 +701,7 @@ Todo erro de API:
 | `how_to_use_me` | `{}` | body de `GET /v1/howtouseme` (contrato LLM) |
 | `describe_catalog` | `{}` | body de `GET /v1/catalog` |
 | `execute_query` | Query IR | body de `POST /v1/queries` (sync ou accepted) |
+| `execute_sql` | `{ sql, version? }` | body de `POST /v1/sql` |
 | `get_query` | `{ queryId }` | status e result se ready |
 
 ### Transportes
@@ -634,12 +709,12 @@ Todo erro de API:
 | Modo | CLI | Endpoint |
 |------|-----|----------|
 | stdio | `qllm serve --mcp` | processo (Inspector STDIO) |
-| Streamable HTTP | `qllm serve --mcp-http --mcp-addr :8089` | `POST/GET http://host:8089/mcp` |
-| SSE (legado) | mesmo `--mcp-http` | `GET http://host:8089/sse` + `/message` |
+| Streamable HTTP | `qllm serve --mcp-http` (default `127.0.0.1:8089`) | `POST/GET http://127.0.0.1:8089/mcp` |
+| SSE (legado) | mesmo `--mcp-http` | `GET http://127.0.0.1:8089/sse` + `/message` |
 
 `--mcp` (stdio) é exclusivo; `--http` e `--mcp-http` podem coexistir em portas distintas.
 
-**Segurança:** MCP HTTP sem autenticação no MVP — expor só em localhost / rede confiável / tunnel.
+**Segurança (D14/D16):** Bearer opcional via `authTokenEnv`, **ou** keys em `qllm.access.yaml`. CORS allowlist só no MCP HTTP. Defaults loopback; bind não-loopback sem token/key exige `insecureBind`. Stdio MCP é process-local; com access file exige `--app`.
 
 ---
 
@@ -655,4 +730,4 @@ Todo erro de API:
 - [ ] Discovery `--config-dir` / `--project` / flags explícitas documentada na CLI
 - [ ] Exemplos do harness usam entity names distintos por fonte REST
 - [ ] Capability matrix em `04-connectors.md` alinhada ao IR
-- [ ] Nenhuma tool de agente expõe SQL cru no default
+- [ ] Nenhuma tool de agente expõe SQL cru fora de `execute_sql` / `POST /v1/sql` (D15)

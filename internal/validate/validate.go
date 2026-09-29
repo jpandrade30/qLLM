@@ -21,6 +21,9 @@ var (
 	presetSchema  *jsonschema.Schema
 	catalogSchema *jsonschema.Schema
 	querySchema   *jsonschema.Schema
+	accessSchema  *jsonschema.Schema
+	sqlReqSchema  *jsonschema.Schema
+	envFileSchema *jsonschema.Schema
 )
 
 func init() {
@@ -38,6 +41,9 @@ func init() {
 	mustAdd("preset.schema.json")
 	mustAdd("catalog.schema.json")
 	mustAdd("query-ir.schema.json")
+	mustAdd("access.schema.json")
+	mustAdd("sql-request.schema.json")
+	mustAdd("env-file.schema.json")
 	var err error
 	presetSchema, err = c.Compile("https://qllm.dev/schemas/preset.schema.json")
 	if err != nil {
@@ -48,6 +54,18 @@ func init() {
 		panic(err)
 	}
 	querySchema, err = c.Compile("https://qllm.dev/schemas/query-ir.schema.json")
+	if err != nil {
+		panic(err)
+	}
+	accessSchema, err = c.Compile("https://qllm.dev/schemas/access.schema.json")
+	if err != nil {
+		panic(err)
+	}
+	sqlReqSchema, err = c.Compile("https://qllm.dev/schemas/sql-request.schema.json")
+	if err != nil {
+		panic(err)
+	}
+	envFileSchema, err = c.Compile("https://qllm.dev/schemas/env-file.schema.json")
 	if err != nil {
 		panic(err)
 	}
@@ -92,6 +110,43 @@ func Catalog(c *protocol.Catalog) *protocol.ProtocolError {
 
 func QuerySchema(q *protocol.QueryIR) *protocol.ProtocolError {
 	return validateSchema(querySchema, q, protocol.ErrInvalidIR)
+}
+
+func Access(a *protocol.AccessFile) *protocol.ProtocolError {
+	return validateSchema(accessSchema, a, protocol.ErrConfigError)
+}
+
+func SQLRequest(r *protocol.SQLRequest) *protocol.ProtocolError {
+	return validateSchema(sqlReqSchema, r, protocol.ErrInvalidSQL)
+}
+
+func EnvFile(e *protocol.EnvFile) *protocol.ProtocolError {
+	return validateSchema(envFileSchema, e, protocol.ErrConfigError)
+}
+
+func EnforceACL(idx *catalogidx.Index, q *protocol.QueryIR, allow map[string]struct{}) *protocol.ProtocolError {
+	if allow == nil {
+		return nil
+	}
+	check := func(ref string) *protocol.ProtocolError {
+		ent, err := idx.ResolveEntity(ref)
+		if err != nil {
+			return err
+		}
+		if _, ok := allow[ent.Name]; !ok {
+			return protocol.NewError(protocol.ErrForbidden, "entity not allowed for this app: "+ent.Name, map[string]any{"entity": ent.Name})
+		}
+		return nil
+	}
+	if err := check(q.From); err != nil {
+		return err
+	}
+	for _, j := range q.Joins {
+		if err := check(j.From); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func Bundle(preset *protocol.Preset, catalog *protocol.Catalog) (*catalogidx.Index, *protocol.ProtocolError) {

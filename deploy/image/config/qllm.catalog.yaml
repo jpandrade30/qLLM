@@ -1,0 +1,171 @@
+protocolVersion: "0.1.0"
+project: qllm-demo
+entities:
+  - name: customers
+    description: CRM customers
+    source: crm_pg
+    binding: { kind: table, schema: public, table: customers }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: email, type: string, physical: email }
+      - { name: full_name, type: string, physical: full_name }
+      - { name: phone, type: string, physical: phone }
+      - { name: country, type: string, physical: country }
+      - { name: created_at, type: timestamp, physical: created_at }
+
+  - name: addresses
+    source: crm_pg
+    binding: { kind: table, schema: public, table: addresses }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: customer_id, type: string, physical: customer_id }
+      - { name: city, type: string, physical: city }
+      - { name: state, type: string, physical: state }
+      - { name: country, type: string, physical: country }
+      - { name: postal_code, type: string, physical: postal_code }
+    relations:
+      - { name: customer, to: customers, type: many_to_one, on: [[customer_id, id]] }
+
+  - name: support_tickets
+    source: crm_pg
+    binding: { kind: table, schema: public, table: support_tickets }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: customer_id, type: string, physical: customer_id }
+      - { name: subject, type: string, physical: subject }
+      - { name: status, type: string, physical: status }
+      - { name: priority, type: string, physical: priority }
+      - { name: created_at, type: timestamp, physical: created_at }
+
+  - name: subscriptions
+    source: crm_pg
+    binding: { kind: table, schema: public, table: subscriptions }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: customer_id, type: string, physical: customer_id }
+      - { name: plan, type: string, physical: plan }
+      - { name: status, type: string, physical: status }
+      - { name: mrr, type: number, physical: mrr_cents }
+      - { name: started_at, type: timestamp, physical: started_at }
+
+  - name: products
+    source: billing_mysql
+    binding: { kind: table, schema: billing, table: products }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: sku, type: string, physical: sku }
+      - { name: name, type: string, physical: name }
+      - { name: price, type: number, physical: price_cents }
+      - { name: category, type: string, physical: category }
+
+  - name: invoices
+    description: Billing invoices
+    source: billing_mysql
+    binding: { kind: table, schema: billing, table: invoices }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: customer_id, type: string, physical: customer_id }
+      - { name: total, type: number, physical: total_cents }
+      - { name: status, type: string, physical: status }
+      - { name: issued_at, type: timestamp, physical: issued_at }
+    relations:
+      - { name: customer, to: customers, type: many_to_one, on: [[customer_id, id]] }
+
+  - name: invoice_items
+    source: billing_mysql
+    binding: { kind: table, schema: billing, table: invoice_items }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: invoice_id, type: string, physical: invoice_id }
+      - { name: product_id, type: string, physical: product_id }
+      - { name: qty, type: number, physical: qty }
+      - { name: unit, type: number, physical: unit_cents }
+
+  - name: payments
+    source: billing_mysql
+    binding: { kind: table, schema: billing, table: payments }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: invoice_id, type: string, physical: invoice_id }
+      - { name: customer_id, type: string, physical: customer_id }
+      - { name: amount, type: number, physical: amount_cents }
+      - { name: method, type: string, physical: method }
+      - { name: paid_at, type: timestamp, physical: paid_at }
+
+  - name: events
+    source: events_mongo
+    binding: { kind: collection, collection: app_events }
+    fields:
+      - { name: id, type: string, physical: _id }
+      - { name: customer_id, type: string, physical: customerId }
+      - { name: type, type: string, physical: type }
+      - { name: ts, type: timestamp, physical: ts }
+
+  - name: sessions
+    source: events_mongo
+    binding: { kind: collection, collection: sessions }
+    fields:
+      - { name: id, type: string, physical: _id }
+      - { name: customer_id, type: string, physical: customerId }
+      - { name: device, type: string, physical: device }
+      - { name: started_at, type: timestamp, physical: startedAt }
+      - { name: active, type: boolean, physical: active }
+
+  - name: notifications
+    source: events_mongo
+    binding: { kind: collection, collection: notifications }
+    fields:
+      - { name: id, type: string, physical: _id }
+      - { name: customer_id, type: string, physical: customerId }
+      - { name: channel, type: string, physical: channel }
+      - { name: title, type: string, physical: title }
+      - { name: read, type: boolean, physical: read }
+      - { name: created_at, type: timestamp, physical: createdAt }
+
+  - name: audit_logs
+    source: events_mongo
+    binding: { kind: collection, collection: audit_logs }
+    fields:
+      - { name: id, type: string, physical: _id }
+      - { name: customer_id, type: string, physical: customerId }
+      - { name: action, type: string, physical: action }
+      - { name: resource, type: string, physical: resource }
+      - { name: at, type: timestamp, physical: at }
+
+  - name: legacy_users
+    aliases: [users_api]
+    source: legacy_api
+    binding: { kind: rest_resource, resource: users }
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: email, type: string, physical: email }
+      - { name: full_name, type: string, physical: full_name }
+      - { name: country, type: string, physical: country }
+
+  - name: api_products
+    source: legacy_api
+    binding: { kind: rest_resource, resource: products }
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: sku, type: string, physical: sku }
+      - { name: name, type: string, physical: name }
+      - { name: price, type: number, physical: price_cents }
+      - { name: category, type: string, physical: category }
+
+  - name: api_tickets
+    source: legacy_api
+    binding: { kind: rest_resource, resource: tickets }
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: customer_id, type: string, physical: customer_id }
+      - { name: subject, type: string, physical: subject }
+      - { name: status, type: string, physical: status }
+      - { name: priority, type: string, physical: priority }

@@ -51,3 +51,30 @@ func TestPostgresTimestampParamTyped(t *testing.T) {
 		t.Fatalf("expected time.Time arg, got %T (%v)", built.Args[1], built.Args[1])
 	}
 }
+
+func TestContainsEscapesLikeWildcards(t *testing.T) {
+	e := &protocol.Entity{
+		Name: "customers",
+		Fields: []protocol.Field{
+			{Name: "email", Type: protocol.TypeString, Physical: "email"},
+		},
+		Binding: protocol.Binding{Kind: "table", Schema: "public", Table: "customers"},
+	}
+	step := def.PushdownStep{
+		Entity: e,
+		Select: []def.SelectItem{{Field: "email", As: "email"}},
+		Where:  map[string]any{"field": "email", "op": "contains", "value": "a%b_c"},
+		Limit:  10,
+	}
+	built, err := sqlbuild.Build(sqlbuild.Postgres, step)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(built.SQL, "ESCAPE") {
+		t.Fatalf("expected ESCAPE in SQL: %s", built.SQL)
+	}
+	got, _ := built.Args[0].(string)
+	if got != `a\%b\_c` {
+		t.Fatalf("escaped arg=%q", got)
+	}
+}

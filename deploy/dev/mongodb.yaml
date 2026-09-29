@@ -12,6 +12,10 @@ spec:
     metadata:
       labels:
         app: mongodb
+        # Cluster Datadog admission breaks mongosh probes (NODE_OPTIONS preload).
+        admission.datadoghq.com/enabled: "false"
+      annotations:
+        admission.datadoghq.com/enabled: "false"
     spec:
       containers:
         - name: mongodb
@@ -19,8 +23,8 @@ spec:
           ports:
             - containerPort: 27017
           readinessProbe:
-            exec:
-              command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+            tcpSocket:
+              port: 27017
             initialDelaySeconds: 10
             periodSeconds: 10
 ---

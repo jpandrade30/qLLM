@@ -210,11 +210,11 @@ func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph f
 		if d == Postgres {
 			p = p + "::text"
 		}
-		*args = append(*args, fmt.Sprintf("%v", w["value"]))
+		*args = append(*args, escapeLike(fmt.Sprintf("%v", w["value"])))
 		if d == Postgres {
-			return col + " LIKE '%' || " + p + " || '%'", *args, nil
+			return col + " LIKE '%' || " + p + " || '%' ESCAPE '\\'", *args, nil
 		}
-		return col + " LIKE CONCAT('%', " + p + ", '%')", *args, nil
+		return col + " LIKE CONCAT('%', " + p + ", '%') ESCAPE '\\\\'", *args, nil
 	default:
 		sqlOp := map[string]string{
 			"eq": "=", "neq": "<>", "gt": ">", "gte": ">=", "lt": "<", "lte": "<=",
@@ -282,4 +282,11 @@ func jsonMarshal(v any) ([]byte, error) {
 
 func jsonUnmarshal(b []byte, v any) error {
 	return jsonUnmarshalImpl(b, v)
+}
+
+func escapeLike(s string) string {
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `%`, `\%`)
+	s = strings.ReplaceAll(s, `_`, `\_`)
+	return s
 }

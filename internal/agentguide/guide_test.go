@@ -1,6 +1,7 @@
 package agentguide_test
 
 import (
+	"strings"
 	"testing"
 
 	"qLLM/internal/agentguide"
@@ -21,6 +22,13 @@ func TestBuildHasLLMContract(t *testing.T) {
 	out := agentguide.Build(preset, catalog)
 	if len(out.Never) == 0 || len(out.NotSupported) == 0 {
 		t.Fatal("missing never/notSupported")
+	}
+	joined := strings.Join(out.NotSupported, " ")
+	if !strings.Contains(joined, "Query IR") || !strings.Contains(joined, "Mutations") {
+		t.Fatalf("notSupported should document IR vs SQL: %v", out.NotSupported)
+	}
+	if !strings.Contains(strings.Join(out.Never, " "), "execute_sql") {
+		t.Fatal("never should steer SQL features to execute_sql")
 	}
 	if len(out.Where.Shapes) == 0 || out.Where.InvalidExample == nil || out.Where.Fix == nil {
 		t.Fatalf("where guide incomplete: %+v", out.Where)

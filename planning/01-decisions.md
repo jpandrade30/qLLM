@@ -59,9 +59,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ### D10 — Segurança default
 
-- **Decisão:** Read-only; allowlist de entidades do catalog; `limit` obrigatório; sem raw query livre no caminho do agente.
+- **Decisão:** Read-only; allowlist de entidades do catalog; `limit` obrigatório; Query IR continua o contrato JSON. SQL do agente só no caminho fechado (D15): uma statement `SELECT`, nomes lógicos do catalog, tabelas da key (D16), sem função que leia arquivo/rede.
 - **Por quê:** Tool de agente é superfície de risco.
-- **Consequência:** Modo admin/raw (se existir) fica explícito e fora do default.
+- **Consequência:** Modo admin/raw (se existir) fica explícito e fora do default. `execute_sql` / `POST /v1/sql` não substituem o IR.
 
 ### D11 — Versionamento do protocolo
 
@@ -80,3 +80,21 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** Preset + catalog vivem em arquivos no disco (YAML ou JSON). O binário recebe `--config-dir` ou paths explícitos / `qllm.project.yaml` que aponta para eles. Em `serve`, carrega uma vez no startup (reload explícito depois, se houver).
 - **Por quê:** Maleável por projeto sem recompilar; fácil versionar no git do projeto consumidor.
 - **Consequência:** Não há “spec embutida só em código” no caminho feliz. Layout e flags: `03` § Project layout + `02-architecture`.
+
+### D14 — Runtime serve config separado do preset (data-plane)
+
+- **Decisão:** Bind addresses, Bearer auth (`authTokenEnv`), CORS allowlist, body size caps e `insecureBind` vivem em `qllm.config.yaml` (opcional) ou flags CLI — **não** no preset. Preset continua sources + limits + `*Env` de conexões.
+- **Por quê:** Preset é o contrato de dados (Query IR / catalog); serve é superfície de exposição. Misturar CORS/auth no preset acopla deploy a catalogs versionados.
+- **Consequência:** Defaults seguros (loopback, CORS off). Precedência: defaults → `qllm.config.*` → flags. Segredo do token só via env. Schema: `schemas/runtime-config.schema.json`.
+
+### D15 — Dialeto SQL versionado ao lado do Query IR
+
+- **Decisão:** `POST /v1/sql` e MCP `execute_sql` aceitam `{ "version"?, "sql" }`. `version` omitido = dialeto mais novo (`"2"`). `"1"` permanece válido e congelado (sem `UNION`/`INTERSECT`/`EXCEPT`/`QUALIFY`). Desconhecida = `UNSUPPORTED_VERSION`. Query IR e `protocolVersion` `0.1.0` não mudam.
+- **Por quê:** Parser/joins/transforms no DuckDB após fetch das colunas citadas; IR permanece para clientes existentes. Inventário Databricks-like: [`07-sql-dialect.md`](07-sql-dialect.md).
+- **Consequência:** Sem pushdown de `WHERE`/join neste caminho. Build `-tags duckdb` obrigatório para executar SQL. Parser valida tabelas/colunas/ACL; DuckDB executa o `SELECT` (denylist de I/O).
+
+### D16 — Acesso por app (`qllm.access.yaml`)
+
+- **Decisão:** Arquivo opcional lista `apps[]` com `name`, `key` (literal ou `${ENV_NAME}`) e `tables` (nomes de entidade do catalog). Arquivo presente substitui o Bearer único (`authTokenEnv`). A key escolhe o app; a allowlist vale para IR e SQL. MCP stdio usa `--app` / `QLLM_APP`.
+- **Por quê:** Kubernetes injeta Secret em env; yaml aponta `${ENV}` sem copiar o valor para o git.
+- **Consequência:** Sem o arquivo, comportamento D14 (um token, catalog inteiro). Com o arquivo, catalog/`howtouseme` filtrados às tabelas da key.

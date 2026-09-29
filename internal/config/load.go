@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"qLLM/internal/protocol"
+	"qLLM/internal/validate"
 
 	"gopkg.in/yaml.v3"
 )
@@ -69,10 +70,17 @@ func resolveProject(path string) (Paths, error) {
 			"project file must set preset and catalog", nil)
 	}
 	base := filepath.Dir(path)
-	return Paths{
-		Preset:  filepath.Clean(filepath.Join(base, pf.Preset)),
-		Catalog: filepath.Clean(filepath.Join(base, pf.Catalog)),
-	}, nil
+	preset := filepath.Clean(filepath.Join(base, pf.Preset))
+	catalog := filepath.Clean(filepath.Join(base, pf.Catalog))
+	preset, err = ConfinePath(base, preset)
+	if err != nil {
+		return Paths{}, err
+	}
+	catalog, err = ConfinePath(base, catalog)
+	if err != nil {
+		return Paths{}, err
+	}
+	return Paths{Preset: preset, Catalog: catalog}, nil
 }
 
 func findNamed(dir, base string) (string, error) {
@@ -110,6 +118,79 @@ func LoadCatalog(path string) (*protocol.Catalog, error) {
 		return nil, protocol.NewError(protocol.ErrConfigError, err.Error(), nil)
 	}
 	return &c, nil
+}
+
+func LoadAccess(explicitPath, configDir string) (*protocol.AccessFile, string, error) {
+	var path string
+	var err error
+	if explicitPath != "" {
+		path = explicitPath
+	} else {
+		dir := configDir
+		if dir == "" {
+			dir, err = os.Getwd()
+			if err != nil {
+				return nil, "", protocol.NewError(protocol.ErrConfigError, err.Error(), nil)
+			}
+		}
+		path, err = findNamedOptional(dir, "qllm.access")
+		if err != nil {
+			return nil, "", err
+		}
+		if path == "" {
+			return nil, "", nil
+		}
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, "", protocol.NewError(protocol.ErrConfigError,
+			fmt.Sprintf("read access config: %v", err), nil)
+	}
+	var af protocol.AccessFile
+	if err := unmarshalFlexible(path, raw, &af); err != nil {
+		return nil, "", protocol.NewError(protocol.ErrConfigError, err.Error(), nil)
+	}
+	return &af, path, nil
+}
+
+// ApplyEnvFile loads optional qllm.env.yaml and sets empty process env keys only.
+func ApplyEnvFile(configDir string) error {
+	dir := configDir
+	if dir == "" {
+		var err error
+		dir, err = os.Getwd()
+		if err != nil {
+			return protocol.NewError(protocol.ErrConfigError, err.Error(), nil)
+		}
+	}
+	path, err := findNamedOptional(dir, "qllm.env")
+	if err != nil {
+		return err
+	}
+	if path == "" {
+		return nil
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return protocol.NewError(protocol.ErrConfigError,
+			fmt.Sprintf("read env file: %v", err), nil)
+	}
+	var ef protocol.EnvFile
+	if err := unmarshalFlexible(path, raw, &ef); err != nil {
+		return protocol.NewError(protocol.ErrConfigError, err.Error(), nil)
+	}
+	if perr := validate.EnvFile(&ef); perr != nil {
+		return perr
+	}
+	for k, v := range ef.Env {
+		if os.Getenv(k) != "" {
+			continue
+		}
+		if err := os.Setenv(k, v); err != nil {
+			return protocol.NewError(protocol.ErrConfigError, err.Error(), map[string]any{"env": k})
+		}
+	}
+	return nil
 }
 
 func LoadQueryIR(path string) (*protocol.QueryIR, error) {

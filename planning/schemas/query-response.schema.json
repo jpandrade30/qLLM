@@ -60,6 +60,7 @@
       "properties": {
         "elapsedMs": { "type": "integer", "minimum": 0 },
         "mode": { "type": "string", "enum": ["sync", "async"] },
+        "app": { "type": "string" },
         "plan": {
           "type": "object",
           "properties": {
@@ -94,7 +95,10 @@
             "AMBIGUOUS_ALIAS",
             "LIMIT_EXCEEDED",
             "FORBIDDEN",
+            "UNAUTHORIZED",
             "UNSUPPORTED",
+            "UNSUPPORTED_VERSION",
+            "INVALID_SQL",
             "CONFIG_ERROR",
             "TIMEOUT",
             "SOURCE_ERROR",

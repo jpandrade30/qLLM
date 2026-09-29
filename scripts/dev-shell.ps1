@@ -58,6 +58,8 @@ Write-Host "  gcc:         $((Get-Command gcc).Source)"
 Write-Host "  CGO_ENABLED: $env:CGO_ENABLED"
 Write-Host "  duckdblib:   $DuckDbLib"
 Write-Host ""
-Write-Host "Try:  go run .\tmp\duckdb_smoke.go" -ForegroundColor DarkGray
+Write-Host "Try:  go test -tags duckdb ./internal/duckdblocal/" -ForegroundColor DarkGray
+Write-Host "      go run -tags duckdb .\scripts\duckdb_smoke.go" -ForegroundColor DarkGray
+
 Write-Host "      go build -o qllm.exe .\cmd\qllm" -ForegroundColor DarkGray
 Write-Host ""

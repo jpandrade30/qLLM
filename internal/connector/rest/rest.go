@@ -19,15 +19,22 @@ import (
 )
 
 type Connector struct {
-	id      string
-	baseURL string
-	client  *http.Client
-	auth    map[string]any
-	res     map[string]any
-	caps    def.Caps
+	id               string
+	baseURL          string
+	client           *http.Client
+	auth             map[string]any
+	res              map[string]any
+	caps             def.Caps
+	readOnly         bool
+	maxResponseBytes int64
 }
 
-func Open(src protocol.Source) (*Connector, error) {
+type OpenOpts struct {
+	ReadOnly             bool
+	MaxResponseBodyBytes int64
+}
+
+func Open(src protocol.Source, opts OpenOpts) (*Connector, error) {
 	base, err := config.EnvString(src.Connection, "baseUrlEnv")
 	if err != nil {
 		return nil, protocol.NewError(protocol.ErrConfigError, err.Error(), nil)
@@ -43,12 +50,18 @@ func Open(src protocol.Source) (*Connector, error) {
 			timeout = time.Duration(ms) * time.Millisecond
 		}
 	}
+	maxBytes := opts.MaxResponseBodyBytes
+	if maxBytes <= 0 {
+		maxBytes = protocol.DefaultMaxRestResponseBytes
+	}
 	return &Connector{
-		id:      src.ID,
-		baseURL: strings.TrimRight(base, "/"),
-		client:  &http.Client{Timeout: timeout},
-		auth:    auth,
-		res:     resources,
+		id:               src.ID,
+		baseURL:          strings.TrimRight(base, "/"),
+		client:           &http.Client{Timeout: timeout},
+		auth:             auth,
+		res:              resources,
+		readOnly:         opts.ReadOnly,
+		maxResponseBytes: maxBytes,
 		caps: def.Caps{
 			Filter: true, Project: true, Limit: true,
 		},
@@ -83,10 +96,19 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 	if method == "" {
 		method = http.MethodGet
 	}
+	if c.readOnly {
+		m := strings.ToUpper(method)
+		if m != http.MethodGet && m != http.MethodHead {
+			return nil, protocol.NewError(protocol.ErrForbidden,
+				fmt.Sprintf("readOnly forbids REST method %s on source %s", m, c.id),
+				map[string]any{"source": c.id, "method": m})
+		}
+	}
 	path, _ := list["path"].(string)
 	u, err := url.Parse(c.baseURL + path)
 	if err != nil {
-		return nil, protocol.NewError(protocol.ErrConfigError, err.Error(), nil)
+		return nil, protocol.NewError(protocol.ErrConfigError,
+			fmt.Sprintf("source %s invalid resource URL", c.id), map[string]any{"source": c.id})
 	}
 	q := u.Query()
 	if step.Where != nil {
@@ -104,7 +126,8 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 
 	req, err := http.NewRequestWithContext(ctx, method, u.String(), nil)
 	if err != nil {
-		return nil, protocol.NewError(protocol.ErrSourceError, err.Error(), nil)
+		return nil, protocol.NewError(protocol.ErrSourceError,
+			fmt.Sprintf("source %s request build failed", c.id), map[string]any{"source": c.id})
 	}
 	if err := c.applyAuth(req); err != nil {
 		return nil, err
@@ -115,12 +138,20 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 			return nil, protocol.NewError(protocol.ErrTimeout,
 				fmt.Sprintf("source %s exceeded timeout", c.id), map[string]any{"source": c.id})
 		}
-		return nil, protocol.NewError(protocol.ErrSourceError, err.Error(), map[string]any{"source": c.id})
+		return nil, protocol.NewError(protocol.ErrSourceError,
+			fmt.Sprintf("source %s request failed", c.id), map[string]any{"source": c.id})
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
+	limited := io.LimitReader(resp.Body, c.maxResponseBytes+1)
+	body, err := io.ReadAll(limited)
 	if err != nil {
-		return nil, protocol.NewError(protocol.ErrSourceError, err.Error(), nil)
+		return nil, protocol.NewError(protocol.ErrSourceError,
+			fmt.Sprintf("source %s read failed", c.id), map[string]any{"source": c.id})
+	}
+	if int64(len(body)) > c.maxResponseBytes {
+		return nil, protocol.NewError(protocol.ErrSourceError,
+			fmt.Sprintf("source %s response exceeded maxRestResponseBytes", c.id),
+			map[string]any{"source": c.id, "maxBytes": c.maxResponseBytes})
 	}
 	if resp.StatusCode >= 400 {
 		return nil, protocol.NewError(protocol.ErrSourceError,
@@ -130,7 +161,8 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 
 	items, err := parseList(body)
 	if err != nil {
-		return nil, protocol.NewError(protocol.ErrSourceError, err.Error(), nil)
+		return nil, protocol.NewError(protocol.ErrSourceError,
+			fmt.Sprintf("source %s unsupported list payload", c.id), map[string]any{"source": c.id})
 	}
 
 	columns := []protocol.Column{}
