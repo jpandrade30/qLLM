@@ -1,7 +1,7 @@
 """
 Generate and load fake demo data into Postgres, MySQL, MongoDB, and the test API JSON.
 
-Usage (with port-forwards up):
+Usage (compose DBs published on localhost):
   pip install -r fixtures/seed/requirements.txt
   python fixtures/seed/generate_and_load.py --customers 200
 """
@@ -18,7 +18,6 @@ from pathlib import Path
 from faker import Faker
 
 ROOT = Path(__file__).resolve().parents[2]
-API_DATA = ROOT / "deploy" / "dev" / "test-api" / "data.json"
 API_FIXTURE = ROOT / "fixtures" / "test-api" / "data.json"
 
 
@@ -233,10 +232,9 @@ def main() -> None:
             for t in tickets
         ],
     }
-    for path in (API_DATA, API_FIXTURE):
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(api_payload), encoding="utf-8")
-        print(f"wrote {path} ({path.stat().st_size // 1024} KB)")
+    API_FIXTURE.parent.mkdir(parents=True, exist_ok=True)
+    API_FIXTURE.write_text(json.dumps(api_payload), encoding="utf-8")
+    print(f"wrote {API_FIXTURE} ({API_FIXTURE.stat().st_size // 1024} KB)")
 
     if args.skip_load:
         return

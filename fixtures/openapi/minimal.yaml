@@ -1,0 +1,34 @@
+openapi: "3.0.3"
+info:
+  title: fixture
+  version: "0"
+paths:
+  /users:
+    get:
+      parameters:
+        - in: query
+          name: email
+        - in: query
+          name: limit
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    email: { type: string }
+  /users/{id}:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  email: { type: string }

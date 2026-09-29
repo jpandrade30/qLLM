@@ -253,31 +253,31 @@ type HowToUseMeResponse struct {
 	Never           []string              `json:"never"`
 	NotSupported    []string              `json:"notSupported"`
 	Endpoints       []HowToEndpoint       `json:"endpoints"`
-	Grammar         string                `json:"grammar"`
-	Where           HowToWhereGuide       `json:"where"`
-	FieldRefRules   []string              `json:"fieldRefRules"`
-	JoinRules       []string              `json:"joinRules"`
-	AggregateRules  []string              `json:"aggregateRules"`
-	OrderByRules    []string              `json:"orderByRules"`
-	QueryIR         HowToQueryIR          `json:"queryIR"`
+	Grammar         string                `json:"grammar,omitempty"`
+	Where           *HowToWhereGuide      `json:"where,omitempty"`
+	FieldRefRules   []string              `json:"fieldRefRules,omitempty"`
+	JoinRules       []string              `json:"joinRules,omitempty"`
+	AggregateRules  []string              `json:"aggregateRules,omitempty"`
+	OrderByRules    []string              `json:"orderByRules,omitempty"`
+	QueryIR         *HowToQueryIR         `json:"queryIR,omitempty"`
 	SQL             HowToSQLGuide         `json:"sql"`
 	Rules           []string              `json:"rules"`
-	Examples        []HowToExample        `json:"examples"`
-	InvalidExamples []HowToInvalidExample `json:"invalidExamples"`
+	Examples        []HowToExample        `json:"examples,omitempty"`
+	InvalidExamples []HowToInvalidExample `json:"invalidExamples,omitempty"`
 	Errors          []HowToError          `json:"errors"`
 	Project         HowToProject          `json:"project"`
 }
 
 type HowToSQLGuide struct {
-	LatestVersion       string            `json:"latestVersion"`
-	SupportedVersions   []string          `json:"supportedVersions"`
-	Tool                string            `json:"tool"`
-	HTTP                string            `json:"http"`
-	Rules               []string          `json:"rules"`
-	Supported           []string          `json:"supported"`
-	Dialect2Only        []string          `json:"dialect2Only"`
-	Reject              []string          `json:"reject"`
-	Examples            []HowToSQLExample `json:"examples"`
+	LatestVersion     string            `json:"latestVersion"`
+	SupportedVersions []string          `json:"supportedVersions"`
+	Tool              string            `json:"tool"`
+	HTTP              string            `json:"http"`
+	Rules             []string          `json:"rules"`
+	Supported         []string          `json:"supported"`
+	Dialect2Only      []string          `json:"dialect2Only"`
+	Reject            []string          `json:"reject"`
+	Examples          []HowToSQLExample `json:"examples"`
 }
 
 type HowToSQLExample struct {

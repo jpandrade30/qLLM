@@ -1,5 +1,5 @@
-# Satellites for local test. The qllm image already contains /config + default env
-# matching these service names (same as in-cluster DNS).
+# Test satellites (DBs + test-api). qllm image bakes deploy/image/config only
+# (preset, catalog, bind, compose DNS). fixtures/ is seed/API/golden queries — not catalog.
 services:
   postgres:
     image: postgres:16-alpine

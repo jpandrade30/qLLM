@@ -42,7 +42,7 @@
 
 ## Onde ficam as specs (preset / catalog)
 
-O executável **não inventa** conexões em código no caminho feliz. Cada projeto consumidor versiona YAML/JSON:
+O harness (`fixtures/` compose/seed) **não** descreve entidades. Só `deploy/image/config` (ou o `--config-dir` de outro projeto) entra no grafo do runtime (D18).
 
 ```text
 my-app/                         # projeto que USA o qLLM
@@ -94,8 +94,8 @@ qLLM/
   cmd/qllm/           # CLI + serve
   internal/           # runtime (não exportar cedo)
   proto/ or api/      # OpenAPI gerada a partir dos schemas
-  deploy/dev/         # K8s/Rancher harness
-  fixtures/           # seeds, OpenAPI da API de teste
+  deploy/image/config/ # preset, catalog, access, serve, env (formato dos dados)
+  fixtures/           # seed, test-api, golden IR/SQL — não catalog
   clients/            # (fase 2) python/, node/
 ```
 

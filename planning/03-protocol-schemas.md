@@ -8,7 +8,7 @@ Todos os exemplos abaixo são normativos para o MVP. JSON Schema máquina-legív
 
 ## 0. Project layout — como o executável lê as specs
 
-As specs de **onde estão os bancos/APIs** e **o que se pode consultar** são arquivos no projeto consumidor (não hardcode no binário).
+As specs de **onde estão os bancos/APIs** e **o que se pode consultar** são YAML no `--config-dir` (não hardcode no binário). `fixtures/` deste repo (seed, test-api, queries) **não** é catalog. Neste repo o config-dir da imagem é [`deploy/image/config`](../deploy/image/config/).
 
 ### Arquivos
 
@@ -47,9 +47,22 @@ qllm validate --project ./qllm.project.yaml
 qllm query --preset ./p.yaml --catalog ./c.yaml -f ./ir.json
 ```
 
-- `serve`: carrega preset+catalog **no startup**; falha rápido se inválidos. Runtime serve settings: defaults → `qllm.config.*` → flags CLI.
+- `serve`: carrega preset+catalog **no startup**; falha rápido se inválidos (`CONFIG_ERROR`). Sem arquivos, **não** usa `fixtures/` embutido. Runtime serve settings: defaults → `qllm.config.*` → flags CLI.
 - Segredos continuam só via env (`passwordEnv`, `uriEnv`, `authTokenEnv`, …).
-- O harness de dev usa o mesmo mecanismo (`fixtures/presets/` + `--config-dir`).
+- Neste repo, o config-dir da imagem/harness é `deploy/image/config/` (preset, catalog, access, serve, env). `fixtures/` não entra. `go run` sem YAML → `CONFIG_ERROR`.
+
+### Authoring CLI (não é runtime de query)
+
+Rascunhos de catalog (humano revisa relations/aliases):
+
+```bash
+./qllm catalog introspect --source crm_pg --config-dir ./deploy/image/config --out ./deploy/image/config/qllm.catalog.yaml
+qllm catalog from-openapi -f other-team.yaml --source legacy_api --config-dir ./config --out ./generated.catalog.yaml --resources-out ./generated.resources.yaml
+```
+
+- `introspect`: Postgres/MySQL via `information_schema` usando `*Env` do preset. Nomes lógicos = nomes de tabela; `physical` = colunas; PK se visível.
+- `from-openapi`: paths GET listáveis → entities `rest_resource` + fragmento `options.resources`. Não substitui o connector REST.
+- Credenciais iguais ao serve. Hosts vêm do env do **projeto alvo**, não de DNS de compose hardcoded no binário.
 
 ### `qllm.config.yaml` (opcional — serve/runtime)
 
@@ -86,7 +99,7 @@ apps:
 - `key`: literal **ou** placeholder exato `${ENV_NAME}` (um token; sem texto em volta). Env vazio = `CONFIG_ERROR` no startup.
 - Cada entrada de `tables` deve existir no catalog no startup.
 - HTTP e MCP HTTP: `Authorization: Bearer` casa com uma `key`; o app filtra catalog, IR e SQL. `GET /v1/health` continua aberto.
-- MCP stdio: `--app NAME` ou env `QLLM_APP`. Sem app, recusa `execute_query` / `execute_sql`.
+- MCP stdio: `--app NAME` ou env `QLLM_APP`. Sem app, recusa `execute_sql`.
 
 ### `qllm.env.yaml` (opcional — seed de env)
 
@@ -383,7 +396,7 @@ IR para REST no MVP: filter/project/limit mapeáveis a query params; agg/join �
 
 ## 3. Query IR
 
-Contrato que a tool `execute_query` recebe.
+Contrato de `POST /v1/queries` e CLI `qllm query` (não é tool MCP).
 
 ### Exemplo single-source
 
@@ -484,8 +497,8 @@ Runtime fonte: **`GET /v1/howtouseme`** (HTTP) ou tool MCP **`how_to_use_me`**. 
 
 **Never**
 
-- Gerar SQL / Mongo / GraphQL / URLs REST como API do agente.
-- Inventar entity/field/FK — só o catalog.
+- Gerar Mongo / URLs REST como API do agente.
+- Inventar entity/field/FK — só o catalog carregado (vazio se o YAML não tiver entidades).
 - Escrever `where` como `{"and":[...]}` — forma canônica: `{"op":"and","args":[...]}`.
 - Usar operadores SQL (`=`, `>=`, `LIKE`) — usar `eq`, `gte`, `contains`, …
 - Colocar HAVING/UNION/CASE/subquery no Query IR — usar `execute_sql` (ver [`07-sql-dialect.md`](07-sql-dialect.md)).
@@ -701,9 +714,9 @@ Todo erro de API:
 |------|-------|--------|
 | `how_to_use_me` | `{}` | body de `GET /v1/howtouseme` (contrato LLM) |
 | `describe_catalog` | `{}` | body de `GET /v1/catalog` |
-| `execute_query` | Query IR | body de `POST /v1/queries` (sync ou accepted) |
 | `execute_sql` | `{ sql, version? }` | body de `POST /v1/sql` |
-| `get_query` | `{ queryId }` | status e result se ready |
+
+Descriptions MCP no `serve` interpolam nomes do **catalog carregado** (teto ~4k chars). Sem entidades no YAML, as descriptions não citam tabelas de demo. Sem N tools por tabela (D06).
 
 ### Transportes
 

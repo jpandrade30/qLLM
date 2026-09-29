@@ -1,18 +1,18 @@
 ---
 name: qllm-dev-harness
 description: >-
-  Plan and operate the qLLM local Kubernetes test harness on Rancher Desktop
-  (containerd): Postgres, MySQL, MongoDB, Python test API, seeds, and golden
-  Query IR. Use when creating deploy/dev manifests, fixtures, seed data, or
-  integration test setup.
+  Plan and operate the qLLM local test harness on Rancher Desktop (containerd):
+  nerdctl compose (Postgres, MySQL, MongoDB, Python test API, qllm image),
+  seeds, and golden Query IR. Use when creating compose/Dockerfile, fixtures,
+  seed data, or integration test setup.
 ---
 
 # qLLM Dev Harness
 
 ## When to use
 
-- Adding/changing `deploy/dev`, `fixtures/`, or seed scripts
-- Wiring preset env vars to local Services / port-forwards
+- Adding/changing `docker-compose.yml`, `Dockerfile`, `fixtures/` (satellites), or `deploy/image/config`
+- Wiring preset env vars to compose service DNS vs localhost
 - Writing golden IR tests against live backends
 
 ## Read first
@@ -20,34 +20,34 @@ description: >-
 - [planning/05-dev-harness.md](../../../planning/05-dev-harness.md)
 - Demo shapes in [planning/03-protocol-schemas.md](../../../planning/03-protocol-schemas.md)
 
-## Target topology
+## Target topology (compose)
 
 | Service | Role |
 |---------|------|
 | `postgres` | CRM `customers` |
 | `mysql` | billing `invoices` |
 | `mongodb` | `app_events` |
-| `test-api` | REST users (Python OK) |
+| `test-api` | REST users (Python) |
+| `qllm` | runtime (`/config` baked) |
 
-Namespace: `qllm-dev`.
+No Kubernetes namespace required.
 
 ## Workflow
 
-1. Manifests: Deployments + Services + Secrets/ConfigMaps for **dev-only** creds
-2. Seeds: correlated `customer_id` across all stores
-3. Preset/catalog demo files under `fixtures/presets/` (loaded with `qllm --config-dir fixtures/presets`)
-4. Golden IRs under `fixtures/queries/` validated with `query-ir.schema.json` (use distinct entity names per REST source; qualify with `as` in joins)
-5. Document how host reaches cluster (port-forward default)
-6. Add one timeout fixture (API sleep > budget)
+1. `nerdctl compose up --build`
+2. Seed: `scripts/dev-seed-fake.ps1` (writes `fixtures/test-api/data.json`; rebuild test-api if JSON changed)
+3. Preset/catalog/access/env: **only** `deploy/image/config/` (Dockerfile COPY). `fixtures/` = seed, test-api, golden IR — not schema.
+4. Golden IRs under `fixtures/queries/`
+5. Host reaches DBs via published ports; container qllm uses compose DNS from `qllm.env.yaml`
 
 ## Do not
 
+- Put preset/catalog under `fixtures/` (that tree is not the data contract)
 - Commit production secrets
 - Use unbounded seed tables
-- Change stable DNS names without updating planning docs
 
 ## Acceptance
 
-- Backends healthy with one apply path
-- ≥3 golden queries (SQL single-source, cross-source join, REST)
-- Fail-fast timeout test proves typed `TIMEOUT`
+- Backends + qllm healthy with compose
+- ≥3 golden queries (single-source, cross-source join, REST)
+- Fail-fast timeout test proves typed `TIMEOUT` when added

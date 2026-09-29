@@ -22,10 +22,12 @@ import (
 
 // New registers MCP tools on a transport-agnostic MCPServer.
 func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store) *server.MCPServer {
+	_ = store
 	s := server.NewMCPServer("qllm", protocol.ProtocolVersion)
+	d := DescriptionsFor(idx)
 
 	s.AddTool(mcp.NewTool("how_to_use_me",
-		mcp.WithDescription("Return the LLM guide: Query IR contract + catalog SQL dialect (latest \""+protocol.SQLDialectLatest+"\"). Includes sql.examples. Call BEFORE execute_query or execute_sql."),
+		mcp.WithDescription(d.HowToUseMe),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		b, err := json.Marshal(agentguide.Build(idx.Preset, idx.CatalogFor(allowFrom(ctx, exec))))
 		if err != nil {
@@ -35,7 +37,7 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	})
 
 	s.AddTool(mcp.NewTool("describe_catalog",
-		mcp.WithDescription("Return the logical catalog, entities, fields, relations, and source capabilities. Call after how_to_use_me."),
+		mcp.WithDescription(d.DescribeCatalog),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		b, err := json.Marshal(idx.CatalogResponseFor(allowFrom(ctx, exec)))
 		if err != nil {
@@ -44,35 +46,8 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 		return mcp.NewToolResultText(string(b)), nil
 	})
 
-	s.AddTool(mcp.NewTool("execute_query",
-		mcp.WithDescription("Execute a qLLM Query IR JSON document. Call how_to_use_me first. Query IR is NOT SQL — use {op,args} for AND/OR, CompareOp tokens like eq/gte."),
-		mcp.WithString("ir", mcp.Required(), mcp.Description("Query IR as JSON string or object fields at top-level")),
-	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		var q protocol.QueryIR
-		raw, _ := json.Marshal(req.Params.Arguments)
-		if err := json.Unmarshal(raw, &q); err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		if q.From == "" {
-			if ir, err := req.RequireString("ir"); err == nil {
-				if err := json.Unmarshal([]byte(ir), &q); err != nil {
-					return mcp.NewToolResultError(err.Error()), nil
-				}
-			}
-		}
-		resp := exec.Execute(ctx, &q)
-		b, err := json.Marshal(resp)
-		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		if resp.Status == protocol.StatusFailed {
-			return mcp.NewToolResultError(string(b)), nil
-		}
-		return mcp.NewToolResultText(string(b)), nil
-	})
-
 	s.AddTool(mcp.NewTool("execute_sql",
-		mcp.WithDescription("Execute catalog SQL SELECT (DuckDB after fetch). Tables = catalog entity names (not schema.table). Supports HAVING, CASE, windows, UNION (dialect 2). version omitted = latest \""+protocol.SQLDialectLatest+"\". Call how_to_use_me → sql section and describe_catalog first."),
+		mcp.WithDescription(d.ExecuteSQL),
 		mcp.WithString("sql", mcp.Required(), mcp.Description("SELECT using catalog entity names; output AS aliases OK")),
 		mcp.WithString("version", mcp.Description("SQL dialect: \"1\" (frozen) or \"2\" (latest). Omit for latest.")),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -91,25 +66,6 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 		}
 		if resp.Status == protocol.StatusFailed {
 			return mcp.NewToolResultError(string(b)), nil
-		}
-		return mcp.NewToolResultText(string(b)), nil
-	})
-
-	s.AddTool(mcp.NewTool("get_query",
-		mcp.WithDescription("Get status/result for an async queryId"),
-		mcp.WithString("queryId", mcp.Required(), mcp.Description("Query id returned by execute_query")),
-	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		id, err := req.RequireString("queryId")
-		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		resp, perr := store.Get(id)
-		if perr != nil {
-			return mcp.NewToolResultError(perr.Error()), nil
-		}
-		b, err := json.Marshal(resp)
-		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
 		}
 		return mcp.NewToolResultText(string(b)), nil
 	})

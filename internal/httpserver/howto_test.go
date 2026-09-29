@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"qLLM/internal/catalogidx"
@@ -39,23 +40,23 @@ func TestHowToUseMe(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
 	}
+	if strings.Contains(strings.ToLower(rec.Body.String()), "graphql") {
+		t.Fatal("howtouseme must not mention GraphQL")
+	}
 	var out protocol.HowToUseMeResponse
 	if e := json.Unmarshal(rec.Body.Bytes(), &out); e != nil {
 		t.Fatal(e)
 	}
-	if len(out.Never) == 0 || out.Where.InvalidExample == nil {
-		t.Fatalf("incomplete LLM guide: never=%d where=%+v", len(out.Never), out.Where)
+	if len(out.Never) == 0 || out.SQL.LatestVersion == "" {
+		t.Fatalf("incomplete LLM guide: never=%d sql=%+v", len(out.Never), out.SQL)
 	}
 	if out.Project.Name != "demo" || len(out.Project.EntityNames) != 1 {
 		t.Fatalf("project meta: %+v", out.Project)
 	}
-	foundAnd := false
-	for _, ex := range out.Examples {
-		if w, ok := ex.IR["where"].(map[string]any); ok && w["op"] == "and" {
-			foundAnd = true
-		}
+	if strings.Contains(strings.ToLower(rec.Body.String()), "execute_query") {
+		t.Fatal("howtouseme must not mention execute_query")
 	}
-	if !foundAnd {
-		t.Fatal("expected and example in howtouseme")
+	if strings.Contains(rec.Body.String(), "/v1/queries") {
+		t.Fatal("howtouseme must not advertise /v1/queries")
 	}
 }

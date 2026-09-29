@@ -1,93 +1,70 @@
-# 05 — Dev Harness (Rancher Desktop)
+# 05 — Dev harness (Rancher Desktop + nerdctl compose)
 
 ## Premissas
 
-- Rancher Desktop com **containerd** + **Kubernetes** habilitados
-- Imagens oficiais dos bancos; **API de teste em Python** (FastAPI)
-- Não precisa ser Go nas fixtures
+- Rancher Desktop with **containerd** (nerdctl). Kubernetes **not** required for the default path.
+- Official DB images; **test API in Python** (FastAPI)
+- Fixtures need not be Go
 
-## Objetivos do harness
+## Objetivos
 
-1. Subir Postgres, MySQL, MongoDB, API REST com dados seed correlacionados (`customer_id` cruzável)
-2. Aplicar preset + catalog de exemplo via `--config-dir fixtures/presets` (mesmo mecanismo de produção; ver `03` § 0)
-3. Rodar queries IR de integração contra o binário `qllm`
-4. Validar timeout fail-fast (endpoint/API lenta opcional)
+1. Subir Postgres, MySQL, MongoDB, API REST e qLLM com `nerdctl compose`
+2. Seed correlacionado (`customer_id` cruzável) via `generate_and_load.py` nas portas publicadas
+3. Queries: container (MCP/HTTP) **ou** host `qllm --config-dir deploy/image/config` com `QLLM_*` em `127.0.0.1` (ver `qllm.env.host.yaml`)
+4. Fail-fast timeout (budget do preset)
 
-## Layout alvo
+## Layout
 
 ```text
-deploy/dev/
-  namespace.yaml          # qllm-dev
-  postgres.yaml
-  mysql.yaml
-  mongodb.yaml
-  test-api.yaml           # FastAPI Deployment+Service
-  kustomization.yaml      # opcional
+docker-compose.yml          # postgres, mysql, mongodb, test-api, qllm
+Dockerfile                  # COPY só deploy/image/config → /config
+deploy/image/config/
+  qllm.preset.yaml          # sources / *Env
+  qllm.catalog.yaml         # entidades / fields / bindings
+  qllm.config.yaml          # bind 0.0.0.0
+  qllm.env.yaml             # compose DNS + token (container)
+  qllm.env.host.yaml        # documentação: localhost no host (não é qllm.env.yaml)
 fixtures/
-  seed/
-    postgres.sql
-    mysql.sql
-    mongo.js              # ou JSON import
-  test-api/               # código Python da API
-  presets/
-    demo.preset.yaml      # ou qllm.preset.yaml
-    demo.catalog.yaml
-    # preferir nomes qllm.preset.yaml / qllm.catalog.yaml para --config-dir
-    qllm.project.yaml     # opcional
-  queries/                # IRs de golden test
+  seed/generate_and_load.py
+  test-api/                 # compose build context
+  queries/                  # Query IR golden (testes, não schema)
+  sql/manual-examples.md
+  openapi/                  # spec mínima para CLI from-openapi
+scripts/dev-seed-fake.ps1
 ```
 
-Carregar:
+`fixtures/` = satélites de teste (processos + dados fake + queries de regressão). **Não** descreve formato das APIs/DBs. Isso é só `deploy/image/config`. Sem `deploy/dev` K8s no path default. Produção: substitui o conteúdo de config (ConfigMap/Secret), não leva seed/compose.
+
+## Comandos
 
 ```bash
-qllm serve --http --config-dir fixtures/presets
-# com port-forwards + env QLLM_* exportados
+nerdctl compose up --build
+# DBs: localhost 5432/3306/27017; test-api 18080; qllm 8088/8089
+
+# seed (host → published ports)
+.\scripts\dev-seed-fake.ps1
+# se data.json mudou: nerdctl compose up --build -d test-api
 ```
 
-## Serviços (nomes estáveis)
+HTTP: `Authorization: Bearer change-me` (valor em `deploy/image/config/qllm.env.yaml`).
 
-| Service DNS (in-cluster) | Porta | Uso |
-|--------------------------|-------|-----|
-| `postgres.qllm-dev.svc` | 5432 | CRM tables |
-| `mysql.qllm-dev.svc` | 3306 | billing |
-| `mongodb.qllm-dev.svc` | 27017 | events |
-| `test-api.qllm-dev.svc` | 8080 | REST legacy_users |
+Host binário (sem container qllm): `--config-dir deploy/image/config` e env de [`qllm.env.host.yaml`](../deploy/image/config/qllm.env.host.yaml) (`127.0.0.1`). Process env ganha de `qllm.env.yaml` (DNS compose).
 
-Credenciais de dev **fixas e documentadas** só no harness (nunca produção).
+## Serviços (compose DNS)
 
-## Dados seed (mínimo correlacionado)
+| Hostname | Porta no container | Host |
+|----------|--------------------|------|
+| `postgres` | 5432 | 5432 |
+| `mysql` | 3306 | 3306 |
+| `mongodb` | 27017 | 27017 |
+| `test-api` | 8080 | 18080 |
+| `qllm` | 8088 / 8089 | 8088 / 8089 |
 
-- `customers` (pg): id, email, created_at
-- `invoices` (mysql): id, customer_id, total_cents, status
-- `app_events` (mongo): _id, customerId, type, ts
-- `GET /users` (api): id, email (subset alinhado a customers)
+Credenciais de dev **fixas só no harness**.
 
-## Como o runtime acessa do host
+## Critérios de aceite
 
-Opções (escolher na implementação; documentar uma default):
-
-1. `kubectl port-forward` + preset com `localhost`
-2. Ingress local Rancher
-3. Rodar `qllm` **dentro** do cluster (Job/Pod de integração)
-
-Default recomendado para DX: scripts que sobem port-forwards + exportam env `QLLM_*`.
-
-## Comandos alvo (a implementar)
-
-```bash
-# aplicar manifests
-kubectl apply -k deploy/dev
-
-# seeds
-./scripts/dev-seed.sh
-
-# testar
-./scripts/dev-query.sh fixtures/queries/invoices_paid.json
-```
-
-## Critérios de aceite do harness
-
-- [ ] Um comando sobe todos os backends healthy
-- [ ] Seed idempotente
-- [ ] Pelo menos 3 IRs golden: single pg, join pg+mysql via DuckDB, REST list+filter
-- [ ] Um teste de `TIMEOUT` forçado (API sleep > budget)
+- [x] Um comando sobe backends + qllm (`compose up --build`)
+- [x] Seed via Python fake (idempotente no gerador)
+- [x] IRs em `fixtures/queries/` + SQL em `fixtures/sql/manual-examples.md`
+- [ ] TIMEOUT forçado (API sleep > budget) — ainda desejável

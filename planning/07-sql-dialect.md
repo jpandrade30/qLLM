@@ -10,7 +10,8 @@ Omitted `version` = latest dialect **`"2"`**. `"1"` remains valid and frozen (no
 
 | Item | test |
 |------|------|
-| Agent API is not Mongo / GraphQL / raw REST URLs | skip-reason: HTTP/MCP contract |
+| Agent API is Query IR + catalog SQL only; GraphQL is never a qLLM API | skip-reason: HTTP/MCP contract (D17) |
+| Agent API is not Mongo / raw REST URLs | skip-reason: HTTP/MCP contract |
 | SQL only via `execute_sql` / `POST /v1/sql`; tables = catalog entity names | reject: `public.customers` |
 | Do not invent entities/fields/join keys | skip-reason: catalog validation |
 | Query IR `where` is `{op,args}` not `{and:[…]}` | reject: llmlint |

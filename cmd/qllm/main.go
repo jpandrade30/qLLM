@@ -329,7 +329,7 @@ func main() {
 	serveCmd.Flags().StringSlice("cors-origin", nil, "allowed CORS origin (repeatable; empty disables CORS)")
 	serveCmd.Flags().String("app", "", "app name for MCP stdio when qllm.access.yaml is present (or QLLM_APP)")
 
-	root.AddCommand(validateCmd, queryCmd, sqlCmd, serveCmd)
+	root.AddCommand(validateCmd, queryCmd, sqlCmd, serveCmd, newCatalogCmd(opts, addConfigFlags))
 	if err := root.Execute(); err != nil {
 		os.Exit(1)
 	}

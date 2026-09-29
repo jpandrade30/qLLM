@@ -5,12 +5,13 @@ alwaysApply: true
 
 # qLLM Core
 
-- Product: portable **query runtime** (Go) with preset + logical catalog + JSON Query IR.
+- Product: portable **query runtime** (Go) with preset + logical catalog + JSON Query IR + catalog SQL.
+- Agent API is **not** GraphQL.
 - Local compute: **DuckDB** only for cross-source join / unsupported pushdown — not a warehouse.
 - Fail-fast: default budget **~15s**; slow sources are out of scope (typed `TIMEOUT`, cancel).
 - Public contract is JSON (`planning/schemas/`). Do not invent ad-hoc request shapes.
-- MVP tools/API: `describe_catalog`, `execute_query`, optional `get_query`. No per-table tools.
-- Test harness: Rancher Desktop (containerd + K8s). Fixture APIs may be Python; DBs use official images.
+- MVP MCP tools: `how_to_use_me`, `describe_catalog`, `execute_sql`. No per-table tools. Query IR is HTTP/CLI, not an MCP tool.
+- Test harness: Rancher Desktop (containerd) + **nerdctl compose**. Fixture APIs may be Python; DBs use official images.
 - Python/Node SDKs are **phase 2**; HTTP/MCP is the API.
 - Specs live in `planning/`. Update specs before code when changing contracts.
 - Read-only by default; `limit` required/capped; no raw SQL as the agent-facing interface.

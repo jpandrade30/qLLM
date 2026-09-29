@@ -17,9 +17,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ### D03 — Catálogo lógico ≠ schema físico
 
-- **Decisão:** Agente fala `orders`; preset mapeia para `postgres.sales.orders` / collection Mongo / resource REST.
-- **Por quê:** Domínio estável entre projetos; físicos mudam.
-- **Consequência:** Catalog é obrigatório no MVP (pode ser manual; introspecção depois).
+- **Decisão:** Agente fala `orders`; preset mapeia para `postgres.sales.orders` / collection Mongo / resource REST. O arquivo de catalog no disco é obrigatório no serve. Pode ser escrito à mão **ou** gerado por `qllm catalog introspect` / `from-openapi` e depois revisado (relations, aliases).
+- **Por quê:** Domínio estável entre projetos; físicos mudam. Geração não substitui review nem vira schema em runtime.
+- **Consequência:** Sem introspect em cada query. Output é YAML versionado. Mongo sample-collection fica fase posterior (1b).
 
 ### D04 — Fail-fast ~15s
 
@@ -35,9 +35,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ### D06 — Surface mínima de tools
 
-- **Decisão:** `describe_catalog` + `execute_query` (+ `get_query` se async).
-- **Por quê:** Elimina N tools por fonte.
-- **Consequência:** Descrições ricas no catalog; IR expressivo o suficiente para filtros/proj/agg/join básico.
+- **Decisão:** MCP: `how_to_use_me`, `describe_catalog`, `execute_sql`. Sem N tools por tabela. Query IR permanece em HTTP (`POST /v1/queries`) e CLI `qllm query`, não como tool MCP.
+- **Por quê:** Agente usa um caminho de query (SQL no catalog). IR continua para clients HTTP.
+- **Consequência:** Descriptions interpolam o catalog carregado. Sem `execute_query` / `get_query` no MCP.
 
 ### D07 — Clients Python/Node = fase posterior
 
@@ -45,11 +45,11 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Por quê:** Protocolo estável primeiro reduz churn triplo.
 - **Consequência:** Qualquer linguagem usa HTTP/JSON no início.
 
-### D08 — Harness de teste: Rancher Desktop (containerd + K8s)
+### D08 — Harness de teste: Rancher Desktop (containerd + compose)
 
-- **Decisão:** Subir Postgres, MySQL, Mongo e API REST de teste via manifests/compose compatível com Rancher.
-- **Por quê:** Ambiente local próximo de produção K8s; APIs/bancos de teste podem ser Python/imagens oficiais.
-- **Consequência:** Docs e scripts em `deploy/dev` (a criar); não exigir Go nas fixtures.
+- **Decisão:** Subir Postgres, MySQL, Mongo, API REST e qLLM via `nerdctl compose` (Rancher containerd). Sem path Kubernetes default.
+- **Por quê:** Um comando; DNS de serviço igual ao bake `qllm.env.yaml`; APIs/bancos oficiais.
+- **Consequência:** `docker-compose.yml` + `Dockerfile`; `fixtures/` só sobe satélites (seed, test-api, golden IR/SQL). Formato/acesso/conexões da instância: **`deploy/image/config`**. Harness de processo ≠ YAML de produto (D18).
 
 ### D09 — Fontes v1
 
@@ -98,3 +98,15 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** Arquivo opcional lista `apps[]` com `name`, `key` (literal ou `${ENV_NAME}`) e `tables` (nomes de entidade do catalog). Arquivo presente substitui o Bearer único (`authTokenEnv`). A key escolhe o app; a allowlist vale para IR e SQL. MCP stdio usa `--app` / `QLLM_APP`.
 - **Por quê:** Kubernetes injeta Secret em env; yaml aponta `${ENV}` sem copiar o valor para o git.
 - **Consequência:** Sem o arquivo, comportamento D14 (um token, catalog inteiro). Com o arquivo, catalog/`howtouseme` filtrados às tabelas da key.
+
+### D17 — Superfície de agente = Query IR + catalog SQL; GraphQL fora
+
+- **Decisão:** MCP: catalog SQL (`execute_sql`) só. HTTP ainda tem Query IR (`POST /v1/queries`) e SQL (`POST /v1/sql`). GraphQL **nunca** é API qLLM.
+- **Por quê:** SQL no DuckDB após fetch já cobre expressões ricas; um segundo dialeto de documento (GraphQL) duplica contrato e confunde o agente.
+- **Consequência:** HTTP/MCP (`how_to_use_me`, tools) **não** citam GraphQL. Superfície do agente: Query IR + catalog SQL. Spec interna (D17) registra a exclusão; o modelo não recebe o vocabulário.
+
+### D18 — Harness de teste é um mundo separado
+
+- **Decisão:** Compose, seeds e `fixtures/` existem para **provar** o runtime. O processo qLLM **só vê** preset/catalog/config/access/env do `--config-dir` (ou `--preset`+`--catalog` / `--project` / CWD com esses arquivos). Sem YAML descrevendo fonte/entidade/host, isso **não existe** para `describe_catalog`, IR ou SQL.
+- **Por quê:** Se o binário ou defaults de produção incorporarem DNS `postgres`, entidades `invoices` do demo, token `change-me`, o próximo ambiente real quebra ou finge que o demo é o produto.
+- **Consequência:** Zero lista de hosts/entidades de demo em `internal/`. Sem YAML válido → `CONFIG_ERROR`, nunca fallback para `fixtures/`. A imagem **deste repo** bakeia `deploy/image/config` (o “projeto” desta instância de harness). `fixtures/` não descreve schema. Produção: outro diretório/ConfigMap, não reutilizar seed/compose. Introspect/from-openapi escrevem no config-dir alvo.

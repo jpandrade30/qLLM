@@ -9,9 +9,12 @@ ENV CGO_ENABLED=1
 RUN go build -tags duckdb -o /out/qllm ./cmd/qllm
 
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /config
 COPY --from=build /out/qllm /usr/local/bin/qllm
-COPY deploy/image/config /config
+# Data-plane + serve config live only under deploy/image/config (not fixtures/).
+COPY deploy/image/config/qllm.preset.yaml deploy/image/config/qllm.catalog.yaml /config/
+COPY deploy/image/config/qllm.config.yaml deploy/image/config/qllm.env.yaml /config/
 
 EXPOSE 8088 8089
 ENTRYPOINT ["qllm"]

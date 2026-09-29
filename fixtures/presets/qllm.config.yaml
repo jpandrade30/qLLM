@@ -1,9 +1,0 @@
-# Optional serve/runtime settings (D14). Secrets via env only.
-serve:
-  addr: "127.0.0.1:8088"
-  mcpAddr: "127.0.0.1:8089"
-  insecureBind: false
-  maxBodyBytes: 1048576
-  maxRestResponseBytes: 10485760
-  cors:
-    origins: []

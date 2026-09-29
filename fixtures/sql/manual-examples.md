@@ -2,7 +2,7 @@
 
 Use with MCP tool **`execute_sql`** or `POST /v1/sql` (Bearer `change-me` in the image stack).
 
-Tables and fields are **catalog entity names** from [`fixtures/presets/qllm.catalog.yaml`](presets/qllm.catalog.yaml) — not `billing.invoices`.
+Tables and fields are **catalog entity names** from [`deploy/image/config/qllm.catalog.yaml`](../../deploy/image/config/qllm.catalog.yaml) — not `billing.invoices`.
 
 Omit `version` (latest = `"2"`). Dialeto `"1"` rejects `UNION` / `QUALIFY`.
 

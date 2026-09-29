@@ -1,15 +1,16 @@
 ---
-description: Dev harness and Kubernetes fixtures for Rancher Desktop
-globs: deploy/**/*,fixtures/**/*,scripts/**
+description: Dev harness fixtures for Rancher Desktop (nerdctl compose)
+globs: deploy/**/*,fixtures/**/*,scripts/**,docker-compose.yml,Dockerfile
 alwaysApply: false
 ---
 
 # Dev harness
 
-- Target: Rancher Desktop with containerd + Kubernetes (`planning/05-dev-harness.md`).
-- Namespace/services names stay stable (`qllm-dev`, `postgres`, `mysql`, `mongodb`, `test-api`).
+- Target: Rancher Desktop containerd + `nerdctl compose` (`planning/05-dev-harness.md`).
+- Compose service names stay stable (`postgres`, `mysql`, `mongodb`, `test-api`, `qllm`).
 - Seeds must keep cross-source keys aligned (`customer_id` / `customerId`).
 - Test API may be Python/FastAPI; databases use official images.
-- Dev credentials only in harness docs/manifests — never reuse as production defaults.
+- Preset/catalog/access/env live under `deploy/image/config/` (single place to edit data shape). `fixtures/` is seed, test-api, golden queries only. The Go binary never defaults to either tree (D18).
+- Dev credentials only in harness docs — never reuse as production defaults.
 - Golden Query IR files live under `fixtures/queries/` and must validate against `query-ir.schema.json`.
 - Include at least one forced-timeout scenario for fail-fast verification.

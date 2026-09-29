@@ -29,6 +29,15 @@ Set env vars referenced by the preset (`QLLM_*`), then:
 ./qllm serve --http --config-dir ./my-project
 ```
 
+Without YAML in `--config-dir` (or CWD), serve fails with `CONFIG_ERROR`. Compose/`fixtures/` only start test DBs and the fake API — they are not the catalog. Format, sources, ACL, and env names live in `deploy/image/config/` (this repo’s instance) or your own project dir.
+
+Draft catalog from a live SQL source or an OpenAPI file (review before serve):
+
+```bash
+./qllm catalog introspect --source crm_pg --config-dir ./my-project --out ./my-project/qllm.catalog.yaml
+./qllm catalog from-openapi -f ./other-team.yaml --source legacy_api --config-dir ./my-project --out ./draft.catalog.yaml --resources-out ./draft.resources.yaml
+```
+
 Defaults listen on **`127.0.0.1:8088`** (HTTP) and **`127.0.0.1:8089`** (MCP HTTP). Non-loopback bind without auth requires `--insecure-bind` or `serve.insecureBind: true`.
 
 ### 3. Query
@@ -44,7 +53,7 @@ curl -s -X POST http://127.0.0.1:8088/v1/queries -d @fixtures/queries/customers_
 Or CLI:
 
 ```bash
-./qllm query --config-dir ./fixtures/presets -f ./fixtures/queries/customers_list.json
+./qllm query --config-dir ./deploy/image/config -f ./fixtures/queries/customers_list.json
 ```
 
 ### Auth (optional)
@@ -70,19 +79,19 @@ apps:
 
 ### Docker
 
-Image bakes `deploy/image/config` at `/config` (`qllm.preset.yaml`, catalog, `qllm.config.yaml`, `qllm.env.yaml`). Connection/auth values live in `qllm.env.yaml`, not Dockerfile `ENV`. Process env / K8s Secret wins if already set.
+Image `/config` is copied **only** from [`deploy/image/config`](deploy/image/config) (preset, catalog, `qllm.config.yaml`, `qllm.env.yaml`). `fixtures/` is not copied into the image except as the `test-api` build context. Process env wins if already set.
+
+```bash
+nerdctl compose up --build
+```
+
+HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` (localhost ports). Rebuild `test-api` if `fixtures/test-api/data.json` changed.
+
+Standalone image (same compose network / `--network`):
 
 ```bash
 nerdctl build -t qllm .
 nerdctl run --rm -p 8088:8088 -p 8089:8089 qllm
-```
-
-Same network as the databases (compose or K8s namespace). HTTP: `Authorization: Bearer change-me`.
-
-Satellites + app:
-
-```bash
-nerdctl compose up --build
 ```
 
 ### Runtime config (`qllm.config.yaml`)
@@ -108,15 +117,15 @@ Flags: `--runtime-config`, `--addr`, `--mcp-addr`, `--auth-token-env`, `--insecu
 **STDIO** (Inspector local):
 
 ```bash
-./qllm serve --mcp --config-dir ./fixtures/presets
+./qllm serve --mcp --config-dir ./deploy/image/config
 ```
 
 **Streamable HTTP + SSE** (Jupyter / LangChain) — defaults to loopback; enable CORS allowlist only if a browser client needs it:
 
 ```bash
-./qllm serve --mcp-http --config-dir ./fixtures/presets
+./qllm serve --mcp-http --config-dir ./deploy/image/config
 # or together with REST:
-./qllm serve --http --mcp-http --config-dir ./fixtures/presets
+./qllm serve --http --mcp-http --config-dir ./deploy/image/config
 ```
 
 | Path | Transport |
@@ -137,13 +146,13 @@ client = MultiServerMCPClient({
 tools = await client.get_tools()
 ```
 
-Tools: `how_to_use_me`, `describe_catalog`, `execute_query`, `get_query`.
+Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`.
 
 Requires Go **1.25+** toolchain (deps). `mcp-go` is pinned at **v0.48.0**; with Go 1.25.5+ you can later bump toward `v0.56`.
 
 ## Dev harness notes
 
-`deploy/dev` fixtures use weak passwords, open Mongo, and `sslMode: disable` for local K8s only — do not expose those ports beyond localhost.
+Compose DBs use weak passwords, open Mongo, and `sslMode: disable` for **local** use — do not publish those ports beyond localhost.
 
 ## Fail-fast
 

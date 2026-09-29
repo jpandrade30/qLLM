@@ -24,7 +24,7 @@
 - [x] Pushdown filter/project/agg/group/limit
 - [x] Resultado tabular
 - [x] Timeouts + cancel
-- [x] Harness K8s manifests + seeds (aplicar com Rancher ligado)
+- [x] Harness `nerdctl compose` + seeds (Rancher containerd)
 
 **Exit:** golden queries SQL prontas em `fixtures/queries/`.
 
@@ -69,7 +69,21 @@
 - [x] Funções extras via DuckDB + denylist (não lista allow de centenas de nomes no schema IR)
 - [x] Golden + table-driven tests em `internal/sqlparse`, `internal/duckdblocal` (`-tags duckdb`), `internal/validate` (llmlint)
 
+## Fase 5d — Catalog authoring + GraphQL out + harness isolation
+
+- [x] D17: GraphQL never qLLM API (spec + agent never)
+- [x] D18: harness ≠ produto; binário sem fallback para `fixtures/`
+- [x] CLI `qllm catalog introspect` (postgres/mysql) → rascunho YAML
+- [x] CLI `qllm catalog from-openapi` → entities REST + `options.resources`
+- [x] MCP tool descriptions a partir do catalog carregado (cap ~4k)
+
+**Exit:** `go run` sem YAML não lista entidades de demo; introspect/from-openapi escrevem arquivos no projeto alvo.
+
 ## Fase 6 — Clients (depois)
+
+- [ ] Python thin client
+- [ ] Node thin client
+- [ ] OpenAPI gerada a partir dos schemas
 
 - [ ] Python thin client
 - [ ] Node thin client

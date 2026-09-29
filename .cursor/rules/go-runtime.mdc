@@ -13,4 +13,4 @@ alwaysApply: false
 - Apply `min(sourceTimeout, limits.maxSourceMs)` per source call.
 - Do not pull unbounded tables to “emulate” unsupported ops — return `UNSUPPORTED`.
 - Secrets only via env referenced by preset (`*Env` fields), never hardcode in repo.
-- Tests: table-driven for IR validation; integration tests against `deploy/dev` when harness exists.
+- Tests: table-driven for IR validation; integration against compose DBs when the harness is up.

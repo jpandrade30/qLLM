@@ -161,6 +161,9 @@ func (c *SQLConnector) Type() protocol.SourceType { return c.srcType }
 func (c *SQLConnector) Capabilities() def.Caps    { return c.caps }
 func (c *SQLConnector) Close() error              { return c.db.Close() }
 
+// Stdlib exposes the pool for catalog introspect (information_schema). Not used on the query path.
+func (c *SQLConnector) Stdlib() *sql.DB { return c.db }
+
 func (c *SQLConnector) Query(ctx context.Context, step def.PushdownStep) (*protocol.TabularResult, error) {
 	built, err := sqlbuild.Build(c.dialect, step)
 	if err != nil {

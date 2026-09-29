@@ -97,8 +97,4 @@ $env:QLLM_EVENTS_MONGO_URI = if ($env:QLLM_EVENTS_MONGO_URI) { $env:QLLM_EVENTS_
 $customers = if ($args.Count -gt 0) { $args[0] } else { 200 }
 & $VenvPy (Join-Path $SeedDir "generate_and_load.py") --customers $customers --seed 42
 if ($LASTEXITCODE -ne 0) { throw "generate_and_load.py failed" }
-
-kubectl apply -k "$Root/deploy/dev"
-kubectl -n qllm-dev rollout restart deploy/test-api
-kubectl -n qllm-dev rollout status deploy/test-api --timeout=180s
-Write-Host "fake data loaded + test-api refreshed"
+Write-Host "fake data loaded (rebuild/restart compose test-api if data.json changed)"

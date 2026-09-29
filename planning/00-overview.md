@@ -17,7 +17,7 @@ Dados interligados em múltiplas fontes (REST, MongoDB, MySQL, Postgres, …). H
 - **Query IR (JSON)** — contrato único de consulta/agregação
 - **Adapters** — traduzem IR → Postgres / MySQL / Mongo / REST
 - **DuckDB** — join/cálculo local só quando necessário
-- **Tool/API surface mínima** — `describe_catalog` + `execute_query` (+ status/result se async)
+- **Tool MCP** — `how_to_use_me` + `describe_catalog` + `execute_sql`. Query IR: HTTP/CLI, não tool MCP.
 
 Clients Python/Node ficam para depois; o protocolo (HTTP e/ou MCP) é a API.
 
@@ -26,7 +26,7 @@ Clients Python/Node ficam para depois; o protocolo (HTTP e/ou MCP) é a API.
 - Reduzir complexidade do dia: poucas tools, preset reutilizável, IR validável
 - Fail-fast: budget curto (~15s); query lenta é problema da fonte/ops, não do qLLM
 - Maleável: N instâncias do mesmo tipo (`crm_mongo`, `logs_mongo`, …)
-- Testável: harness em Rancher Desktop (containerd + Kubernetes)
+- Testável: harness em Rancher Desktop (containerd + compose) — mundo isolado; o runtime só vê YAML do config-dir (D18)
 
 ## Não-objetivos (v1)
 
@@ -36,6 +36,8 @@ Clients Python/Node ficam para depois; o protocolo (HTTP e/ou MCP) é a API.
 - SDKs Python/Node no MVP
 - DSL textual humana (açúcar sobre o IR pode vir depois)
 - Raw SQL/Mongo livre como interface principal do agente
+- GraphQL como API qLLM (tool, endpoint ou tradução IR↔GraphQL) — superfície é Query IR + catalog SQL (D17)
+- Incorporar o harness compose/`fixtures` no binário como “projeto default” (D18)
 
 ## Princípio de produto
 

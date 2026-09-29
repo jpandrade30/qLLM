@@ -20,6 +20,8 @@
 3. Se join cross-source ou REST agg → fetch com filter/limit máximos → DuckDB.
 4. Se op pedida é impossível sem scan absurdo → `UNSUPPORTED` (não “puxar a tabela inteira”).
 
+Authoring (não é query): `qllm catalog from-openapi` gera entities `rest_resource` e um fragmento `options.resources` a partir de GET listáveis. O connector continua lendo só o YAML já no preset.
+
 ## Bindings físicos
 
 | type | `binding.kind` | Campos |
