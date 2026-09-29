@@ -65,6 +65,37 @@ func TestDescriptionsIncludeLoadedCatalogNames(t *testing.T) {
 	if !strings.Contains(d.ExecuteSQL, "invoices.customer_id=customers.id") {
 		t.Fatalf("relation missing: %s", d.ExecuteSQL)
 	}
+}
+
+func TestExecuteSQLDescriptionOmitsPhysicalNames(t *testing.T) {
+	preset := &protocol.Preset{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Limits:          protocol.Limits{DefaultLimit: 10, MaxLimit: 100, ReadOnly: true},
+		Sources:         []protocol.Source{{ID: "crm_pg", Type: protocol.SourcePostgres}},
+	}
+	catalog := &protocol.Catalog{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Entities: []protocol.Entity{{
+			Name: "subscriptions", Source: "crm_pg",
+			Fields: []protocol.Field{
+				{Name: "mrr", Type: protocol.TypeNumber, Physical: "mrr_cents", Description: "Monthly recurring revenue in cents"},
+				{Name: "id", Type: protocol.TypeString, Physical: "_id"},
+			},
+		}},
+	}
+	idx, err := catalogidx.New(preset, catalog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	d := mcpserver.DescriptionsFor(idx)
+	if !strings.Contains(d.ExecuteSQL, "mrr") {
+		t.Fatalf("logical name missing: %s", d.ExecuteSQL)
+	}
+	if strings.Contains(d.ExecuteSQL, "mrr_cents") || strings.Contains(d.ExecuteSQL, "_id") || strings.Contains(strings.ToLower(d.ExecuteSQL), "physical") {
+		t.Fatalf("physical leaked: %s", d.ExecuteSQL)
+	}
 	emptyIdx, err := catalogidx.New(preset, &protocol.Catalog{ProtocolVersion: protocol.ProtocolVersion, Project: "demo"})
 	if err != nil {
 		t.Fatal(err)

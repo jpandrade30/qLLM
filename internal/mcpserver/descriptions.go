@@ -61,11 +61,6 @@ func fieldLine(f protocol.Field) string {
 	b.WriteString(f.Name)
 	b.WriteByte(' ')
 	b.WriteString(string(f.Type))
-	if f.Physical != "" && f.Physical != f.Name {
-		b.WriteString(" (physical ")
-		b.WriteString(f.Physical)
-		b.WriteByte(')')
-	}
 	if d := strings.TrimSpace(f.Description); d != "" {
 		b.WriteString(" — ")
 		b.WriteString(d)

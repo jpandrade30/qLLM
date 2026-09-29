@@ -614,8 +614,16 @@ func merge(dst, src *Result) {
 }
 
 func hasMultiStatement(toks []tok) bool {
-	for _, t := range toks {
-		if t.kind == 'p' && t.val == ";" {
+	last := -1
+	for i := len(toks) - 1; i >= 0; i-- {
+		if toks[i].kind == 'p' && toks[i].val == ";" {
+			continue
+		}
+		last = i
+		break
+	}
+	for i := 0; i <= last; i++ {
+		if toks[i].kind == 'p' && toks[i].val == ";" {
 			return true
 		}
 	}
