@@ -134,6 +134,49 @@ func TestWindowAliasesNotCollectedAsColumns(t *testing.T) {
 	}
 }
 
+func TestCTEBindAliasAndSources(t *testing.T) {
+	sql := `
+WITH revenue AS (
+  SELECT c.id, c.full_name, c.country, SUM(i.total) AS paid_total
+  FROM customers c
+  JOIN invoices i ON i.customer_id = c.id
+  WHERE i.status = 'paid' AND EXTRACT(YEAR FROM i.issued_at) = 2025
+  GROUP BY c.id, c.full_name, c.country
+)
+SELECT r.full_name, r.country, r.paid_total, COUNT(st.id) AS open_tickets,
+  ROW_NUMBER() OVER (ORDER BY r.paid_total DESC) AS posicao
+FROM revenue r
+LEFT JOIN support_tickets st ON st.customer_id = r.id AND st.status = 'open'
+GROUP BY r.id, r.full_name, r.country, r.paid_total
+QUALIFY posicao <= 10
+ORDER BY posicao
+LIMIT 10`
+	r, err := sqlparse.ParseWithVersion(sql, protocol.SQLDialect2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Limit == nil || *r.Limit != 10 {
+		t.Fatalf("limit=%v", r.Limit)
+	}
+	got := map[string]bool{}
+	for _, tb := range r.Tables {
+		got[tb.Name] = true
+	}
+	if !got["customers"] || !got["invoices"] || !got["support_tickets"] {
+		t.Fatalf("tables=%v", r.Tables)
+	}
+	if got["revenue"] || got["r"] {
+		t.Fatalf("CTE should not be catalog table: %v", r.Tables)
+	}
+	src := strings.Join(r.CTEBind["revenue"], ",")
+	if !strings.Contains(src, "customers") || !strings.Contains(src, "invoices") {
+		t.Fatalf("CTEBind revenue=%v", r.CTEBind)
+	}
+	if strings.Join(r.CTEBind["r"], ",") != strings.Join(r.CTEBind["revenue"], ",") {
+		t.Fatalf("alias r bind=%v revenue=%v", r.CTEBind["r"], r.CTEBind["revenue"])
+	}
+}
+
 func TestInjectLimitAppends(t *testing.T) {
 	got := sqlparse.InjectLimit(`SELECT id FROM invoices OFFSET 5`, 100)
 	if got != `SELECT id FROM invoices OFFSET 5 LIMIT 100` {

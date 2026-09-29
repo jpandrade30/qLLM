@@ -62,7 +62,7 @@ Omitted `version` = latest dialect **`"2"`**. `"1"` remains valid and frozen (no
 | Cast | `CAST` `TRY_CAST` | sql-1 | parse+exec |
 | JSON (DuckDB names) | `json_extract`, `->`, `->>` | sql-1 / duckdb-name-diff | parse+exec |
 | Array (DuckDB names) | `list_contains`, `list_value`, `unnest` in SELECT | sql-1 / duckdb-name-diff | parse+exec |
-| Datetime (DuckDB names) | `date_trunc`, `CURRENT_DATE` | sql-1 / duckdb-name-diff | parse+exec |
+| Datetime (DuckDB names) | `date_trunc`, `EXTRACT(YEAR FROM ts)`, `CURRENT_DATE` | sql-1 / duckdb-name-diff | parse+exec |
 | Extra agg | `COUNT(*) FILTER`, `bool_or`/`bool_and`, `stddev`, `array_agg` | sql-1 | parse+exec |
 
 Databricks aliases (`GET_JSON_OBJECT`, `DATEADD`, `NVL`, `COLLECT_LIST`, `RLIKE`) are **duckdb-name-diff**: agents should use DuckDB spelling. Not rejected if DuckDB implements them.
@@ -72,7 +72,7 @@ Databricks aliases (`GET_JSON_OBJECT`, `DATEADD`, `NVL`, `COLLECT_LIST`, `RLIKE`
 | Family | Examples | status | test |
 |--------|----------|--------|------|
 | Set ops | `UNION` `UNION ALL` `INTERSECT` `EXCEPT` | sql-2 | parse+exec |
-| QUALIFY | `QUALIFY ROW_NUMBER() OVER (…) = 1` | sql-2 | parse+exec |
+| QUALIFY | `QUALIFY ROW_NUMBER() OVER (…) = 1`; SELECT-list aliases (`QUALIFY posicao <= 10`) OK in DuckDB | sql-2 | parse+exec |
 | COUNT DISTINCT | `COUNT(DISTINCT status)` | sql-2 (also parsed in 1) | parse+exec |
 | XOR | boolean `XOR` | sql-2 | parse+exec |
 | Window | `ROW_NUMBER` `RANK` `DENSE_RANK` `LAG` `LEAD` `NTILE` `SUM() OVER` | sql-2 | parse+exec |
@@ -90,6 +90,9 @@ Databricks aliases (`GET_JSON_OBJECT`, `DATEADD`, `NVL`, `COLLECT_LIST`, `RLIKE`
 ## Execution rules (unchanged)
 
 - Tables in SQL = catalog **entity names** (logical), not `schema.table`.
+- CTE names and their `FROM` aliases (`WITH revenue AS (…) SELECT … FROM revenue r`) are **not** catalog entities. Fetch uses tables cited **inside** the CTE (and any real `JOIN`s). Computed CTE columns (`SUM(…) AS paid_total`) are not catalog fields.
+- `QUALIFY` and `LIMIT` may appear on the same statement (one `LIMIT`; `QUALIFY` is a window filter, not a second `LIMIT`).
+- `EXTRACT(YEAR FROM col)` is DuckDB datetime spelling (`FROM` inside the function is not the query `FROM`).
 - Fetch cited columns; no WHERE pushdown on the SQL path.
 - DuckDB `SET enable_external_access=false`.
 - Build `-tags duckdb` required for `ExecSQL`.

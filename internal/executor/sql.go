@@ -166,6 +166,24 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 		}
 	}
 
+	needCol := func(ent *protocol.Entity, field string) {
+		m := need[ent.Name]
+		if m == nil {
+			m = map[string]struct{}{}
+			need[ent.Name] = m
+		}
+		m[field] = struct{}{}
+	}
+	cteEntities := func(qual string) []*protocol.Entity {
+		var ents []*protocol.Entity
+		for _, n := range parsed.CTEBind[strings.ToLower(qual)] {
+			if ent := alias[strings.ToLower(n)]; ent != nil {
+				ents = append(ents, ent)
+			}
+		}
+		return ents
+	}
+
 	if parsed.Star {
 		for _, ent := range order {
 			allFields(ent)
@@ -181,7 +199,14 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 			}
 			ent := alias[strings.ToLower(c.Qual)]
 			if ent == nil {
-				return nil, protocol.NewError(protocol.ErrUnknownEntity, "unknown table alias: "+c.Qual, map[string]any{"alias": c.Qual})
+				ents := cteEntities(c.Qual)
+				if len(ents) == 0 {
+					return nil, protocol.NewError(protocol.ErrUnknownEntity, "unknown table alias: "+c.Qual, map[string]any{"alias": c.Qual})
+				}
+				for _, src := range ents {
+					allFields(src)
+				}
+				continue
 			}
 			allFields(ent)
 			continue
@@ -192,17 +217,27 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 		if c.Qual != "" {
 			ent := alias[strings.ToLower(c.Qual)]
 			if ent == nil {
-				return nil, protocol.NewError(protocol.ErrUnknownEntity, "unknown table alias: "+c.Qual, map[string]any{"alias": c.Qual})
+				ents := cteEntities(c.Qual)
+				if len(ents) == 0 {
+					return nil, protocol.NewError(protocol.ErrUnknownEntity, "unknown table alias: "+c.Qual, map[string]any{"alias": c.Qual})
+				}
+				matched := false
+				for _, src := range ents {
+					if _, ok := e.Idx.Field(src, c.Name); ok {
+						needCol(src, c.Name)
+						matched = true
+					}
+				}
+				if !matched {
+					// Computed CTE column (paid_total) or SELECT alias (posicao).
+					continue
+				}
+				continue
 			}
 			if _, ok := e.Idx.Field(ent, c.Name); !ok {
 				return nil, protocol.NewError(protocol.ErrUnknownField, "unknown field: "+c.Name, map[string]any{"field": c.Name, "entity": ent.Name})
 			}
-			m := need[ent.Name]
-			if m == nil {
-				m = map[string]struct{}{}
-				need[ent.Name] = m
-			}
-			m[c.Name] = struct{}{}
+			needCol(ent, c.Name)
 			continue
 		}
 		var hits []*protocol.Entity

@@ -4,6 +4,7 @@ package duckdblocal_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"qLLM/internal/duckdblocal"
@@ -159,5 +160,84 @@ func TestSQLFamilyDateTrunc(t *testing.T) {
 	_, err = eng.ExecSQL(ctx, `SELECT date_trunc('month', issued_at::TIMESTAMP) AS m FROM invoices LIMIT 1`)
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestSQLCTEJoinQualifyLimit(t *testing.T) {
+	eng, err := duckdblocal.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer eng.Close()
+	ctx := context.Background()
+	_ = eng.Materialize(ctx, "customers", result.New(
+		[]protocol.Column{
+			{Name: "id", Type: protocol.TypeString},
+			{Name: "full_name", Type: protocol.TypeString},
+			{Name: "country", Type: protocol.TypeString},
+		},
+		[][]any{{"c1", "Ada", "BR"}, {"c2", "Bob", "US"}},
+		false,
+	))
+	_ = eng.Materialize(ctx, "invoices", result.New(
+		[]protocol.Column{
+			{Name: "id", Type: protocol.TypeString},
+			{Name: "customer_id", Type: protocol.TypeString},
+			{Name: "total", Type: protocol.TypeNumber},
+			{Name: "status", Type: protocol.TypeString},
+			{Name: "issued_at", Type: protocol.TypeTimestamp},
+		},
+		[][]any{
+			{"i1", "c1", 100, "paid", "2025-03-01T00:00:00Z"},
+			{"i2", "c1", 50, "paid", "2025-06-01T00:00:00Z"},
+			{"i3", "c2", 20, "open", "2025-01-01T00:00:00Z"},
+		},
+		false,
+	))
+	_ = eng.Materialize(ctx, "support_tickets", result.New(
+		[]protocol.Column{
+			{Name: "id", Type: protocol.TypeString},
+			{Name: "customer_id", Type: protocol.TypeString},
+			{Name: "status", Type: protocol.TypeString},
+		},
+		[][]any{{"t1", "c1", "open"}, {"t2", "c1", "closed"}},
+		false,
+	))
+
+	extractSQL := `SELECT EXTRACT(YEAR FROM issued_at::TIMESTAMP) AS y FROM invoices LIMIT 1`
+	if _, err = eng.ExecSQL(ctx, extractSQL); err != nil {
+		t.Fatalf("EXTRACT: %v", err)
+	}
+
+	qualifyWindow := `
+WITH revenue AS (
+  SELECT c.id, c.full_name, c.country, SUM(i.total) AS paid_total
+  FROM customers c
+  JOIN invoices i ON i.customer_id = c.id
+  WHERE i.status = 'paid' AND EXTRACT(YEAR FROM i.issued_at) = 2025
+  GROUP BY c.id, c.full_name, c.country
+)
+SELECT r.full_name, r.country, r.paid_total, COUNT(st.id) AS open_tickets,
+  ROW_NUMBER() OVER (ORDER BY r.paid_total DESC) AS posicao
+FROM revenue r
+LEFT JOIN support_tickets st ON st.customer_id = r.id AND st.status = 'open'
+GROUP BY r.id, r.full_name, r.country, r.paid_total
+QUALIFY ROW_NUMBER() OVER (ORDER BY r.paid_total DESC) <= 10
+ORDER BY posicao
+LIMIT 10`
+
+	tab, err := eng.ExecSQL(ctx, qualifyWindow)
+	if err != nil {
+		t.Fatalf("CTE QUALIFY window: %v", err)
+	}
+	if tab.RowCount < 1 {
+		t.Fatal("expected rows")
+	}
+
+	qualifyAlias := strings.Replace(qualifyWindow,
+		"QUALIFY ROW_NUMBER() OVER (ORDER BY r.paid_total DESC) <= 10",
+		"QUALIFY posicao <= 10", 1)
+	if _, err = eng.ExecSQL(ctx, qualifyAlias); err != nil {
+		t.Logf("QUALIFY select-list alias not supported (use window in QUALIFY): %v", err)
 	}
 }

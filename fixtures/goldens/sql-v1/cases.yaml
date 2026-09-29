@@ -311,6 +311,38 @@ cases:
       ORDER BY e.customer_id, e.ts, e.id
       LIMIT 30
 
+  - id: chain_cte_window_qualify
+    version: "2"
+    expect: ok
+    covers: [cte, join, agg, window, qualify, postgres, mysql]
+    sql: |
+      WITH revenue AS (
+        SELECT
+          c.id,
+          c.full_name,
+          c.country,
+          SUM(i.total) AS paid_total
+        FROM customers c
+        JOIN invoices i ON i.customer_id = c.id
+        WHERE i.status = 'paid'
+          AND EXTRACT(YEAR FROM i.issued_at) = 2026
+        GROUP BY c.id, c.full_name, c.country
+      )
+      SELECT
+        r.full_name,
+        r.country,
+        r.paid_total,
+        COUNT(st.id) AS open_tickets,
+        ROW_NUMBER() OVER (ORDER BY r.paid_total DESC) AS posicao
+      FROM revenue r
+      LEFT JOIN support_tickets st
+        ON st.customer_id = r.id
+       AND st.status = 'open'
+      GROUP BY r.id, r.full_name, r.country, r.paid_total
+      QUALIFY posicao <= 10
+      ORDER BY posicao
+      LIMIT 10
+
   - id: ok_trailing_semicolon
     version: "1"
     expect: ok

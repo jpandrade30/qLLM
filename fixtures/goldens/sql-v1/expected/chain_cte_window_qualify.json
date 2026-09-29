@@ -1,0 +1,97 @@
+{
+  "columns": [
+    {
+      "name": "full_name",
+      "type": "string"
+    },
+    {
+      "name": "country",
+      "type": "string"
+    },
+    {
+      "name": "paid_total",
+      "type": "number"
+    },
+    {
+      "name": "open_tickets",
+      "type": "number"
+    },
+    {
+      "name": "posicao",
+      "type": "number"
+    }
+  ],
+  "rows": [
+    [
+      "Jordan York",
+      "NL",
+      508956,
+      1,
+      1
+    ],
+    [
+      "Jordan Frazier",
+      "LY",
+      504596,
+      1,
+      2
+    ],
+    [
+      "Denise Mccann",
+      "LV",
+      474120,
+      1,
+      3
+    ],
+    [
+      "Lisa Allen",
+      "KR",
+      375661,
+      1,
+      4
+    ],
+    [
+      "Cheryl Williams",
+      "LR",
+      366612,
+      0,
+      5
+    ],
+    [
+      "Amy Russell",
+      "AF",
+      297537,
+      0,
+      6
+    ],
+    [
+      "Derek Wright",
+      "BW",
+      269433,
+      1,
+      7
+    ],
+    [
+      "David Murphy",
+      "CF",
+      265331,
+      0,
+      8
+    ],
+    [
+      "Jennifer Brown",
+      "PH",
+      263641,
+      2,
+      9
+    ],
+    [
+      "Carlos Brewer",
+      "MG",
+      252860,
+      0,
+      10
+    ]
+  ],
+  "rowCount": 10
+}

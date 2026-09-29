@@ -26,6 +26,8 @@ type Result struct {
 	Star     bool
 	Limit    *int
 	CTENames []string
+	// CTEBind maps a CTE name or its FROM alias to catalog table names cited inside that CTE.
+	CTEBind map[string][]string
 }
 
 var bannedFns = map[string]struct{}{
@@ -188,6 +190,7 @@ func (p *parser) skipWith(out *Result) *protocol.ProtocolError {
 		}
 		merge(out, inner)
 		out.CTENames = append(out.CTENames, cteName)
+		bindCTE(out, cteName, tableNames(inner))
 		if p.peek().kind == 'p' && p.peek().val == "," {
 			p.i++
 			continue
@@ -425,6 +428,11 @@ func (p *parser) parseTableRef(out *Result) *protocol.ProtocolError {
 	}
 	alias := p.optionalAlias()
 	if cteNamed(out, name) {
+		srcs := cteSources(out, name)
+		bindCTE(out, name, srcs)
+		if alias != "" {
+			bindCTE(out, alias, srcs)
+		}
 		return nil
 	}
 	out.Tables = append(out.Tables, TableUse{Name: name, Alias: alias})
@@ -439,6 +447,38 @@ func cteNamed(out *Result, name string) bool {
 		}
 	}
 	return false
+}
+
+func tableNames(r *Result) []string {
+	seen := map[string]struct{}{}
+	var out []string
+	for _, t := range r.Tables {
+		k := strings.ToLower(t.Name)
+		if _, ok := seen[k]; ok {
+			continue
+		}
+		seen[k] = struct{}{}
+		out = append(out, t.Name)
+	}
+	return out
+}
+
+func cteSources(out *Result, name string) []string {
+	if out.CTEBind == nil {
+		return nil
+	}
+	return out.CTEBind[strings.ToLower(name)]
+}
+
+func bindCTE(out *Result, name string, sources []string) {
+	if name == "" {
+		return
+	}
+	if out.CTEBind == nil {
+		out.CTEBind = map[string][]string{}
+	}
+	cp := append([]string{}, sources...)
+	out.CTEBind[strings.ToLower(name)] = cp
 }
 
 func (p *parser) optionalAlias() string {
@@ -633,6 +673,14 @@ func merge(dst, src *Result) {
 	dst.Tables = append(dst.Tables, src.Tables...)
 	dst.Columns = append(dst.Columns, src.Columns...)
 	dst.CTENames = append(dst.CTENames, src.CTENames...)
+	if src.CTEBind != nil {
+		if dst.CTEBind == nil {
+			dst.CTEBind = map[string][]string{}
+		}
+		for k, v := range src.CTEBind {
+			dst.CTEBind[k] = append([]string{}, v...)
+		}
+	}
 	if src.Star {
 		dst.Star = true
 	}
