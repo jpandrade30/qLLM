@@ -7,6 +7,18 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ## [Unreleased]
 
+### Added
+
+- `deploy/prd/` Kubernetes simulation of a separate **fleet-ops** system. Not the compose harness; do not run both at once.
+- `.\scripts\prd-port-forward.ps1` forwards qLLM, DBs, crew API, and Argo CD if present.
+- `.\scripts\prd-argocd-up.ps1` installs Argo CD with `--insecure` so `http://127.0.0.1:18081` is real HTTP (stock server is TLS even on Service port 80).
+- `.\scripts\prd-argocd-register-app.ps1` creates Application `qllm-prd-sim` (Argo UI is empty until this CR exists).
+
+### Fixed
+
+- Docker build image is `golang:1.26-bookworm` so `go mod download` matches `go.mod` (was 1.25 with `GOTOOLCHAIN=local`).
+- PRD sim: `qllm:local` uses `imagePullPolicy: Never` so kubelet does not pull `docker.io/library/qllm:local`. Build with `nerdctl --namespace k8s.io`.
+
 ## [0.2.0] - 2026-09-29
 
 ### Added

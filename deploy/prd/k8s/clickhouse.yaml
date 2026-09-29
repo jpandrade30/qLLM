@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleet-ch
+spec:
+  selector: { app: fleet-ch }
+  ports:
+    - { name: native, port: 9000, targetPort: 9000 }
+    - { name: http, port: 8123, targetPort: 8123 }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fleet-ch
+spec:
+  serviceName: fleet-ch
+  replicas: 1
+  selector: { matchLabels: { app: fleet-ch } }
+  template:
+    metadata:
+      labels: { app: fleet-ch, qllm.dev/world: fleet-ops }
+    spec:
+      containers:
+        - name: clickhouse
+          image: clickhouse/clickhouse-server:24.8
+          env:
+            - { name: CLICKHOUSE_USER, value: fleet }
+            - { name: CLICKHOUSE_PASSWORD, value: fleet-sim }
+            - { name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT, value: "1" }
+          ports: [{ containerPort: 9000 }, { containerPort: 8123 }]
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/clickhouse }
+            - { name: init, mountPath: /docker-entrypoint-initdb.d, readOnly: true }
+          readinessProbe:
+            httpGet: { path: /ping, port: 8123 }
+            periodSeconds: 5
+            initialDelaySeconds: 10
+      volumes:
+        - name: init
+          configMap: { name: fleet-ch-init }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: { requests: { storage: 2Gi } }

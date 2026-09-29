@@ -87,6 +87,8 @@ nerdctl compose up --build
 
 HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Rebuild `test-api` if `fixtures/test-api/data.json` changed. SQL MCP goldens: `pytest fixtures/sqlcheck`.
 
+Optional **fleet-ops** Kubernetes sim: [`deploy/prd/README.md`](deploy/prd/README.md) (`kubectl apply -k deploy/prd`). Port-forward everything: `.\scripts\prd-port-forward.ps1`. Do not run with compose. Goldens unchanged.
+
 Standalone image (same compose network / `--network`):
 
 ```bash
@@ -148,7 +150,7 @@ tools = await client.get_tools()
 
 Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`.
 
-Requires Go **1.26+** toolchain (`go.mod`; older 1.25 may still work with an older module graph). `mcp-go` is pinned at **v0.48.0**; with a current toolchain you can later bump toward `v0.56`.
+Requires Go **1.26+** (`go.mod` and the image build stage `golang:1.26-bookworm`). `mcp-go` is pinned at **v0.48.0**.
 
 ### Experimental sources (0.2.0)
 

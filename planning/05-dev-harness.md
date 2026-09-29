@@ -37,7 +37,9 @@ fixtures/
 scripts/dev-seed-fake.ps1
 ```
 
-`fixtures/` = satélites de teste (processos + dados fake + queries de regressão). **Não** descreve formato das APIs/DBs. Isso é só `deploy/image/config`. Sem `deploy/dev` K8s no path default. Produção: substitui o conteúdo de config (ConfigMap/Secret), não leva seed/compose.
+`fixtures/` = satélites de teste (processos + dados fake + queries de regressão). **Não** descreve formato das APIs/DBs. Isso é só `deploy/image/config`. Sem `deploy/dev` K8s no path default.
+
+Simulação de **outro** sistema (Kubernetes, namespace `qllm-prd`, projeto `fleet-ops`): [`deploy/prd/`](../deploy/prd/). Não altera goldens nem o compose. Não rode junto com `nerdctl compose` — derrube os containers de teste primeiro. Argo CD opcional: `deploy/prd/argocd/application.yaml`.
 
 ## Comandos
 
