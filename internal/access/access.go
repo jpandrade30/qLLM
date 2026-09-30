@@ -24,6 +24,7 @@ type Registry struct {
 	Apps []*App
 }
 
+// Resolve resolves names or paths.
 func Resolve(file *protocol.AccessFile, idx *catalogidx.Index) (*Registry, *protocol.ProtocolError) {
 	if file == nil {
 		return nil, nil
@@ -57,6 +58,7 @@ func Resolve(file *protocol.AccessFile, idx *catalogidx.Index) (*Registry, *prot
 	return reg, nil
 }
 
+// expandKey implements runtime behavior for this package.
 func expandKey(raw string, idx int) (string, *protocol.ProtocolError) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
@@ -79,6 +81,7 @@ func expandKey(raw string, idx int) (string, *protocol.ProtocolError) {
 	return raw, nil
 }
 
+// LookupBearer implements runtime behavior for this package.
 func (r *Registry) LookupBearer(token string) *App {
 	if r == nil {
 		return nil
@@ -92,6 +95,7 @@ func (r *Registry) LookupBearer(token string) *App {
 	return found
 }
 
+// LookupName implements runtime behavior for this package.
 func (r *Registry) LookupName(name string) *App {
 	if r == nil {
 		return nil
@@ -104,6 +108,7 @@ func (r *Registry) LookupName(name string) *App {
 	return nil
 }
 
+// Allows computes an allowlist.
 func (a *App) Allows(entityName string) bool {
 	if a == nil {
 		return true
@@ -112,6 +117,7 @@ func (a *App) Allows(entityName string) bool {
 	return ok
 }
 
+// TableSet implements runtime behavior for this package.
 func (a *App) TableSet() map[string]struct{} {
 	if a == nil {
 		return nil

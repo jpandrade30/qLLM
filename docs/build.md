@@ -32,7 +32,7 @@ go build -tags duckdb -o qllm.exe ./cmd/qllm
 go run -tags duckdb .\scripts\duckdb_smoke.go
 ```
 
-O `Dockerfile` do repo faz `go build -tags duckdb`.
+[`Dockerfile`](../Dockerfile) e [`Dockerfile.dev`](../Dockerfile.dev) fazem `go build -tags duckdb`. O produto copia `deploy/prd`; o compose usa `.dev` + `deploy/image/config`.
 
 ## Docker / nerdctl
 

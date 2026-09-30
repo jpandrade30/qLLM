@@ -18,6 +18,7 @@ func EqValues(where map[string]any) (map[string]any, *protocol.ProtocolError) {
 	return out, nil
 }
 
+// walk implements runtime behavior for this package.
 func walk(w map[string]any, out map[string]any) *protocol.ProtocolError {
 	if op, ok := w["op"].(string); ok && (op == "and" || op == "or" || op == "not") {
 		if op != "and" {
@@ -51,6 +52,7 @@ func walk(w map[string]any, out map[string]any) *protocol.ProtocolError {
 	return nil
 }
 
+// RequireEq implements runtime behavior for this package.
 func RequireEq(where map[string]any, logicalKeys []string) (map[string]any, *protocol.ProtocolError) {
 	if len(logicalKeys) == 0 {
 		return nil, protocol.NewError(protocol.ErrUnsupported,

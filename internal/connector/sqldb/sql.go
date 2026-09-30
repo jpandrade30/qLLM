@@ -28,6 +28,7 @@ type SQLConnector struct {
 	caps    def.Caps
 }
 
+// statementTimeoutMs implements runtime behavior for this package.
 func statementTimeoutMs(src protocol.Source, maxSourceMs int) int {
 	ms := maxSourceMs
 	if src.Options != nil {
@@ -45,6 +46,7 @@ func statementTimeoutMs(src protocol.Source, maxSourceMs int) int {
 	return ms
 }
 
+// asInt implements runtime behavior for this package.
 func asInt(v any) (int, bool) {
 	switch n := v.(type) {
 	case int:
@@ -58,6 +60,7 @@ func asInt(v any) (int, bool) {
 	}
 }
 
+// OpenPostgres opens a source or engine.
 func OpenPostgres(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	host, err := config.EnvString(src.Connection, "hostEnv")
 	if err != nil {
@@ -106,6 +109,7 @@ func OpenPostgres(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	}, nil
 }
 
+// OpenMySQL opens a source or engine.
 func OpenMySQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	host, err := config.EnvString(src.Connection, "hostEnv")
 	if err != nil {
@@ -156,14 +160,22 @@ func OpenMySQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	}, nil
 }
 
-func (c *SQLConnector) ID() string                { return c.id }
+// ID implements runtime behavior for this package.
+func (c *SQLConnector) ID() string { return c.id }
+
+// Type implements runtime behavior for this package.
 func (c *SQLConnector) Type() protocol.SourceType { return c.srcType }
-func (c *SQLConnector) Capabilities() def.Caps    { return c.caps }
-func (c *SQLConnector) Close() error              { return c.db.Close() }
+
+// Capabilities implements runtime behavior for this package.
+func (c *SQLConnector) Capabilities() def.Caps { return c.caps }
+
+// Close releases resources.
+func (c *SQLConnector) Close() error { return c.db.Close() }
 
 // Stdlib exposes the pool for catalog introspect (information_schema). Not used on the query path.
 func (c *SQLConnector) Stdlib() *sql.DB { return c.db }
 
+// Query fetches rows from a source.
 func (c *SQLConnector) Query(ctx context.Context, step def.PushdownStep) (*protocol.TabularResult, error) {
 	built, err := sqlbuild.Build(c.dialect, step)
 	if err != nil {
@@ -217,6 +229,7 @@ func (c *SQLConnector) Query(ctx context.Context, step def.PushdownStep) (*proto
 	return result.New(columns, out, truncated), nil
 }
 
+// inferOutType implements runtime behavior for this package.
 func inferOutType(step def.PushdownStep, name string) protocol.LogicalType {
 	for _, s := range step.Select {
 		as := s.As
@@ -233,6 +246,7 @@ func inferOutType(step def.PushdownStep, name string) protocol.LogicalType {
 	return protocol.TypeString
 }
 
+// normalizeSQLValue implements runtime behavior for this package.
 func normalizeSQLValue(v any) any {
 	switch t := v.(type) {
 	case nil:

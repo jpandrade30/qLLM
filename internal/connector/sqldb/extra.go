@@ -17,6 +17,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// OpenMSSQL opens a source or engine.
 func OpenMSSQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	host, err := config.EnvString(src.Connection, "hostEnv")
 	if err != nil {
@@ -56,6 +57,7 @@ func OpenMSSQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	}, nil
 }
 
+// OpenSQLite opens a source or engine.
 func OpenSQLite(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	path, err := config.EnvString(src.Connection, "pathEnv")
 	if err != nil {
@@ -74,6 +76,7 @@ func OpenSQLite(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	}, nil
 }
 
+// OpenClickHouse opens a source or engine.
 func OpenClickHouse(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	host, err := config.EnvString(src.Connection, "hostEnv")
 	if err != nil {
@@ -106,6 +109,7 @@ func OpenClickHouse(src protocol.Source, maxSourceMs int) (*SQLConnector, error)
 	}, nil
 }
 
+// sqlCaps implements runtime behavior for this package.
 func sqlCaps() def.Caps {
 	return def.Caps{
 		Filter: true, Project: true, Agg: true, GroupBy: true,

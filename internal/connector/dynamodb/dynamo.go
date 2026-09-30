@@ -24,6 +24,7 @@ type Connector struct {
 	caps   def.Caps
 }
 
+// Open opens a source or engine.
 func Open(src protocol.Source) (*Connector, error) {
 	region := config.ConnString(src.Connection, "region", "")
 	if region == "" {
@@ -49,11 +50,19 @@ func Open(src protocol.Source) (*Connector, error) {
 	}, nil
 }
 
-func (c *Connector) ID() string                { return c.id }
-func (c *Connector) Type() protocol.SourceType { return protocol.SourceDynamoDB }
-func (c *Connector) Capabilities() def.Caps    { return c.caps }
-func (c *Connector) Close() error              { return nil }
+// ID implements runtime behavior for this package.
+func (c *Connector) ID() string { return c.id }
 
+// Type implements runtime behavior for this package.
+func (c *Connector) Type() protocol.SourceType { return protocol.SourceDynamoDB }
+
+// Capabilities implements runtime behavior for this package.
+func (c *Connector) Capabilities() def.Caps { return c.caps }
+
+// Close releases resources.
+func (c *Connector) Close() error { return nil }
+
+// Query fetches rows from a source.
 func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol.TabularResult, error) {
 	for _, s := range step.Select {
 		if s.Agg != "" {
@@ -120,6 +129,7 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 	return result.New(columns, rows, truncated), nil
 }
 
+// joinAnd implements runtime behavior for this package.
 func joinAnd(parts []string) string {
 	s := ""
 	for i, p := range parts {
@@ -131,6 +141,7 @@ func joinAnd(parts []string) string {
 	return s
 }
 
+// projectItems implements runtime behavior for this package.
 func projectItems(step def.PushdownStep, items []map[string]types.AttributeValue) ([]protocol.Column, [][]any) {
 	sel := step.Select
 	if len(sel) == 0 {

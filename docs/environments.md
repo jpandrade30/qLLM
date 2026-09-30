@@ -8,7 +8,7 @@ Rancher Desktop + **nerdctl compose**. Spec: [`planning/05-dev-harness.md`](../p
 nerdctl compose up --build
 ```
 
-Config bakeada na imagem: [`deploy/image/config`](../deploy/image/config). HTTP Bearer demo: `change-me`. Portas no host: HTTP 8088, MCP 8089 (ver compose).
+Config bakeada no **compose**: [`Dockerfile.dev`](../Dockerfile.dev) + [`deploy/image/config`](../deploy/image/config). HTTP Bearer demo: `change-me`. Portas no host: HTTP 8088, MCP 8089 (ver compose). Seed: `.\scripts\dev-seed-fake.ps1` ou `./scripts/dev-seed-fake.sh`.
 
 Seed da fake API:
 
@@ -29,27 +29,31 @@ A tua pasta em vez do demo: [point-your-folder.md](point-your-folder.md).
 
 ```bash
 nerdctl build -t qllm .
+# bake: deploy/prd
 nerdctl run --rm -p 8088:8088 -p 8089:8089 qllm
 ```
 
-`/config` na imagem = só `deploy/image/config`. Em K8s PRD o Deployment **monta** um ConfigMap em `/config` e ignora o catalog bakeado.
+Compose: `Dockerfile.dev` + `deploy/image/config`. Sim K8s: ConfigMap `deploy/prd-tst/config` tapa o bake.
 
-## Sim Kubernetes fleet-ops (`deploy/prd`)
+Exemplo **só YAML + `Dockerfile`**: [`deploy/prd/README.md`](../deploy/prd/README.md).
+
+## Sim Kubernetes fleet-ops (`deploy/prd-tst`)
 
 Mundo **separado** (D18). Namespace `qllm-prd`. **Não** com compose ao mesmo tempo.
 
-Guia passo a passo: [`deploy/prd/README.md`](../deploy/prd/README.md).
+Guia: [`deploy/prd-tst/README.md`](../deploy/prd-tst/README.md).
 
 ```bash
 nerdctl compose down -v
-nerdctl --namespace k8s.io build -t qllm:local .
-kubectl apply -k deploy/prd
+nerdctl --namespace k8s.io build -f Dockerfile.dev -t qllm:local .
+kubectl apply -k deploy/prd-tst
 ```
 
 Port-forward (um processo, Ctrl+C mata todos):
 
 ```powershell
-.\scripts\prd-port-forward.ps1
+.\scripts\prd-tst-port-forward.ps1
+# Unix: ./scripts/prd-tst-port-forward.sh
 ```
 
 | Host | Serviço |
@@ -68,10 +72,10 @@ Argo é **opcional**. Scripts:
 
 | Script | Função |
 |--------|--------|
-| `prd-argocd-up.ps1` | Instala Argo `--insecure` (HTTP real no :80) |
-| `prd-argocd-password.ps1` | Password `admin` |
-| `prd-argocd-register-app.ps1` | Application CR |
-| `prd-argocd-add-ssh-repo.ps1` | Chave SSH **dentro** do cluster (git-gui local não conta) |
+| `prd-tst-argocd-up.ps1` / `.sh` | Instala Argo `--insecure` |
+| `prd-tst-argocd-password.ps1` / `.sh` | Password `admin` |
+| `prd-tst-argocd-register-app.ps1` / `.sh` | Application CR |
+| `prd-tst-argocd-add-ssh-repo.ps1` / `.sh` | Chave SSH in-cluster |
 
 `imagePullPolicy: Never` + `qllm:local` no namespace `k8s.io`. `ErrImagePull` = a imagem não está no containerd do Kubernetes.
 
@@ -79,8 +83,8 @@ Argo é **opcional**. Scripts:
 
 | Script | Função |
 |--------|--------|
-| `dev-shell.ps1` / `dev-shell.cmd` | gcc + duckdblib no Windows para `-tags duckdb` |
-| `dev-seed-fake.ps1` | Seed `fixtures/datasets/v1` |
+| `dev-shell.ps1` / `dev-shell.cmd` / `dev-shell.sh` | CGO / gcc Windows vs Unix |
+| `dev-seed-fake.ps1` / `.sh` | Seed `fixtures/datasets/v1` |
 | `duckdb_smoke.go` | Smoke CGO DuckDB |
 
 ## Logs de queries

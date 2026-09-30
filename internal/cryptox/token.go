@@ -9,6 +9,7 @@ import (
 // 32 bytes so hmac.Equal does not branch on token length.
 var comparePepper = []byte("qllm-bearer-compare-v1")
 
+// digest implements runtime behavior for this package.
 func digest(s string) []byte {
 	mac := hmac.New(sha256.New, comparePepper)
 	_, _ = mac.Write([]byte(s))

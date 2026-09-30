@@ -42,6 +42,6 @@ Protocolo anunciado nas respostas: **0.2.0**. Ficheiros preset/catalog/IR **0.1.
 | Mundo | Onde | Entidades típicas |
 |-------|------|-------------------|
 | Demo / goldens | `nerdctl compose` + `deploy/image/config` | `customers`, `invoices`, … |
-| Sim fleet-ops | `kubectl apply -k deploy/prd` | `vehicles`, `depots`, `gps_samples`, … |
+| Sim fleet-ops | `kubectl apply -k deploy/prd-tst` | `vehicles`, `depots`, `gps_samples`, … |
 
 Não corras os dois ao mesmo tempo. O processo **só vê** o `--config-dir` (ou CWD / `--project`). Compose não “injeta” o catalog no binário.

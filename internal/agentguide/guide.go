@@ -122,6 +122,7 @@ func Build(preset *protocol.Preset, catalog *protocol.Catalog) protocol.HowToUse
 	}
 }
 
+// fieldName implements runtime behavior for this package.
 func fieldName(e *protocol.Entity, prefer ...string) string {
 	if e != nil {
 		for _, p := range prefer {
@@ -138,6 +139,7 @@ func fieldName(e *protocol.Entity, prefer ...string) string {
 	return "id"
 }
 
+// joinOn implements runtime behavior for this package.
 func joinOn(a, b *protocol.Entity) (left, right string) {
 	for _, r := range a.Relations {
 		if r.To == b.Name && len(r.On) > 0 && len(r.On[0]) == 2 {
@@ -152,6 +154,7 @@ func joinOn(a, b *protocol.Entity) (left, right string) {
 	return fieldName(a, "id"), fieldName(b, "id")
 }
 
+// sqlExamplesFromCatalog implements runtime behavior for this package.
 func sqlExamplesFromCatalog(catalog *protocol.Catalog) []protocol.HowToSQLExample {
 	if catalog == nil || len(catalog.Entities) == 0 {
 		return nil

@@ -19,6 +19,7 @@ import (
 
 const sqlLogMaxRunes = 4096
 
+// logExecuteSQL implements runtime behavior for this package.
 func logExecuteSQL(req *protocol.SQLRequest, resp *protocol.QueryResponse) {
 	if resp == nil {
 		return
@@ -26,6 +27,7 @@ func logExecuteSQL(req *protocol.SQLRequest, resp *protocol.QueryResponse) {
 	_, _ = os.Stderr.WriteString(formatExecuteSQLLog(req, resp))
 }
 
+// formatExecuteSQLLog implements runtime behavior for this package.
 func formatExecuteSQLLog(req *protocol.SQLRequest, resp *protocol.QueryResponse) string {
 	sql := ""
 	version := ""
@@ -72,6 +74,7 @@ func formatExecuteSQLLog(req *protocol.SQLRequest, resp *protocol.QueryResponse)
 	return b.String()
 }
 
+// ExecuteSQL runs a query.
 func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (resp *protocol.QueryResponse) {
 	defer func() { logExecuteSQL(req, resp) }()
 	start := time.Now()
@@ -186,6 +189,7 @@ type sqlScan struct {
 	selects []def.SelectItem
 }
 
+// planSQLScans implements runtime behavior for this package.
 func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sqlScan, *protocol.ProtocolError) {
 	if len(parsed.Tables) == 0 {
 		return nil, protocol.NewError(protocol.ErrInvalidSQL, "SELECT requires FROM with catalog tables", nil)

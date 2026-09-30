@@ -24,6 +24,7 @@ type Built struct {
 	Args []any
 }
 
+// Build builds a value.
 func Build(d Dialect, step def.PushdownStep) (Built, error) {
 	e := step.Entity
 	table := qualifyTable(d, e.Binding)
@@ -140,6 +141,7 @@ func Build(d Dialect, step def.PushdownStep) (Built, error) {
 	return Built{SQL: b.String(), Args: args}, nil
 }
 
+// qualifyTable implements runtime behavior for this package.
 func qualifyTable(d Dialect, bind protocol.Binding) string {
 	if bind.Schema != "" {
 		return quoteIdent(d, bind.Schema) + "." + quoteIdent(d, bind.Table)
@@ -147,6 +149,7 @@ func qualifyTable(d Dialect, bind protocol.Binding) string {
 	return quoteIdent(d, bind.Table)
 }
 
+// quoteIdent implements runtime behavior for this package.
 func quoteIdent(d Dialect, name string) string {
 	switch d {
 	case MySQL, SQLite, ClickHouse:
@@ -158,6 +161,7 @@ func quoteIdent(d Dialect, name string) string {
 	}
 }
 
+// whereSQL implements runtime behavior for this package.
 func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph func() string) (string, []any, error) {
 	if op, ok := w["op"].(string); ok {
 		switch op {
@@ -254,6 +258,7 @@ func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph f
 	}
 }
 
+// coerceValue implements runtime behavior for this package.
 func coerceValue(e *protocol.Entity, logicalField string, v any) any {
 	switch def.FieldType(e, logicalField) {
 	case protocol.TypeTimestamp:
@@ -282,6 +287,7 @@ func coerceValue(e *protocol.Entity, logicalField string, v any) any {
 	return v
 }
 
+// typedPlaceholder implements runtime behavior for this package.
 func typedPlaceholder(d Dialect, e *protocol.Entity, logicalField string, ph func() string) string {
 	p := ph()
 	if d != Postgres {
@@ -302,14 +308,17 @@ func typedPlaceholder(d Dialect, e *protocol.Entity, logicalField string, ph fun
 	}
 }
 
+// jsonMarshal implements runtime behavior for this package.
 func jsonMarshal(v any) ([]byte, error) {
 	return jsonMarshalImpl(v)
 }
 
+// jsonUnmarshal implements runtime behavior for this package.
 func jsonUnmarshal(b []byte, v any) error {
 	return jsonUnmarshalImpl(b, v)
 }
 
+// escapeLike implements runtime behavior for this package.
 func escapeLike(s string) string {
 	s = strings.ReplaceAll(s, `\`, `\\`)
 	s = strings.ReplaceAll(s, `%`, `\%`)

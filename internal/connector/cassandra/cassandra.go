@@ -21,6 +21,7 @@ type Connector struct {
 	caps    def.Caps
 }
 
+// Open opens a source or engine.
 func Open(src protocol.Source) (*Connector, error) {
 	ks := config.ConnString(src.Connection, "keyspace", "")
 	if ks == "" {
@@ -63,14 +64,22 @@ func Open(src protocol.Source) (*Connector, error) {
 	}, nil
 }
 
-func (c *Connector) ID() string                { return c.id }
+// ID implements runtime behavior for this package.
+func (c *Connector) ID() string { return c.id }
+
+// Type implements runtime behavior for this package.
 func (c *Connector) Type() protocol.SourceType { return protocol.SourceCassandra }
-func (c *Connector) Capabilities() def.Caps    { return c.caps }
+
+// Capabilities implements runtime behavior for this package.
+func (c *Connector) Capabilities() def.Caps { return c.caps }
+
+// Close releases resources.
 func (c *Connector) Close() error {
 	c.session.Close()
 	return nil
 }
 
+// Query fetches rows from a source.
 func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol.TabularResult, error) {
 	for _, s := range step.Select {
 		if s.Agg != "" {
@@ -136,6 +145,7 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 	return result.New(outCols, rows, truncated), nil
 }
 
+// qident implements runtime behavior for this package.
 func qident(s string) string {
 	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 }

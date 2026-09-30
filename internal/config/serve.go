@@ -48,6 +48,7 @@ func LoadRuntimeConfig(explicitPath, configDir string) (*protocol.RuntimeConfig,
 	return &rc, path, nil
 }
 
+// findNamedOptional implements runtime behavior for this package.
 func findNamedOptional(dir, base string) (string, error) {
 	for _, ext := range []string{".yaml", ".yml", ".json"} {
 		p := filepath.Join(dir, base+ext)
@@ -58,6 +59,7 @@ func findNamedOptional(dir, base string) (string, error) {
 	return "", nil
 }
 
+// validateRuntimeConfig implements runtime behavior for this package.
 func validateRuntimeConfig(rc *protocol.RuntimeConfig) error {
 	if rc.Serve.CORS != nil {
 		for _, o := range rc.Serve.CORS.Origins {
@@ -82,6 +84,7 @@ type ServeFlagOverrides struct {
 	MaxRestResponseBytes *int64
 }
 
+// MergeServeSettings merges values.
 func MergeServeSettings(file *protocol.RuntimeConfig, flags ServeFlagOverrides) (protocol.ServeSettings, error) {
 	s := protocol.DefaultServeSettings()
 	if file != nil {
@@ -125,6 +128,7 @@ func MergeServeSettings(file *protocol.RuntimeConfig, flags ServeFlagOverrides) 
 	return s, nil
 }
 
+// applyServeFile implements runtime behavior for this package.
 func applyServeFile(s *protocol.ServeSettings, f protocol.ServeConfig) {
 	if f.Addr != "" {
 		s.Addr = f.Addr

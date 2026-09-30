@@ -30,10 +30,12 @@ type ProtocolError struct {
 	Details map[string]any `json:"details,omitempty"`
 }
 
+// Error implements runtime behavior for this package.
 func (e *ProtocolError) Error() string {
 	return string(e.Code) + ": " + e.Message
 }
 
+// NewError constructs a value.
 func NewError(code ErrorCode, message string, details map[string]any) *ProtocolError {
 	return &ProtocolError{Code: code, Message: message, Details: details}
 }
@@ -98,6 +100,7 @@ type AccessPath struct {
 	KsqlKey   string   `json:"ksqlKey,omitempty" yaml:"ksqlKey,omitempty"`
 }
 
+// PartitionKeys implements runtime behavior for this package.
 func (a AccessPath) PartitionKeys() []string {
 	if len(a.Partition) > 0 {
 		return a.Partition
@@ -105,6 +108,7 @@ func (a AccessPath) PartitionKeys() []string {
 	return a.PK
 }
 
+// SortKey implements runtime behavior for this package.
 func (a AccessPath) SortKey() string {
 	if a.Sort != "" {
 		return a.Sort

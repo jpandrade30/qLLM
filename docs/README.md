@@ -1,6 +1,6 @@
 # Manual de implementação (qLLM)
 
-**Não sabes nada e vais escrever todos os `qllm.*` à mão:** começa em [from-scratch.md](from-scratch.md), depois [field-reference.md](field-reference.md) (cada campo/enum) e [point-your-folder.md](point-your-folder.md) (`--config-dir`, Docker `-v`, ConfigMap em `deploy/prd`).
+**Não sabes nada e vais escrever todos os `qllm.*` à mão:** [from-scratch.md](from-scratch.md), [field-reference.md](field-reference.md), pasta de exemplo [`deploy/prd/`](../deploy/prd), [point-your-folder.md](point-your-folder.md). Sim K8s: `deploy/prd-tst`.
 
 O contrato normativo (JSON Schema, Query IR, erros) continua em [`planning/`](../planning/) e [`planning/schemas/`](../planning/schemas/). Este `docs/` é o guia operacional. Se os dois divergirem, **vence o `planning/`**.
 
@@ -8,7 +8,7 @@ O contrato normativo (JSON Schema, Query IR, erros) continua em [`planning/`](..
 |-----|----------|
 | [from-scratch.md](from-scratch.md) | Pasta tua, exemplo Postgres, validate, como **provar** que subiu o YAML certo |
 | [field-reference.md](field-reference.md) | Todos os campos, enums, `*Env`, options REST |
-| [point-your-folder.md](point-your-folder.md) | CLI, Docker, Dockerfile, `deploy/prd/config` |
+| [point-your-folder.md](point-your-folder.md) | CLI, `Dockerfile` vs `.dev`, `deploy/prd` vs `prd-tst` |
 | [scope.md](scope.md) | O que o produto é / não é |
 | [project-files.md](project-files.md) | Discovery e precedência |
 | [cli.md](cli.md) | Todos os comandos e flags |

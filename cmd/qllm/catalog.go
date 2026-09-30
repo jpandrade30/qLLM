@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// newCatalogCmd implements runtime behavior for this package.
 func newCatalogCmd(opts func() config.Options, addFlags func(*cobra.Command)) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "catalog",
@@ -22,6 +23,7 @@ func newCatalogCmd(opts func() config.Options, addFlags func(*cobra.Command)) *c
 	return cmd
 }
 
+// newIntrospectCmd implements runtime behavior for this package.
 func newIntrospectCmd(opts func() config.Options, addFlags func(*cobra.Command)) *cobra.Command {
 	var source, out string
 	var merge bool
@@ -71,6 +73,7 @@ func newIntrospectCmd(opts func() config.Options, addFlags func(*cobra.Command))
 	return cmd
 }
 
+// newFromOpenAPICmd implements runtime behavior for this package.
 func newFromOpenAPICmd(opts func() config.Options, addFlags func(*cobra.Command)) *cobra.Command {
 	var source, specPath, out, resourcesOut string
 	var merge bool
@@ -153,6 +156,7 @@ func newFromOpenAPICmd(opts func() config.Options, addFlags func(*cobra.Command)
 	return cmd
 }
 
+// writeOut implements runtime behavior for this package.
 func writeOut(path string, raw []byte) error {
 	if path == "" {
 		_, err := os.Stdout.Write(raw)

@@ -87,6 +87,7 @@ func IntrospectSQL(ctx context.Context, preset *protocol.Preset, sourceID string
 	return EntitiesFromColumns(sourceID, rows), nil
 }
 
+// scanColumns implements runtime behavior for this package.
 func scanColumns(ctx context.Context, db *sql.DB, query string) ([]ColumnRow, error) {
 	rs, err := db.QueryContext(ctx, query)
 	if err != nil {

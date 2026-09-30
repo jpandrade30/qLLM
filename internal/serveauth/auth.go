@@ -41,6 +41,7 @@ func Middleware(token string, next http.Handler) http.Handler {
 	})
 }
 
+// AppsMiddleware implements runtime behavior for this package.
 func AppsMiddleware(reg *access.Registry, next http.Handler) http.Handler {
 	if reg == nil || len(reg.Apps) == 0 {
 		return next
@@ -70,6 +71,7 @@ func AppsMiddleware(reg *access.Registry, next http.Handler) http.Handler {
 	})
 }
 
+// bearerToken implements runtime behavior for this package.
 func bearerToken(h string) string {
 	const p = "Bearer "
 	if len(h) < len(p) || !strings.EqualFold(h[:len(p)], p) {
@@ -78,6 +80,7 @@ func bearerToken(h string) string {
 	return strings.TrimSpace(h[len(p):])
 }
 
+// secureEqual implements runtime behavior for this package.
 func secureEqual(got, want string) bool {
 	return cryptox.HMACEqual(got, want)
 }

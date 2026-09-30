@@ -11,6 +11,7 @@ type SQLRequest struct {
 	SQL     string `json:"sql" yaml:"sql"`
 }
 
+// ResolveSQLVersion resolves names or paths.
 func ResolveSQLVersion(version string) (string, *ProtocolError) {
 	if version == "" {
 		return SQLDialectLatest, nil

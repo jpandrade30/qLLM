@@ -11,6 +11,7 @@ type Index struct {
 	sources map[string]*protocol.Source
 }
 
+// New constructs a value.
 func New(preset *protocol.Preset, catalog *protocol.Catalog) (*Index, *protocol.ProtocolError) {
 	idx := &Index{
 		Preset:  preset,
@@ -44,6 +45,7 @@ func New(preset *protocol.Preset, catalog *protocol.Catalog) (*Index, *protocol.
 	return idx, nil
 }
 
+// register implements runtime behavior for this package.
 func (idx *Index) register(name string, e *protocol.Entity) *protocol.ProtocolError {
 	if _, exists := idx.byName[name]; exists {
 		return protocol.NewError(protocol.ErrConfigError,
@@ -53,6 +55,7 @@ func (idx *Index) register(name string, e *protocol.Entity) *protocol.ProtocolEr
 	return nil
 }
 
+// ResolveEntity resolves names or paths.
 func (idx *Index) ResolveEntity(ref string) (*protocol.Entity, *protocol.ProtocolError) {
 	e, ok := idx.byName[ref]
 	if !ok {
@@ -62,11 +65,13 @@ func (idx *Index) ResolveEntity(ref string) (*protocol.Entity, *protocol.Protoco
 	return e, nil
 }
 
+// Source implements runtime behavior for this package.
 func (idx *Index) Source(id string) (*protocol.Source, bool) {
 	s, ok := idx.sources[id]
 	return s, ok
 }
 
+// Field implements runtime behavior for this package.
 func (idx *Index) Field(e *protocol.Entity, name string) (*protocol.Field, bool) {
 	for i := range e.Fields {
 		if e.Fields[i].Name == name {
@@ -76,6 +81,7 @@ func (idx *Index) Field(e *protocol.Entity, name string) (*protocol.Field, bool)
 	return nil, false
 }
 
+// DefaultCapabilities implements runtime behavior for this package.
 func DefaultCapabilities(t protocol.SourceType) protocol.Capabilities {
 	switch t {
 	case protocol.SourcePostgres, protocol.SourceMySQL, protocol.SourceMSSQL, protocol.SourceSQLite, protocol.SourceClickHouse:
@@ -98,10 +104,12 @@ func DefaultCapabilities(t protocol.SourceType) protocol.Capabilities {
 	}
 }
 
+// CatalogResponse builds catalog data.
 func (idx *Index) CatalogResponse() protocol.CatalogResponse {
 	return idx.CatalogResponseFor(nil)
 }
 
+// CatalogResponseFor builds catalog data.
 func (idx *Index) CatalogResponseFor(allow map[string]struct{}) protocol.CatalogResponse {
 	ents := idx.Catalog.Entities
 	if allow != nil {
@@ -138,6 +146,7 @@ func (idx *Index) CatalogResponseFor(allow map[string]struct{}) protocol.Catalog
 	}
 }
 
+// CatalogFor builds catalog data.
 func (idx *Index) CatalogFor(allow map[string]struct{}) *protocol.Catalog {
 	if allow == nil {
 		return idx.Catalog

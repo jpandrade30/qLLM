@@ -7,12 +7,12 @@ type RuntimeConfig struct {
 }
 
 type ServeConfig struct {
-	Addr                 string     `json:"addr,omitempty" yaml:"addr,omitempty"`
-	MCPAddr              string     `json:"mcpAddr,omitempty" yaml:"mcpAddr,omitempty"`
-	AuthTokenEnv         string     `json:"authTokenEnv,omitempty" yaml:"authTokenEnv,omitempty"`
-	InsecureBind         *bool      `json:"insecureBind,omitempty" yaml:"insecureBind,omitempty"`
-	MaxBodyBytes         *int64     `json:"maxBodyBytes,omitempty" yaml:"maxBodyBytes,omitempty"`
-	MaxRestResponseBytes *int64     `json:"maxRestResponseBytes,omitempty" yaml:"maxRestResponseBytes,omitempty"`
+	Addr                 string      `json:"addr,omitempty" yaml:"addr,omitempty"`
+	MCPAddr              string      `json:"mcpAddr,omitempty" yaml:"mcpAddr,omitempty"`
+	AuthTokenEnv         string      `json:"authTokenEnv,omitempty" yaml:"authTokenEnv,omitempty"`
+	InsecureBind         *bool       `json:"insecureBind,omitempty" yaml:"insecureBind,omitempty"`
+	MaxBodyBytes         *int64      `json:"maxBodyBytes,omitempty" yaml:"maxBodyBytes,omitempty"`
+	MaxRestResponseBytes *int64      `json:"maxRestResponseBytes,omitempty" yaml:"maxRestResponseBytes,omitempty"`
 	CORS                 *CORSConfig `json:"cors,omitempty" yaml:"cors,omitempty"`
 }
 
@@ -40,12 +40,13 @@ type ServeSettings struct {
 }
 
 const (
-	DefaultHTTPAddr            = "127.0.0.1:8088"
-	DefaultMCPAddr             = "127.0.0.1:8089"
-	DefaultMaxBodyBytes        = int64(1 << 20)  // 1 MiB
+	DefaultHTTPAddr             = "127.0.0.1:8088"
+	DefaultMCPAddr              = "127.0.0.1:8089"
+	DefaultMaxBodyBytes         = int64(1 << 20)  // 1 MiB
 	DefaultMaxRestResponseBytes = int64(10 << 20) // 10 MiB
 )
 
+// DefaultServeSettings implements runtime behavior for this package.
 func DefaultServeSettings() ServeSettings {
 	return ServeSettings{
 		Addr:                 DefaultHTTPAddr,

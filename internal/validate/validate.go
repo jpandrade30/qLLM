@@ -26,6 +26,7 @@ var (
 	envFileSchema *jsonschema.Schema
 )
 
+// init registers package defaults.
 func init() {
 	c := jsonschema.NewCompiler()
 	c.Draft = jsonschema.Draft2020
@@ -71,6 +72,7 @@ func init() {
 	}
 }
 
+// toJSONValue implements runtime behavior for this package.
 func toJSONValue(v any) (any, error) {
 	b, err := json.Marshal(v)
 	if err != nil {
@@ -83,6 +85,7 @@ func toJSONValue(v any) (any, error) {
 	return out, nil
 }
 
+// validateSchema implements runtime behavior for this package.
 func validateSchema(s *jsonschema.Schema, v any, code protocol.ErrorCode) *protocol.ProtocolError {
 	doc, err := toJSONValue(v)
 	if err != nil {
@@ -94,6 +97,7 @@ func validateSchema(s *jsonschema.Schema, v any, code protocol.ErrorCode) *proto
 	return nil
 }
 
+// Preset implements runtime behavior for this package.
 func Preset(p *protocol.Preset) *protocol.ProtocolError {
 	if err := validateSchema(presetSchema, p, protocol.ErrConfigError); err != nil {
 		return err
@@ -104,26 +108,32 @@ func Preset(p *protocol.Preset) *protocol.ProtocolError {
 	return nil
 }
 
+// Catalog builds catalog data.
 func Catalog(c *protocol.Catalog) *protocol.ProtocolError {
 	return validateSchema(catalogSchema, c, protocol.ErrConfigError)
 }
 
+// QuerySchema fetches rows from a source.
 func QuerySchema(q *protocol.QueryIR) *protocol.ProtocolError {
 	return validateSchema(querySchema, q, protocol.ErrInvalidIR)
 }
 
+// Access implements runtime behavior for this package.
 func Access(a *protocol.AccessFile) *protocol.ProtocolError {
 	return validateSchema(accessSchema, a, protocol.ErrConfigError)
 }
 
+// SQLRequest implements runtime behavior for this package.
 func SQLRequest(r *protocol.SQLRequest) *protocol.ProtocolError {
 	return validateSchema(sqlReqSchema, r, protocol.ErrInvalidSQL)
 }
 
+// EnvFile implements runtime behavior for this package.
 func EnvFile(e *protocol.EnvFile) *protocol.ProtocolError {
 	return validateSchema(envFileSchema, e, protocol.ErrConfigError)
 }
 
+// EnforceACL implements runtime behavior for this package.
 func EnforceACL(idx *catalogidx.Index, q *protocol.QueryIR, allow map[string]struct{}) *protocol.ProtocolError {
 	if allow == nil {
 		return nil
@@ -149,6 +159,7 @@ func EnforceACL(idx *catalogidx.Index, q *protocol.QueryIR, allow map[string]str
 	return nil
 }
 
+// Bundle implements runtime behavior for this package.
 func Bundle(preset *protocol.Preset, catalog *protocol.Catalog) (*catalogidx.Index, *protocol.ProtocolError) {
 	if err := Preset(preset); err != nil {
 		return nil, err
@@ -164,6 +175,7 @@ type binding struct {
 	entity *protocol.Entity
 }
 
+// Query fetches rows from a source.
 func Query(idx *catalogidx.Index, q *protocol.QueryIR) *protocol.ProtocolError {
 	if err := lintQueryIRLLM(q); err != nil {
 		return err
@@ -275,6 +287,7 @@ func Query(idx *catalogidx.Index, q *protocol.QueryIR) *protocol.ProtocolError {
 	return nil
 }
 
+// isOutputAlias implements runtime behavior for this package.
 func isOutputAlias(q *protocol.QueryIR, name string) bool {
 	for _, item := range q.Select {
 		m, ok := asMap(item)
@@ -288,6 +301,7 @@ func isOutputAlias(q *protocol.QueryIR, name string) bool {
 	return false
 }
 
+// asMap implements runtime behavior for this package.
 func asMap(v any) (map[string]any, bool) {
 	if m, ok := v.(map[string]any); ok {
 		return m, true
@@ -303,6 +317,7 @@ func asMap(v any) (map[string]any, bool) {
 	return m, true
 }
 
+// resolveField implements runtime behavior for this package.
 func resolveField(idx *catalogidx.Index, bindings map[string]binding, multi bool, ref string) *protocol.ProtocolError {
 	parts := strings.Split(ref, ".")
 	switch len(parts) {
@@ -353,6 +368,7 @@ func resolveField(idx *catalogidx.Index, bindings map[string]binding, multi bool
 	}
 }
 
+// walkWhere implements runtime behavior for this package.
 func walkWhere(idx *catalogidx.Index, bindings map[string]binding, multi bool, w map[string]any) *protocol.ProtocolError {
 	if op, ok := w["op"].(string); ok {
 		switch op {

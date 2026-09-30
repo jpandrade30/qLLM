@@ -26,10 +26,12 @@ type Executor struct {
 	StdioApp string
 }
 
+// New constructs a value.
 func New(idx *catalogidx.Index, reg *connector.Registry, store *querystore.Store) *Executor {
 	return &Executor{Idx: idx, Reg: reg, Store: store}
 }
 
+// Execute runs a query.
 func (e *Executor) Execute(ctx context.Context, q *protocol.QueryIR) *protocol.QueryResponse {
 	start := time.Now()
 	queryID := uuid.NewString()
@@ -87,6 +89,7 @@ func (e *Executor) Execute(ctx context.Context, q *protocol.QueryIR) *protocol.Q
 	return e.run(ctx, queryID, mode, plan, q, start, app)
 }
 
+// run implements runtime behavior for this package.
 func (e *Executor) run(ctx context.Context, queryID, mode string, plan *planner.Plan, q *protocol.QueryIR, start time.Time, app *access.App) *protocol.QueryResponse {
 	srcBudget := time.Duration(e.Idx.Preset.Limits.MaxSourceMs) * time.Millisecond
 	metaSteps := []protocol.PlanStepMeta{}
@@ -163,6 +166,7 @@ func (e *Executor) run(ctx context.Context, queryID, mode string, plan *planner.
 	}
 }
 
+// buildLocalSpec implements runtime behavior for this package.
 func buildLocalSpec(plan *planner.Plan, q *protocol.QueryIR) (duckdblocal.QuerySpec, *protocol.ProtocolError) {
 	root := plan.Steps[0].Binding
 	spec := duckdblocal.QuerySpec{
@@ -222,6 +226,7 @@ func buildLocalSpec(plan *planner.Plan, q *protocol.QueryIR) (duckdblocal.QueryS
 	return spec, nil
 }
 
+// buildWhere implements runtime behavior for this package.
 func buildWhere(w map[string]any, root string) (*duckdblocal.WhereExpr, *protocol.ProtocolError) {
 	if w == nil {
 		return nil, nil
@@ -269,6 +274,7 @@ func buildWhere(w map[string]any, root string) (*duckdblocal.WhereExpr, *protoco
 	}
 }
 
+// splitRef implements runtime behavior for this package.
 func splitRef(ref, defaultBind string) (bind, col string) {
 	if i := strings.LastIndex(ref, "."); i >= 0 {
 		return ref[:i], ref[i+1:]
@@ -276,6 +282,7 @@ func splitRef(ref, defaultBind string) (bind, col string) {
 	return defaultBind, ref
 }
 
+// colAlias implements runtime behavior for this package.
 func colAlias(ref string) string {
 	if i := strings.LastIndex(ref, "."); i >= 0 {
 		return ref[i+1:]
@@ -283,6 +290,7 @@ func colAlias(ref string) string {
 	return ref
 }
 
+// fail implements runtime behavior for this package.
 func fail(id, mode string, start time.Time, err *protocol.ProtocolError, app *access.App) *protocol.QueryResponse {
 	return &protocol.QueryResponse{
 		ProtocolVersion: protocol.ProtocolVersion,
@@ -297,6 +305,7 @@ func fail(id, mode string, start time.Time, err *protocol.ProtocolError, app *ac
 	}
 }
 
+// appName implements runtime behavior for this package.
 func appName(app *access.App) string {
 	if app == nil {
 		return ""
@@ -304,6 +313,7 @@ func appName(app *access.App) string {
 	return app.Name
 }
 
+// resolveApp implements runtime behavior for this package.
 func (e *Executor) resolveApp(ctx context.Context) (*access.App, *protocol.ProtocolError) {
 	if e.ACL == nil {
 		return nil, nil
@@ -321,6 +331,7 @@ func (e *Executor) resolveApp(ctx context.Context) (*access.App, *protocol.Proto
 	return nil, protocol.NewError(protocol.ErrUnauthorized, "app required: Authorization Bearer key or --app / QLLM_APP", nil)
 }
 
+// asProto implements runtime behavior for this package.
 func asProto(err error) *protocol.ProtocolError {
 	if pe, ok := err.(*protocol.ProtocolError); ok {
 		return pe

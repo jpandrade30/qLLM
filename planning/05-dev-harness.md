@@ -17,7 +17,8 @@
 
 ```text
 docker-compose.yml          # postgres, mysql, mongodb, test-api, qllm
-Dockerfile                  # COPY só deploy/image/config → /config
+Dockerfile.dev              # compose: COPY deploy/image/config → /config
+Dockerfile                  # product: COPY deploy/prd → /config
 deploy/image/config/
   qllm.preset.yaml          # sources / *Env
   qllm.catalog.yaml         # entidades / fields / bindings
@@ -34,12 +35,12 @@ fixtures/
   queries/                  # Query IR golden (testes, não schema)
   sql/manual-examples.md
   openapi/                  # spec mínima para CLI from-openapi
-scripts/dev-seed-fake.ps1
+scripts/dev-seed-fake.ps1 / .sh
 ```
 
 `fixtures/` = satélites de teste (processos + dados fake + queries de regressão). **Não** descreve formato das APIs/DBs. Isso é só `deploy/image/config`. Sem `deploy/dev` K8s no path default.
 
-Simulação de **outro** sistema (Kubernetes, namespace `qllm-prd`, projeto `fleet-ops`): [`deploy/prd/`](../deploy/prd/). Não altera goldens nem o compose. Não rode junto com `nerdctl compose` — derrube os containers de teste primeiro. Argo CD opcional: `deploy/prd/argocd/application.yaml`.
+Exemplo só YAML: [`deploy/prd/`](../deploy/prd/). Simulação Kubernetes (namespace `qllm-prd`, projeto `fleet-ops`): [`deploy/prd-tst/`](../deploy/prd-tst/). Não altera goldens nem o compose. Não rode junto com `nerdctl compose`. Argo: `deploy/prd-tst/argocd/application.yaml`.
 
 ## Comandos
 

@@ -25,6 +25,7 @@ type Connector struct {
 	caps def.Caps
 }
 
+// Open opens a source or engine.
 func Open(src protocol.Source) (*Connector, error) {
 	uri, err := config.EnvString(src.Connection, "uriEnv")
 	if err != nil {
@@ -49,11 +50,19 @@ func Open(src protocol.Source) (*Connector, error) {
 	}, nil
 }
 
-func (c *Connector) ID() string                   { return c.id }
-func (c *Connector) Type() protocol.SourceType    { return protocol.SourceMongoDB }
-func (c *Connector) Capabilities() def.Caps { return c.caps }
-func (c *Connector) Close() error                 { return c.cli.Disconnect(context.Background()) }
+// ID implements runtime behavior for this package.
+func (c *Connector) ID() string { return c.id }
 
+// Type implements runtime behavior for this package.
+func (c *Connector) Type() protocol.SourceType { return protocol.SourceMongoDB }
+
+// Capabilities implements runtime behavior for this package.
+func (c *Connector) Capabilities() def.Caps { return c.caps }
+
+// Close releases resources.
+func (c *Connector) Close() error { return c.cli.Disconnect(context.Background()) }
+
+// Query fetches rows from a source.
 func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol.TabularResult, error) {
 	collName := step.Entity.Binding.Collection
 	coll := c.db.Collection(collName)
@@ -136,6 +145,7 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 	return result.New(columns, rows, truncated), nil
 }
 
+// aggQuery implements runtime behavior for this package.
 func (c *Connector) aggQuery(ctx context.Context, coll *mongo.Collection, step def.PushdownStep, filter bson.M) (*protocol.TabularResult, error) {
 	pipeline := mongo.Pipeline{}
 	if len(filter) > 0 {
@@ -205,6 +215,7 @@ func (c *Connector) aggQuery(ctx context.Context, coll *mongo.Collection, step d
 	return result.New(columns, rows, false), nil
 }
 
+// whereBSON implements runtime behavior for this package.
 func whereBSON(e *protocol.Entity, w map[string]any) (bson.M, error) {
 	if w == nil {
 		return bson.M{}, nil
@@ -272,6 +283,7 @@ func whereBSON(e *protocol.Entity, w map[string]any) (bson.M, error) {
 	}
 }
 
+// stripQual implements runtime behavior for this package.
 func stripQual(f string) string {
 	if i := strings.LastIndex(f, "."); i >= 0 {
 		return f[i+1:]
@@ -279,6 +291,7 @@ func stripQual(f string) string {
 	return f
 }
 
+// normalize implements runtime behavior for this package.
 func normalize(v any) any {
 	switch t := v.(type) {
 	case time.Time:
@@ -290,6 +303,7 @@ func normalize(v any) any {
 	}
 }
 
+// mapErr implements runtime behavior for this package.
 func mapErr(id string, ctx context.Context, err error) error {
 	if ctx.Err() != nil {
 		return protocol.NewError(protocol.ErrTimeout,

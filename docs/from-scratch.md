@@ -19,7 +19,7 @@ Extensões aceites: `.yaml`, `.yml`, `.json`. **Não** podes inventar `preset.ya
 
 `protocolVersion` nos YAML: `"0.1.0"` ou `"0.2.0"` (semver `N.N.N`). O runtime **responde** `0.2.0`.
 
-Lista de **todos** os campos: [field-reference.md](field-reference.md). Como apontar a pasta no Docker/K8s: [point-your-folder.md](point-your-folder.md).
+Lista de **todos** os campos: [field-reference.md](field-reference.md). Pasta de exemplo (cópia do demo, bake do `Dockerfile`): [`deploy/prd/`](../deploy/prd). Docker/K8s: [point-your-folder.md](point-your-folder.md).
 
 ## 2. Ordem de trabalho
 

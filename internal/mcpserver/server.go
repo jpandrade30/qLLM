@@ -75,6 +75,7 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	return s
 }
 
+// allowFrom implements runtime behavior for this package.
 func allowFrom(ctx context.Context, exec *executor.Executor) map[string]struct{} {
 	if exec == nil || exec.ACL == nil {
 		return nil

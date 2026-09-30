@@ -59,7 +59,7 @@ Logs: `---- mcp_tool ----` e o mesmo bloco `execute_sql`.
 
 ### Inspector (sim PRD)
 
-URL `http://127.0.0.1:18089/mcp` (port-forward). Header `Authorization: Bearer …` com o **toggle ligado**. Ver [`deploy/prd/README.md`](../deploy/prd/README.md).
+URL `http://127.0.0.1:18089/mcp` (port-forward). Header `Authorization: Bearer …` com o **toggle ligado**. Ver [`deploy/prd-tst/README.md`](../deploy/prd-tst/README.md).
 
 ## Auth
 

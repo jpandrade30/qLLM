@@ -79,7 +79,7 @@ apps:
 
 ### Docker
 
-Image `/config` is copied **only** from [`deploy/image/config`](deploy/image/config) (preset, catalog, `qllm.config.yaml`, `qllm.env.yaml`). `fixtures/` is not copied into the image except as the `test-api` build context. Process env wins if already set.
+Product [`Dockerfile`](Dockerfile) bakes [`deploy/prd/`](deploy/prd) into `/config`. Compose uses [`Dockerfile.dev`](Dockerfile.dev) + [`deploy/image/config`](deploy/image/config). `fixtures/` is not copied except as the `test-api` build context. Process env wins if already set.
 
 ```bash
 nerdctl compose up --build
@@ -87,7 +87,7 @@ nerdctl compose up --build
 
 HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Rebuild `test-api` if `fixtures/test-api/data.json` changed. SQL MCP goldens: `pytest fixtures/sqlcheck`.
 
-Optional **fleet-ops** Kubernetes sim: [`deploy/prd/README.md`](deploy/prd/README.md) (`kubectl apply -k deploy/prd`). Port-forward everything: `.\scripts\prd-port-forward.ps1`. Do not run with compose. Goldens unchanged.
+Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md). Optional **fleet-ops** Kubernetes sim: [`deploy/prd-tst/README.md`](deploy/prd-tst/README.md) (`kubectl apply -k deploy/prd-tst`). Port-forward: `.\scripts\prd-tst-port-forward.ps1` or `./scripts/prd-tst-port-forward.sh`. Do not run with compose. Goldens unchanged.
 
 Standalone image (same compose network / `--network`):
 

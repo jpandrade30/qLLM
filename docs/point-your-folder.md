@@ -1,6 +1,11 @@
 # Como apontar o qLLM para **a tua** pasta
 
-O binário só vê YAML se lhos deres. A imagem deste repo **copia** `deploy/image/config` para `/config` no build — isso é o demo. Produção / o teu projecto = **outra pasta** montada ou outro ConfigMap.
+O binário só vê YAML se lhos deres.
+
+| Imagem | Bake em `/config` | Uso |
+|--------|-------------------|-----|
+| [`Dockerfile`](../Dockerfile) | [`deploy/prd/`](../deploy/prd) | Produto / exemplo (`docker build`) |
+| [`Dockerfile.dev`](../Dockerfile.dev) | [`deploy/image/config`](../deploy/image/config) | Compose + binário do sim K8s |
 
 ## No teu PC (binário)
 
@@ -65,37 +70,35 @@ Prova: `GET /v1/catalog` → `project` = o teu. Se ainda é o demo, o `-v` não 
 
 ## Mudar o que a imagem **bakeia** (rebuild)
 
-O [`Dockerfile`](../Dockerfile) faz:
+O [`Dockerfile`](../Dockerfile) (produto) faz:
 
 ```text
-COPY deploy/image/config/qllm.preset.yaml …
-COPY deploy/image/config/qllm.catalog.yaml …
-COPY deploy/image/config/qllm.config.yaml deploy/image/config/qllm.env.yaml …
-ENTRYPOINT qllm
+COPY deploy/prd/qllm.preset.yaml …
+COPY deploy/prd/qllm.access.yaml …
 CMD serve --http --mcp-http --config-dir /config
 ```
 
-Para o **harness deste repo**, edita `deploy/image/config/*` e `nerdctl build`. **Não** é o sítio do projecto do cliente.
+Edita [`deploy/prd/`](../deploy/prd) e `docker build -t qllm .`. Guia: [`deploy/prd/README.md`](../deploy/prd/README.md).
 
-Para uma imagem **tua**: muda os `COPY` para a tua pasta, ou deixa o `COPY` do demo e **monta sempre** `/config` em runtime (preferível).
+Harness: edita `deploy/image/config/*` e `nerdctl compose build` / `nerdctl build -f Dockerfile.dev`.
 
-A imagem **não** copia `qllm.access.yaml` no Dockerfile actual. ACL no contentor = monta o ficheiro em `/config/qllm.access.yaml` ou acrescenta um `COPY` e rebuild.
+Montar `-v tua-pasta:/config` continua a tapar o bake.
 
-## Kubernetes neste repo (`deploy/prd`)
+## Kubernetes sim (`deploy/prd-tst`)
 
-O Deployment **não** usa o catalog bakeado. Monta o ConfigMap `qllm-config` em `/config`.
+O Deployment **não** usa o catalog bakeado (`Dockerfile.dev`). Monta o ConfigMap `qllm-config` em `/config`.
 
 Os YAML que o cluster usa estão em:
 
 ```text
-deploy/prd/config/qllm.preset.yaml
-deploy/prd/config/qllm.catalog.yaml
-deploy/prd/config/qllm.config.yaml
-deploy/prd/config/qllm.env.yaml
-deploy/prd/config/qllm.access.yaml
+deploy/prd-tst/config/qllm.preset.yaml
+deploy/prd-tst/config/qllm.catalog.yaml
+deploy/prd-tst/config/qllm.config.yaml
+deploy/prd-tst/config/qllm.env.yaml
+deploy/prd-tst/config/qllm.access.yaml
 ```
 
-Ligação no [`deploy/prd/kustomization.yaml`](../deploy/prd/kustomization.yaml):
+Ligação no [`deploy/prd-tst/kustomization.yaml`](../deploy/prd-tst/kustomization.yaml):
 
 ```yaml
 configMapGenerator:
@@ -108,12 +111,12 @@ configMapGenerator:
 
 O que fazes:
 
-1. Substitui o conteúdo de `deploy/prd/config/*.yaml` **ou** muda os paths `config/…` para a tua pasta (ex. `../../meu-qllm/qllm.preset.yaml` — kustomize resolve relativamente a `deploy/prd`).
-2. Segredos: [`deploy/prd/k8s/secret.yaml`](../deploy/prd/k8s/secret.yaml) (`envFrom` no pod). Os `*Env` do preset têm de existir neste Secret ou no `qllm.env.yaml` do ConfigMap.
-3. `kubectl apply -k deploy/prd` e `rollout restart deploy/qllm` (ConfigMap com `disableNameSuffixHash` precisa restart para o pod reler).
-4. Prova: `kubectl logs` + port-forward + `GET /v1/catalog` → `project` e entidades **tuas**.
+1. Substitui `deploy/prd-tst/config/*.yaml` **ou** muda os paths no kustomize.
+2. Segredos: [`deploy/prd-tst/k8s/secret.yaml`](../deploy/prd-tst/k8s/secret.yaml).
+3. `nerdctl --namespace k8s.io build -f Dockerfile.dev -t qllm:local .` então `kubectl apply -k deploy/prd-tst` e `rollout restart deploy/qllm`.
+4. Prova: `GET /v1/catalog` → project `fleet-ops` / `vehicles`.
 
-Args fixos no pod: `serve --http --mcp-http --config-dir /config` ([`k8s/qllm.yaml`](../deploy/prd/k8s/qllm.yaml)). Não apontam para `deploy/image/config`.
+Args do pod: `serve --http --mcp-http --config-dir /config` ([`k8s/qllm.yaml`](../deploy/prd-tst/k8s/qllm.yaml)).
 
 ## Compose do harness
 

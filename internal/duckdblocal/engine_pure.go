@@ -21,8 +21,10 @@ func Open() (Engine, error) {
 	return &pureEngine{tables: map[string]*protocol.TabularResult{}}, nil
 }
 
+// Close releases resources.
 func (e *pureEngine) Close() error { return nil }
 
+// Materialize implements runtime behavior for this package.
 func (e *pureEngine) Materialize(ctx context.Context, table string, tab *protocol.TabularResult) error {
 	_ = ctx
 	cp := *tab
@@ -31,11 +33,13 @@ func (e *pureEngine) Materialize(ctx context.Context, table string, tab *protoco
 	return nil
 }
 
+// Execute runs a query.
 func (e *pureEngine) Execute(ctx context.Context, spec QuerySpec) (*protocol.TabularResult, error) {
 	_ = ctx
 	return ExecutePure(e.tables, spec)
 }
 
+// ExecSQL implements runtime behavior for this package.
 func (e *pureEngine) ExecSQL(ctx context.Context, sqlStr string) (*protocol.TabularResult, error) {
 	_ = ctx
 	_ = sqlStr

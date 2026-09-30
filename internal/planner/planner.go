@@ -16,15 +16,16 @@ type PlannedJoin struct {
 }
 
 type Plan struct {
-	Steps      []def.PushdownStep
-	Joins      []PlannedJoin
-	UseDuckDB  bool
-	Limit      int
-	Offset     int
-	SelectOut  []def.SelectItem // final projection names when duckdb
-	Bindings   map[string]*protocol.Entity
+	Steps     []def.PushdownStep
+	Joins     []PlannedJoin
+	UseDuckDB bool
+	Limit     int
+	Offset    int
+	SelectOut []def.SelectItem // final projection names when duckdb
+	Bindings  map[string]*protocol.Entity
 }
 
+// Build builds a value.
 func Build(idx *catalogidx.Index, q *protocol.QueryIR) (*Plan, *protocol.ProtocolError) {
 	limit := idx.Preset.Limits.DefaultLimit
 	if q.Limit != nil {
@@ -132,6 +133,7 @@ func Build(idx *catalogidx.Index, q *protocol.QueryIR) (*Plan, *protocol.Protoco
 	return plan, nil
 }
 
+// parseSelect implements runtime behavior for this package.
 func parseSelect(items []any, bind string, single bool) []def.SelectItem {
 	out := []def.SelectItem{}
 	for _, item := range items {
@@ -163,6 +165,7 @@ func parseSelect(items []any, bind string, single bool) []def.SelectItem {
 	return out
 }
 
+// fieldsForBinding implements runtime behavior for this package.
 func fieldsForBinding(q *protocol.QueryIR, bind string, ent *protocol.Entity) []def.SelectItem {
 	needed := map[string]struct{}{}
 	addRef := func(ref string) {
@@ -213,6 +216,7 @@ func fieldsForBinding(q *protocol.QueryIR, bind string, ent *protocol.Entity) []
 	return out
 }
 
+// fieldExists implements runtime behavior for this package.
 func fieldExists(e *protocol.Entity, name string) (*protocol.Field, bool) {
 	for i := range e.Fields {
 		if e.Fields[i].Name == name {
@@ -222,6 +226,7 @@ func fieldExists(e *protocol.Entity, name string) (*protocol.Field, bool) {
 	return nil, false
 }
 
+// walkWhereFields implements runtime behavior for this package.
 func walkWhereFields(w map[string]any, add func(string)) {
 	if w == nil {
 		return
@@ -239,6 +244,7 @@ func walkWhereFields(w map[string]any, add func(string)) {
 	}
 }
 
+// filterWhereForBinding implements runtime behavior for this package.
 func filterWhereForBinding(w map[string]any, bind string, single bool) map[string]any {
 	if w == nil || single {
 		return w
@@ -247,6 +253,7 @@ func filterWhereForBinding(w map[string]any, bind string, single bool) map[strin
 	return filterWhere(w, bind)
 }
 
+// filterWhere implements runtime behavior for this package.
 func filterWhere(w map[string]any, bind string) map[string]any {
 	if w == nil {
 		return nil

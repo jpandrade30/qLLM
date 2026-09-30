@@ -1,6 +1,6 @@
 # Registers Application qllm-prd-sim in Argo CD. Run from repo root.
 $ErrorActionPreference = "Stop"
-$yaml = Join-Path $PSScriptRoot "..\deploy\prd\argocd\application.yaml"
+$yaml = Join-Path $PSScriptRoot "..\deploy\prd-tst\argocd\application.yaml"
 if (-not (Test-Path $yaml)) {
     throw "missing $yaml — run from the qLLM clone"
 }
@@ -12,5 +12,5 @@ if ($branch) {
     Write-Host "targetRevision set to branch: $branch"
 }
 Write-Host "Created Application qllm-prd-sim (namespace argocd)."
-Write-Host "Refresh the Argo UI. Push this branch if deploy/prd is not on the remote yet."
+Write-Host "Refresh the Argo UI. Push this branch if deploy/prd-tst is not on the remote yet."
 Write-Host "Private GitHub: Settings -> Repositories in Argo, then Refresh."

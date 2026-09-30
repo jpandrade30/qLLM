@@ -77,6 +77,7 @@ func ParseWithVersion(sql, dialect string) (*Result, *protocol.ProtocolError) {
 	return out, nil
 }
 
+// InjectLimit implements runtime behavior for this package.
 func InjectLimit(sql string, n int) string {
 	s := strings.TrimRight(strings.TrimSpace(sql), ";")
 	return s + " LIMIT " + strconv.Itoa(n)
@@ -88,8 +89,10 @@ type parser struct {
 	dialect string
 }
 
+// dialectV1 implements runtime behavior for this package.
 func (p *parser) dialectV1() bool { return p.dialect == protocol.SQLDialect1 }
 
+// peek implements runtime behavior for this package.
 func (p *parser) peek() tok {
 	if p.i >= len(p.toks) {
 		return tok{kind: 0}
@@ -97,11 +100,13 @@ func (p *parser) peek() tok {
 	return p.toks[p.i]
 }
 
+// atKW implements runtime behavior for this package.
 func (p *parser) atKW(s string) bool {
 	t := p.peek()
 	return t.kind == 'i' && strings.EqualFold(t.val, s)
 }
 
+// eatKW implements runtime behavior for this package.
 func (p *parser) eatKW(s string) bool {
 	if p.atKW(s) {
 		p.i++
@@ -110,6 +115,7 @@ func (p *parser) eatKW(s string) bool {
 	return false
 }
 
+// parseStmt implements runtime behavior for this package.
 func (p *parser) parseStmt() (*Result, *protocol.ProtocolError) {
 	out := &Result{}
 	if p.eatKW("WITH") {
@@ -128,6 +134,7 @@ func (p *parser) parseStmt() (*Result, *protocol.ProtocolError) {
 	return p.parseSelectChain(out)
 }
 
+// parseSelectChain implements runtime behavior for this package.
 func (p *parser) parseSelectChain(out *Result) (*Result, *protocol.ProtocolError) {
 	if err := p.parseSelectCore(out); err != nil {
 		return nil, err
@@ -166,6 +173,7 @@ func (p *parser) parseSelectChain(out *Result) (*Result, *protocol.ProtocolError
 	}
 }
 
+// skipWith implements runtime behavior for this package.
 func (p *parser) skipWith(out *Result) *protocol.ProtocolError {
 	for {
 		if p.peek().kind != 'i' {
@@ -199,6 +207,7 @@ func (p *parser) skipWith(out *Result) *protocol.ProtocolError {
 	}
 }
 
+// parseSubquery implements runtime behavior for this package.
 func (p *parser) parseSubquery() (*Result, *protocol.ProtocolError) {
 	if p.peek().kind != 'p' || p.peek().val != "(" {
 		return nil, protocol.NewError(protocol.ErrInvalidSQL, "expected subquery", nil)
@@ -217,10 +226,12 @@ func (p *parser) parseSubquery() (*Result, *protocol.ProtocolError) {
 	return inner, nil
 }
 
+// parseSelect implements runtime behavior for this package.
 func (p *parser) parseSelect(out *Result) (*Result, *protocol.ProtocolError) {
 	return p.parseSelectChain(out)
 }
 
+// parseSelectCore implements runtime behavior for this package.
 func (p *parser) parseSelectCore(out *Result) *protocol.ProtocolError {
 	p.i++ // SELECT
 	p.eatKW("DISTINCT")
@@ -293,6 +304,7 @@ func (p *parser) parseSelectCore(out *Result) *protocol.ProtocolError {
 	return nil
 }
 
+// parseSelectList implements runtime behavior for this package.
 func (p *parser) parseSelectList(out *Result) *protocol.ProtocolError {
 	for {
 		if p.atKW("FROM") || p.peek().kind == 0 {
@@ -313,6 +325,7 @@ func (p *parser) parseSelectList(out *Result) *protocol.ProtocolError {
 	return nil
 }
 
+// scanSelectItem implements runtime behavior for this package.
 func (p *parser) scanSelectItem(out *Result) *protocol.ProtocolError {
 	t := p.peek()
 	if t.kind == 'i' {
@@ -360,6 +373,7 @@ func (p *parser) scanSelectItem(out *Result) *protocol.ProtocolError {
 	return p.scanExpr(out, "FROM")
 }
 
+// parseFrom implements runtime behavior for this package.
 func (p *parser) parseFrom(out *Result) *protocol.ProtocolError {
 	if err := p.parseTableRef(out); err != nil {
 		return err
@@ -394,6 +408,7 @@ func (p *parser) parseFrom(out *Result) *protocol.ProtocolError {
 	}
 }
 
+// parseTableRef implements runtime behavior for this package.
 func (p *parser) parseTableRef(out *Result) *protocol.ProtocolError {
 	if p.peek().kind == 'p' && p.peek().val == "(" {
 		inner, err := p.parseSubquery()
@@ -439,6 +454,7 @@ func (p *parser) parseTableRef(out *Result) *protocol.ProtocolError {
 	return nil
 }
 
+// cteNamed implements runtime behavior for this package.
 func cteNamed(out *Result, name string) bool {
 	want := strings.ToLower(name)
 	for _, n := range out.CTENames {
@@ -449,6 +465,7 @@ func cteNamed(out *Result, name string) bool {
 	return false
 }
 
+// tableNames implements runtime behavior for this package.
 func tableNames(r *Result) []string {
 	seen := map[string]struct{}{}
 	var out []string
@@ -463,6 +480,7 @@ func tableNames(r *Result) []string {
 	return out
 }
 
+// cteSources implements runtime behavior for this package.
 func cteSources(out *Result, name string) []string {
 	if out.CTEBind == nil {
 		return nil
@@ -470,6 +488,7 @@ func cteSources(out *Result, name string) []string {
 	return out.CTEBind[strings.ToLower(name)]
 }
 
+// bindCTE implements runtime behavior for this package.
 func bindCTE(out *Result, name string, sources []string) {
 	if name == "" {
 		return
@@ -481,6 +500,7 @@ func bindCTE(out *Result, name string, sources []string) {
 	out.CTEBind[strings.ToLower(name)] = cp
 }
 
+// optionalAlias implements runtime behavior for this package.
 func (p *parser) optionalAlias() string {
 	p.eatKW("AS")
 	if p.peek().kind == 'i' && !isFromBreaker(p.peek().val) {
@@ -491,6 +511,7 @@ func (p *parser) optionalAlias() string {
 	return ""
 }
 
+// atExprContinuator implements runtime behavior for this package.
 func (p *parser) atExprContinuator() bool {
 	if p.peek().kind != 'p' {
 		return false
@@ -503,6 +524,7 @@ func (p *parser) atExprContinuator() bool {
 	}
 }
 
+// isFromBreaker implements runtime behavior for this package.
 func isFromBreaker(s string) bool {
 	switch strings.ToUpper(s) {
 	case "ON", "WHERE", "GROUP", "ORDER", "LIMIT", "HAVING", "QUALIFY", "JOIN", "INNER", "LEFT", "RIGHT",
@@ -512,6 +534,7 @@ func isFromBreaker(s string) bool {
 	return false
 }
 
+// scanExpr implements runtime behavior for this package.
 func (p *parser) scanExpr(out *Result, until string) *protocol.ProtocolError {
 	_ = until
 	depth := 0
@@ -586,6 +609,7 @@ func (p *parser) scanExpr(out *Result, until string) *protocol.ProtocolError {
 	return nil
 }
 
+// isClauseKW implements runtime behavior for this package.
 func isClauseKW(s string) bool {
 	switch strings.ToUpper(s) {
 	case "FROM", "WHERE", "GROUP", "ORDER", "LIMIT", "HAVING", "QUALIFY", "JOIN", "INNER", "LEFT", "RIGHT",
@@ -595,6 +619,7 @@ func isClauseKW(s string) bool {
 	return false
 }
 
+// parseInt implements runtime behavior for this package.
 func (p *parser) parseInt() (int, *protocol.ProtocolError) {
 	if p.peek().kind != 'n' {
 		return 0, protocol.NewError(protocol.ErrInvalidSQL, "LIMIT requires a number", nil)
@@ -607,10 +632,12 @@ func (p *parser) parseInt() (int, *protocol.ProtocolError) {
 	return n, nil
 }
 
+// skipBalanced implements runtime behavior for this package.
 func (p *parser) skipBalanced() *protocol.ProtocolError {
 	return p.skipBalancedScan(&Result{})
 }
 
+// skipBalancedScan implements runtime behavior for this package.
 func (p *parser) skipBalancedScan(out *Result) *protocol.ProtocolError {
 	if p.peek().kind != 'p' || p.peek().val != "(" {
 		return protocol.NewError(protocol.ErrInvalidSQL, "expected (", nil)
@@ -669,6 +696,7 @@ func (p *parser) skipBalancedScan(out *Result) *protocol.ProtocolError {
 	return nil
 }
 
+// merge implements runtime behavior for this package.
 func merge(dst, src *Result) {
 	dst.Tables = append(dst.Tables, src.Tables...)
 	dst.Columns = append(dst.Columns, src.Columns...)
@@ -689,6 +717,7 @@ func merge(dst, src *Result) {
 	}
 }
 
+// hasMultiStatement implements runtime behavior for this package.
 func hasMultiStatement(toks []tok) bool {
 	last := -1
 	for i := len(toks) - 1; i >= 0; i-- {
@@ -706,6 +735,7 @@ func hasMultiStatement(toks []tok) bool {
 	return false
 }
 
+// isSQLKeyword implements runtime behavior for this package.
 func isSQLKeyword(s string) bool {
 	switch strings.ToUpper(s) {
 	case "SELECT", "FROM", "WHERE", "JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CROSS",
@@ -719,6 +749,7 @@ func isSQLKeyword(s string) bool {
 	return false
 }
 
+// lex implements runtime behavior for this package.
 func lex(s string) ([]tok, *protocol.ProtocolError) {
 	var out []tok
 	i := 0

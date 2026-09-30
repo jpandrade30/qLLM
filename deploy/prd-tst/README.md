@@ -21,9 +21,9 @@ Connectors exercised here: postgres, clickhouse, sqlite, dynamodb (local), rest.
 ## Apply without Argo
 
 ```bash
-# Rancher Desktop: image must land in Kubernetes' containerd (k8s.io), not only compose.
-nerdctl --namespace k8s.io build -t qllm:local .
-kubectl apply -k deploy/prd
+# Harness binary (Dockerfile.dev). ConfigMap still mounts deploy/prd-tst/config over /config.
+nerdctl --namespace k8s.io build -f Dockerfile.dev -t qllm:local .
+kubectl apply -k deploy/prd-tst
 kubectl -n qllm-prd rollout restart deploy/qllm
 kubectl -n qllm-prd rollout status deploy/qllm --timeout=180s
 ```
@@ -37,7 +37,7 @@ kubectl -n qllm-prd port-forward svc/qllm 18088:8088 18089:8089
 All of this in **one** window (`Ctrl+C` stops every forward). Skips Argo if `argocd` is not installed:
 
 ```powershell
-.\scripts\prd-port-forward.ps1
+.\scripts\prd-tst-port-forward.ps1
 ```
 
 | Host | What |
@@ -49,9 +49,9 @@ All of this in **one** window (`Ctrl+C` stops every forward). Skips Argo if `arg
 | `127.0.0.1:18123` | fleet-ch HTTP (`/ping`) |
 | `127.0.0.1:18000` | fleet-ddb |
 | `127.0.0.1:18080` | fleet-api |
-| `http://127.0.0.1:18081` | Argo CD UI **after** `.\scripts\prd-argocd-up.ps1` (plain HTTP) |
+| `http://127.0.0.1:18081` | Argo CD UI **after** `.\scripts\prd-tst-argocd-up.ps1` (plain HTTP) |
 
-After adding ClickHouse HTTP on the Service, re-apply: `kubectl apply -k deploy/prd`.
+After adding ClickHouse HTTP on the Service, re-apply: `kubectl apply -k deploy/prd-tst`.
 
 `ErrImagePull` on `qllm:local` means kubelet tried Docker Hub. Policy is `Never` (local only). If the image was built with plain `nerdctl build`, import it:
 
@@ -72,18 +72,18 @@ The Deployment **mounts** ConfigMap `qllm-config` at `/config`, so the catalog b
 
 ## Argo CD
 
-`kubectl apply -k deploy/prd` does **not** install Argo. Stock `argocd-server` speaks **TLS** on the pod even if you forward Service port 80, so `http://127.0.0.1:18081` looks “dead” until `--insecure`.
+`kubectl apply -k deploy/prd-tst` does **not** install Argo. Stock `argocd-server` speaks **TLS** on the pod even if you forward Service port 80, so `http://127.0.0.1:18081` looks “dead” until `--insecure`.
 
 ```powershell
-.\scripts\prd-argocd-up.ps1
+.\scripts\prd-tst-argocd-up.ps1
 # Ctrl+C the old port-forward, then:
-.\scripts\prd-port-forward.ps1
+.\scripts\prd-tst-port-forward.ps1
 ```
 
 Then register the app so it **appears in the UI** (this is a separate kubectl; kustomize does not create Applications):
 
 ```powershell
-.\scripts\prd-argocd-register-app.ps1
+.\scripts\prd-tst-argocd-register-app.ps1
 ```
 
 Refresh the Argo browser tab. You should see **qllm-prd-sim**. Do not use Git `HEAD` as revision.
@@ -91,8 +91,8 @@ Refresh the Argo browser tab. You should see **qllm-prd-sim**. Do not use Git `H
 **SSH “no key found”:** the key in git-gui lives on **your PC**. Argo CD runs **inside the cluster** and does not use `ssh-agent`. Register the OpenSSH **private** key as a Secret:
 
 ```powershell
-.\scripts\prd-argocd-add-ssh-repo.ps1
-# or: .\scripts\prd-argocd-add-ssh-repo.ps1 -KeyPath $env:USERPROFILE\.ssh\id_ed25519
+.\scripts\prd-tst-argocd-add-ssh-repo.ps1
+# or: .\scripts\prd-tst-argocd-add-ssh-repo.ps1 -KeyPath $env:USERPROFILE\.ssh\id_ed25519
 ```
 
 Use the private key file, not `.pub`. PuTTY `.ppk` must be exported as OpenSSH in PuTTYgen. Then remove the broken repo entry in Argo **Settings → Repositories** (if you added SSH there without a key) and Refresh.
@@ -102,16 +102,16 @@ Alternatively connect **HTTPS + PAT** in Settings → Repositories (`https://git
 Password (`admin`):
 
 ```powershell
-.\scripts\prd-argocd-password.ps1
+.\scripts\prd-tst-argocd-password.ps1
 ```
 
-(`prd-argocd-up.ps1` also prints it once.) If that Secret is gone, Argo was already reconfigured — reset with `argocd account update-password`.
+(`prd-tst-argocd-up.ps1` also prints it once.) If that Secret is gone, Argo was already reconfigured — reset with `argocd account update-password`.
 
-Local-only without Argo: fleet-ops still works with `kubectl apply -k deploy/prd`.
+Local-only without Argo: fleet-ops still works with `kubectl apply -k deploy/prd-tst`.
 
 ## MCP Inspector (Streamable HTTP)
 
-URL: `http://127.0.0.1:18089/mcp` (keep `prd-port-forward` running). Transport: Streamable HTTP. Prefer **Via Proxy**.
+URL: `http://127.0.0.1:18089/mcp` (keep `prd-tst-port-forward` running). Transport: Streamable HTTP. Prefer **Via Proxy**.
 
 Custom header: name `Authorization`, value `Bearer fleet-prd-token`. **Enable the header toggle** — off means the token is not sent and the Inspector reports a generic proxy/token error.
 
@@ -126,7 +126,7 @@ kubectl logs -n qllm-prd deploy/qllm -f | Select-String "execute_sql|mcp_tool"
 ## Tear down PRD sim
 
 ```bash
-kubectl delete -k deploy/prd
+kubectl delete -k deploy/prd-tst
 # if Argo created the app:
 kubectl -n argocd delete application qllm-prd-sim --ignore-not-found
 ```

@@ -42,6 +42,7 @@ func EncodeResources(resources map[string]any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// WriteFile writes output.
 func WriteFile(path string, data []byte) error {
 	if err := os.WriteFile(path, data, 0o644); err != nil {
 		return protocol.NewError(protocol.ErrConfigError, fmt.Sprintf("write %s: %v", path, err), nil)
@@ -49,6 +50,7 @@ func WriteFile(path string, data []byte) error {
 	return nil
 }
 
+// forceQuotedKeys implements runtime behavior for this package.
 func forceQuotedKeys(n *yaml.Node, keys map[string]bool) {
 	if n == nil {
 		return

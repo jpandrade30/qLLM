@@ -36,6 +36,7 @@ type OpenOpts struct {
 	MaxRestResponseBytes int64
 }
 
+// OpenAll opens a source or engine.
 func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 	if p == nil {
 		return nil, protocol.NewError(protocol.ErrConfigError, "preset is nil", nil)
@@ -85,6 +86,7 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 	return r, nil
 }
 
+// validateReadOnlyREST implements runtime behavior for this package.
 func validateReadOnlyREST(p *protocol.Preset) error {
 	if !p.Limits.ReadOnly {
 		return nil
@@ -115,6 +117,7 @@ func validateReadOnlyREST(p *protocol.Preset) error {
 	return nil
 }
 
+// Get returns a stored value.
 func (r *Registry) Get(id string) (def.Connector, error) {
 	c, ok := r.byID[id]
 	if !ok {
@@ -123,6 +126,7 @@ func (r *Registry) Get(id string) (def.Connector, error) {
 	return c, nil
 }
 
+// Close releases resources.
 func (r *Registry) Close() error {
 	var first error
 	for _, c := range r.byID {

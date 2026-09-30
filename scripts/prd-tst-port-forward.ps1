@@ -18,7 +18,7 @@ $forwards = @(
     @{ Ns = "qllm-prd"; Svc = "svc/fleet-ch"; Ports = @("19000:9000", "18123:8123"); Hint = "ClickHouse native 127.0.0.1:19000  HTTP http://127.0.0.1:18123" }
     @{ Ns = "qllm-prd"; Svc = "svc/fleet-ddb"; Ports = @("18000:8000"); Hint = "DynamoDB Local http://127.0.0.1:18000" }
     @{ Ns = "qllm-prd"; Svc = "svc/fleet-api"; Ports = @("18080:8080"); Hint = "crew API http://127.0.0.1:18080" }
-    @{ Ns = "argocd"; Svc = "svc/argocd-server"; Ports = @("18081:80"); Hint = "Argo CD http://127.0.0.1:18081  (needs .\scripts\prd-argocd-up.ps1 --insecure)" }
+    @{ Ns = "argocd"; Svc = "svc/argocd-server"; Ports = @("18081:80"); Hint = "Argo CD http://127.0.0.1:18081  (needs .\scripts\prd-tst-argocd-up.ps1 --insecure)" }
 )
 
 $procs = @()
@@ -30,7 +30,7 @@ try {
             Write-Host ("skip {0}/{1} (not in cluster)" -f $f.Ns, $short)
             if ($f.Ns -eq "argocd") {
                 Write-Host "  Argo is not installed. HTTP :18081 will not work until:"
-                Write-Host "  .\scripts\prd-argocd-up.ps1"
+                Write-Host "  .\scripts\prd-tst-argocd-up.ps1"
             }
             continue
         }

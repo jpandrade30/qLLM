@@ -115,6 +115,7 @@ func FromOpenAPI(raw []byte, sourceID string) (*OpenAPIResult, error) {
 	return res, nil
 }
 
+// resourceName implements runtime behavior for this package.
 func resourceName(path string) string {
 	p := strings.Trim(path, "/")
 	if p == "" {
@@ -131,6 +132,7 @@ func resourceName(path string) string {
 	return ""
 }
 
+// sanitizeName implements runtime behavior for this package.
 func sanitizeName(s string) string {
 	s = strings.ToLower(s)
 	var b strings.Builder
@@ -148,10 +150,12 @@ func sanitizeName(s string) string {
 	return out
 }
 
+// hasPathParam implements runtime behavior for this package.
 func hasPathParam(path string) bool {
 	return strings.Contains(path, "{")
 }
 
+// asStringMap implements runtime behavior for this package.
 func asStringMap(v any) map[string]any {
 	switch m := v.(type) {
 	case map[string]any:
@@ -167,6 +171,7 @@ func asStringMap(v any) map[string]any {
 	}
 }
 
+// queryParamNames implements runtime behavior for this package.
 func queryParamNames(get map[string]any) []string {
 	params, _ := get["parameters"].([]any)
 	var names []string
@@ -184,6 +189,7 @@ func queryParamNames(get map[string]any) []string {
 	return names
 }
 
+// fieldsFromResponse implements runtime behavior for this package.
 func fieldsFromResponse(get map[string]any, schemas map[string]any) []protocol.Field {
 	resp := asStringMap(get["responses"])
 	if resp == nil {
@@ -245,6 +251,7 @@ func fieldsFromResponse(get map[string]any, schemas map[string]any) []protocol.F
 	return fields
 }
 
+// derefSchema implements runtime behavior for this package.
 func derefSchema(schema map[string]any, schemas map[string]any) map[string]any {
 	if schema == nil {
 		return nil
@@ -264,6 +271,7 @@ func derefSchema(schema map[string]any, schemas map[string]any) map[string]any {
 	return schema
 }
 
+// mapJSONSchemaType implements runtime behavior for this package.
 func mapJSONSchemaType(m map[string]any) protocol.LogicalType {
 	if m == nil {
 		return protocol.TypeJSON
@@ -284,6 +292,7 @@ func mapJSONSchemaType(m map[string]any) protocol.LogicalType {
 	}
 }
 
+// sortStrings implements runtime behavior for this package.
 func sortStrings(s []string) {
 	for i := 0; i < len(s); i++ {
 		for j := i + 1; j < len(s); j++ {

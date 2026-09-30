@@ -26,6 +26,7 @@ type Connector struct {
 	caps    def.Caps
 }
 
+// Open opens a source or engine.
 func Open(src protocol.Source) (*Connector, error) {
 	base, err := config.EnvString(src.Connection, "baseUrlEnv")
 	if err != nil {
@@ -47,11 +48,19 @@ func Open(src protocol.Source) (*Connector, error) {
 	}, nil
 }
 
-func (c *Connector) ID() string                { return c.id }
-func (c *Connector) Type() protocol.SourceType { return protocol.SourceKSQL }
-func (c *Connector) Capabilities() def.Caps    { return c.caps }
-func (c *Connector) Close() error              { return nil }
+// ID implements runtime behavior for this package.
+func (c *Connector) ID() string { return c.id }
 
+// Type implements runtime behavior for this package.
+func (c *Connector) Type() protocol.SourceType { return protocol.SourceKSQL }
+
+// Capabilities implements runtime behavior for this package.
+func (c *Connector) Capabilities() def.Caps { return c.caps }
+
+// Close releases resources.
+func (c *Connector) Close() error { return nil }
+
+// Query fetches rows from a source.
 func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol.TabularResult, error) {
 	for _, s := range step.Select {
 		if s.Agg != "" {
@@ -132,6 +141,7 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 	return result.New(cols, rows, truncated), nil
 }
 
+// applyAuth implements runtime behavior for this package.
 func (c *Connector) applyAuth(req *http.Request) error {
 	if c.auth == nil {
 		return nil
@@ -150,6 +160,7 @@ func (c *Connector) applyAuth(req *http.Request) error {
 	return nil
 }
 
+// parseKSQL implements runtime behavior for this package.
 func parseKSQL(raw []byte, width int) ([][]any, error) {
 	var recs []map[string]any
 	if err := json.Unmarshal(raw, &recs); err != nil {
@@ -173,10 +184,12 @@ func parseKSQL(raw []byte, width int) ([][]any, error) {
 	return rows, nil
 }
 
+// ident implements runtime behavior for this package.
 func ident(s string) string {
 	return "`" + strings.ReplaceAll(s, "`", "``") + "`"
 }
 
+// escapeSQL implements runtime behavior for this package.
 func escapeSQL(s string) string {
 	return strings.ReplaceAll(s, `'`, `''`)
 }
