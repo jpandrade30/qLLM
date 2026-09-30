@@ -2,7 +2,31 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md). Hand-authoring YAML from zero: [docs/from-scratch.md](docs/from-scratch.md), field list [docs/field-reference.md](docs/field-reference.md).
+Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
+
+## Why qLLM
+
+Most organizations keep their data in many places: several databases, internal APIs, event streams. Access to those sources is usually **limited on purpose**. Teams expose a few database views or a handful of API endpoints, not the full schema, and nobody wants to hand an LLM raw credentials or free-form SQL.
+
+Yet an LLM (or an agent) is far more useful when it can talk to that data and run queries over it. qLLM is the missing layer between the two:
+
+- **One governed surface.** You describe sources in a YAML preset, and describe *only* the views, endpoints, and fields you want visible in a logical catalog. The LLM sees the catalog, nothing else.
+- **Read-only and bounded.** Row limits are required and capped, queries fail fast (~15 s budget), and secrets stay in environment variables.
+- **Queries across sources.** Filters and limits are pushed to each source; when a join spans sources, a small local DuckDB step finishes the work.
+- **Standard access.** The agent uses HTTP `/v1` or MCP (`how_to_use_me`, `describe_catalog`, `execute_sql`), so any MCP-capable client works without custom code.
+
+It is a query runtime, not a data warehouse: slow sources are out of scope.
+
+## Documentation / Documentação / Documentación / 文档
+
+Pick the folder for your language. Each one has the same 13 guides, including writing your YAML from zero (`from-scratch.md`) and the full field list (`field-reference.md`).
+
+| Language | Docs |
+|----------|------|
+| English | [docs/en/](docs/en/README.md) |
+| Português | [docs/pt/](docs/pt/README.md) |
+| Español | [docs/es/](docs/es/README.md) |
+| 中文 | [docs/zh/](docs/zh/README.md) |
 
 ## Quick start (5 minutes)
 

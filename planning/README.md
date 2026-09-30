@@ -2,7 +2,7 @@
 
 Índice do planejamento. **Contratos (schemas) são a fonte da verdade** — código segue estes docs, não o contrário.
 
-Guia operacional (comandos, o que aceitar/recusar ao configurar à mão): [`docs/`](../docs/).
+Guia operacional (comandos, o que aceitar/recusar ao configurar à mão), em inglês, português, espanhol e chinês: [`docs/`](../docs/).
 
 | Doc | Conteúdo |
 |-----|----------|
