@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleet-pg
+spec:
+  selector: { app: fleet-pg }
+  ports: [{ name: pg, port: 5432, targetPort: 5432 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fleet-pg
+spec:
+  serviceName: fleet-pg
+  replicas: 1
+  selector: { matchLabels: { app: fleet-pg } }
+  template:
+    metadata:
+      labels: { app: fleet-pg, qllm.dev/world: fleet-ops }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - { name: POSTGRES_USER, value: fleet }
+            - { name: POSTGRES_PASSWORD, value: fleet-sim }
+            - { name: POSTGRES_DB, value: fleet }
+          ports: [{ containerPort: 5432 }]
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+            - { name: init, mountPath: /docker-entrypoint-initdb.d, readOnly: true }
+          readinessProbe:
+            exec: { command: ["pg_isready", "-U", "fleet", "-d", "fleet"] }
+            periodSeconds: 5
+      volumes:
+        - name: init
+          configMap: { name: fleet-pg-init }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: { requests: { storage: 1Gi } }

@@ -32,6 +32,7 @@ func Open() (Engine, error) {
 	return &duckEngine{db: db}, nil
 }
 
+// Close releases resources.
 func (e *duckEngine) Close() error {
 	if e.db == nil {
 		return nil
@@ -39,6 +40,7 @@ func (e *duckEngine) Close() error {
 	return e.db.Close()
 }
 
+// Materialize implements runtime behavior for this package.
 func (e *duckEngine) Materialize(ctx context.Context, table string, tab *protocol.TabularResult) error {
 	name := quoteIdent(table)
 	_, _ = e.db.ExecContext(ctx, "DROP TABLE IF EXISTS "+name)
@@ -58,7 +60,7 @@ func (e *duckEngine) Materialize(ctx context.Context, table string, tab *protoco
 		placeholders[i] = "?"
 	}
 	insert := "INSERT INTO " + name + " VALUES (" + strings.Join(placeholders, ", ") + ")"
-		for _, row := range tab.Rows {
+	for _, row := range tab.Rows {
 		args := make([]any, len(tab.Columns))
 		for i, col := range tab.Columns {
 			if i < len(row) {
@@ -72,6 +74,7 @@ func (e *duckEngine) Materialize(ctx context.Context, table string, tab *protoco
 	return nil
 }
 
+// Execute runs a query.
 func (e *duckEngine) Execute(ctx context.Context, spec QuerySpec) (*protocol.TabularResult, error) {
 	sqlStr, args, err := BuildDuckSQL(spec)
 	if err != nil {
@@ -85,6 +88,7 @@ func (e *duckEngine) Execute(ctx context.Context, spec QuerySpec) (*protocol.Tab
 	return scanDuckRows(rows, spec)
 }
 
+// ExecSQL implements runtime behavior for this package.
 func (e *duckEngine) ExecSQL(ctx context.Context, sqlStr string) (*protocol.TabularResult, error) {
 	rows, err := e.db.QueryContext(ctx, sqlStr)
 	if err != nil {
@@ -94,6 +98,7 @@ func (e *duckEngine) ExecSQL(ctx context.Context, sqlStr string) (*protocol.Tabu
 	return scanDuckRows(rows, QuerySpec{})
 }
 
+// scanDuckRows implements runtime behavior for this package.
 func scanDuckRows(rows *sql.Rows, spec QuerySpec) (*protocol.TabularResult, error) {
 	colNames, err := rows.Columns()
 	if err != nil {
@@ -144,6 +149,7 @@ func scanDuckRows(rows *sql.Rows, spec QuerySpec) (*protocol.TabularResult, erro
 	return result.New(columns, out, false), nil
 }
 
+// coerceDuckCell implements runtime behavior for this package.
 func coerceDuckCell(t protocol.LogicalType, v any) any {
 	if v == nil || t != protocol.TypeTimestamp {
 		return v

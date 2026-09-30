@@ -27,6 +27,7 @@ type Server struct {
 	MaxBodyBytes int64
 }
 
+// logger implements runtime behavior for this package.
 func (s *Server) logger() *slog.Logger {
 	if s.Log != nil {
 		return s.Log
@@ -34,6 +35,7 @@ func (s *Server) logger() *slog.Logger {
 	return slog.Default()
 }
 
+// Handler handles an HTTP or MCP request.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/health", s.health)
@@ -52,14 +54,17 @@ func (s *Server) Handler() http.Handler {
 	return h
 }
 
+// health implements runtime behavior for this package.
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, protocol.HealthResponse{OK: true, ProtocolVersion: protocol.ProtocolVersion})
 }
 
+// catalog implements runtime behavior for this package.
 func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, s.Idx.CatalogResponseFor(s.allow(r)))
 }
 
+// allow implements runtime behavior for this package.
 func (s *Server) allow(r *http.Request) map[string]struct{} {
 	if s.ACL == nil {
 		return nil
@@ -70,6 +75,7 @@ func (s *Server) allow(r *http.Request) map[string]struct{} {
 	return map[string]struct{}{}
 }
 
+// createSQL implements runtime behavior for this package.
 func (s *Server) createSQL(w http.ResponseWriter, r *http.Request) {
 	max := s.MaxBodyBytes
 	if max <= 0 {
@@ -90,17 +96,18 @@ func (s *Server) createSQL(w http.ResponseWriter, r *http.Request) {
 	if resp.Status == protocol.StatusFailed && resp.Error != nil {
 		status = httpStatus(resp.Error.Code)
 	}
-	attrs := []any{"queryId", resp.QueryID, "status", string(resp.Status)}
+	attrs := []any{"queryId", resp.QueryID, "status", string(resp.Status), "via", "http"}
 	if resp.Meta != nil {
 		attrs = append(attrs, "elapsedMs", resp.Meta.ElapsedMs, "app", resp.Meta.App)
 	}
 	if resp.Error != nil {
 		attrs = append(attrs, "error.code", string(resp.Error.Code))
 	}
-	s.logger().Info("execute_sql", attrs...)
+	s.logger().Info("http_execute_sql", attrs...)
 	writeJSON(w, status, resp)
 }
 
+// createQuery implements runtime behavior for this package.
 func (s *Server) createQuery(w http.ResponseWriter, r *http.Request) {
 	max := s.MaxBodyBytes
 	if max <= 0 {
@@ -135,6 +142,7 @@ func (s *Server) createQuery(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, status, resp)
 }
 
+// getQuery implements runtime behavior for this package.
 func (s *Server) getQuery(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	resp, err := s.Store.Get(id)
@@ -145,6 +153,7 @@ func (s *Server) getQuery(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// getResult implements runtime behavior for this package.
 func (s *Server) getResult(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	resp, err := s.Store.Get(id)
@@ -166,6 +175,7 @@ func (s *Server) getResult(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// httpStatus implements runtime behavior for this package.
 func httpStatus(code protocol.ErrorCode) int {
 	switch code {
 	case protocol.ErrInvalidIR, protocol.ErrUnknownEntity, protocol.ErrUnknownField,
@@ -191,12 +201,14 @@ func httpStatus(code protocol.ErrorCode) int {
 	}
 }
 
+// writeJSON implements runtime behavior for this package.
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
 }
 
+// writeErr implements runtime behavior for this package.
 func writeErr(w http.ResponseWriter, status int, err *protocol.ProtocolError) {
 	writeJSON(w, status, protocol.ErrorResponse{
 		ProtocolVersion: protocol.ProtocolVersion,
@@ -204,6 +216,7 @@ func writeErr(w http.ResponseWriter, status int, err *protocol.ProtocolError) {
 	})
 }
 
+// ListenAndServe listens on a network address.
 func ListenAndServe(addr string, s *Server) error {
 	if s.Log == nil {
 		s.Log = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
@@ -211,6 +224,7 @@ func ListenAndServe(addr string, s *Server) error {
 	return http.ListenAndServe(addr, s.Handler())
 }
 
+// logMiddleware implements runtime behavior for this package.
 func (s *Server) logMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

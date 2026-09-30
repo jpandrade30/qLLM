@@ -8,7 +8,7 @@
 
 ## Objetivos
 
-1. Subir Postgres, MySQL, MongoDB, API REST e qLLM com `nerdctl compose`
+1. Subir Postgres, MySQL, MongoDB, API REST e qLLM com `nerdctl compose`. Tipos 0.2.0 experimentais (`mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql`) **não** entram no compose.
 2. Seed correlacionado (`customer_id` cruzável) a partir de `fixtures/datasets/v1` via `load_dataset.py` nas portas publicadas (Faker só em `generate_dataset.py --regenerate`)
 3. Queries: container (MCP/HTTP) **ou** host `qllm --config-dir deploy/image/config` com `QLLM_*` em `127.0.0.1` (ver `qllm.env.host.yaml`)
 4. Fail-fast timeout (budget do preset)
@@ -17,7 +17,8 @@
 
 ```text
 docker-compose.yml          # postgres, mysql, mongodb, test-api, qllm
-Dockerfile                  # COPY só deploy/image/config → /config
+Dockerfile.dev              # compose: COPY deploy/image/config → /config
+Dockerfile                  # product: COPY deploy/prd → /config
 deploy/image/config/
   qllm.preset.yaml          # sources / *Env
   qllm.catalog.yaml         # entidades / fields / bindings
@@ -34,10 +35,12 @@ fixtures/
   queries/                  # Query IR golden (testes, não schema)
   sql/manual-examples.md
   openapi/                  # spec mínima para CLI from-openapi
-scripts/dev-seed-fake.ps1
+scripts/dev-seed-fake.ps1 / .sh
 ```
 
-`fixtures/` = satélites de teste (processos + dados fake + queries de regressão). **Não** descreve formato das APIs/DBs. Isso é só `deploy/image/config`. Sem `deploy/dev` K8s no path default. Produção: substitui o conteúdo de config (ConfigMap/Secret), não leva seed/compose.
+`fixtures/` = satélites de teste (processos + dados fake + queries de regressão). **Não** descreve formato das APIs/DBs. Isso é só `deploy/image/config`. Sem `deploy/dev` K8s no path default.
+
+Exemplo só YAML: [`deploy/prd/`](../deploy/prd/). Simulação Kubernetes (namespace `qllm-prd`, projeto `fleet-ops`): [`deploy/prd-tst/`](../deploy/prd-tst/). Não altera goldens nem o compose. Não rode junto com `nerdctl compose`. Argo: `deploy/prd-tst/argocd/application.yaml`.
 
 ## Comandos
 

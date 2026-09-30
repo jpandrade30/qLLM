@@ -34,6 +34,7 @@ type Connector interface {
 	Close() error
 }
 
+// PhysicalName implements runtime behavior for this package.
 func PhysicalName(e *protocol.Entity, logical string) string {
 	for _, f := range e.Fields {
 		if f.Name == logical {
@@ -43,6 +44,7 @@ func PhysicalName(e *protocol.Entity, logical string) string {
 	return logical
 }
 
+// FieldType implements runtime behavior for this package.
 func FieldType(e *protocol.Entity, logical string) protocol.LogicalType {
 	for _, f := range e.Fields {
 		if f.Name == logical {

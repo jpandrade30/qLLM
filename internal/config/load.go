@@ -28,6 +28,7 @@ type Options struct {
 	ConfigDir string
 }
 
+// Resolve resolves names or paths.
 func Resolve(opts Options) (Paths, error) {
 	if opts.Preset != "" && opts.Catalog != "" {
 		return Paths{Preset: opts.Preset, Catalog: opts.Catalog}, nil
@@ -58,6 +59,7 @@ func Resolve(opts Options) (Paths, error) {
 	return Paths{Preset: preset, Catalog: catalog}, nil
 }
 
+// resolveProject implements runtime behavior for this package.
 func resolveProject(path string) (Paths, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
@@ -86,6 +88,7 @@ func resolveProject(path string) (Paths, error) {
 	return Paths{Preset: preset, Catalog: catalog}, nil
 }
 
+// findNamed implements runtime behavior for this package.
 func findNamed(dir, base string) (string, error) {
 	for _, ext := range []string{".yaml", ".yml", ".json"} {
 		p := filepath.Join(dir, base+ext)
@@ -97,6 +100,7 @@ func findNamed(dir, base string) (string, error) {
 		fmt.Sprintf("missing %s.{yaml|yml|json} in %s", base, dir), nil)
 }
 
+// LoadPreset reads configuration or input.
 func LoadPreset(path string) (*protocol.Preset, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
@@ -110,6 +114,7 @@ func LoadPreset(path string) (*protocol.Preset, error) {
 	return &p, nil
 }
 
+// LoadCatalog reads configuration or input.
 func LoadCatalog(path string) (*protocol.Catalog, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
@@ -123,6 +128,7 @@ func LoadCatalog(path string) (*protocol.Catalog, error) {
 	return &c, nil
 }
 
+// LoadAccess reads configuration or input.
 func LoadAccess(explicitPath, configDir string) (*protocol.AccessFile, string, error) {
 	var path string
 	var err error
@@ -221,6 +227,7 @@ func expandEnvFileValue(k, v string) (string, bool, *protocol.ProtocolError) {
 	return from, false, nil
 }
 
+// LoadQueryIR reads configuration or input.
 func LoadQueryIR(path string) (*protocol.QueryIR, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
@@ -234,6 +241,7 @@ func LoadQueryIR(path string) (*protocol.QueryIR, error) {
 	return &q, nil
 }
 
+// LoadBundle reads configuration or input.
 func LoadBundle(opts Options) (*protocol.Preset, *protocol.Catalog, Paths, error) {
 	paths, err := Resolve(opts)
 	if err != nil {
@@ -250,6 +258,7 @@ func LoadBundle(opts Options) (*protocol.Preset, *protocol.Catalog, Paths, error
 	return preset, catalog, paths, nil
 }
 
+// unmarshalFlexible implements runtime behavior for this package.
 func unmarshalFlexible(path string, raw []byte, dest any) error {
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
@@ -289,6 +298,7 @@ func EnvString(conn map[string]any, key string) (string, error) {
 	return val, nil
 }
 
+// OptionalEnvString implements runtime behavior for this package.
 func OptionalEnvString(conn map[string]any, key string) string {
 	v, ok := conn[key]
 	if !ok {
@@ -301,6 +311,7 @@ func OptionalEnvString(conn map[string]any, key string) string {
 	return os.Getenv(name)
 }
 
+// ConnInt implements runtime behavior for this package.
 func ConnInt(conn map[string]any, key string, def int) int {
 	v, ok := conn[key]
 	if !ok {
@@ -318,6 +329,7 @@ func ConnInt(conn map[string]any, key string, def int) int {
 	}
 }
 
+// ConnString implements runtime behavior for this package.
 func ConnString(conn map[string]any, key, def string) string {
 	v, ok := conn[key]
 	if !ok {
@@ -328,4 +340,20 @@ func ConnString(conn map[string]any, key, def string) string {
 		return def
 	}
 	return s
+}
+
+// ConnBool implements runtime behavior for this package.
+func ConnBool(conn map[string]any, key string, def bool) bool {
+	v, ok := conn[key]
+	if !ok {
+		return def
+	}
+	switch t := v.(type) {
+	case bool:
+		return t
+	case string:
+		return strings.EqualFold(t, "true") || t == "1"
+	default:
+		return def
+	}
 }

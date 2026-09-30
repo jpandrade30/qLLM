@@ -1,6 +1,6 @@
 # 03 — Protocol Schemas (fonte da verdade)
 
-`protocolVersion`: **0.1.0**
+`protocolVersion`: **0.2.0** (additive; **0.1.0** preset/catalog/IR files remain valid). New experimental source types: `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (pull). No harness coverage.
 
 Todos os exemplos abaixo são normativos para o MVP. JSON Schema máquina-legível: [`schemas/`](schemas/).
 
@@ -248,6 +248,45 @@ sources:
         tokenEnv: QLLM_LEGACY_API_TOKEN
     options:
       timeoutMs: 10000
+
+  # Experimental (0.2.0) — no compose/goldens in this repo
+  - id: local_sqlite
+    type: sqlite
+    connection:
+      pathEnv: QLLM_SQLITE_PATH
+  - id: warehouse_ch
+    type: clickhouse
+    connection:
+      hostEnv: QLLM_CH_HOST
+      port: 9000
+      database: default
+      userEnv: QLLM_CH_USER
+      passwordEnv: QLLM_CH_PASSWORD
+  - id: app_mssql
+    type: mssql
+    connection:
+      hostEnv: QLLM_MSSQL_HOST
+      port: 1433
+      database: app
+      userEnv: QLLM_MSSQL_USER
+      passwordEnv: QLLM_MSSQL_PASSWORD
+      encrypt: "true"
+  - id: items_ddb
+    type: dynamodb
+    connection:
+      region: us-east-1
+      endpointEnv: QLLM_DDB_ENDPOINT
+  - id: events_cql
+    type: cassandra
+    connection:
+      hostEnv: QLLM_CASSANDRA_HOST
+      keyspace: events
+      userEnv: QLLM_CASSANDRA_USER
+      passwordEnv: QLLM_CASSANDRA_PASSWORD
+  - id: ksql_pull
+    type: ksql
+    connection:
+      baseUrlEnv: QLLM_KSQL_URL
 ```
 
 ### Campos obrigatórios
@@ -259,7 +298,7 @@ sources:
 | `limits` | object | ver abaixo |
 | `sources` | array | min 1 |
 | `sources[].id` | string | `[a-z][a-z0-9_]*` |
-| `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` |
+| `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` \| `mssql` \| `sqlite` \| `clickhouse` \| `dynamodb` \| `cassandra` \| `ksql` |
 | `sources[].connection` | object | por tipo (ver schemas) |
 
 ### `limits`
@@ -330,6 +369,23 @@ entities:
         to: customers
         type: many_to_one
         on: [[customer_id, id]]
+
+  - name: kv_items
+    source: items_ddb
+    binding:
+      kind: table
+      schema: main
+      table: items
+      accessPath:
+        pk: [pk]
+        sk: sk
+    fields:
+      - name: pk
+        type: string
+        physical: pk
+      - name: sk
+        type: string
+        physical: sk
 
   - name: events
     source: events_mongo
@@ -532,7 +588,7 @@ Base path: `/v1`
 ### 4.1 `GET /v1/health`
 
 ```json
-{ "ok": true, "protocolVersion": "0.1.0" }
+{ "ok": true, "protocolVersion": "0.2.0" }
 ```
 
 ### 4.2 `GET /v1/howtouseme`
@@ -736,7 +792,7 @@ Descriptions MCP no `serve` interpolam nomes do **catalog carregado** (teto ~4k 
 
 - Additive (novos ops/campos opcionais) → bump **minor**
 - Remoção/renomeação/semântica breaking → bump **major**
-- Preset/catalog/IR/API compartilham o mesmo `protocolVersion` major.minor; patch só docs/bugfix de validação
+- Preset/catalog/IR/API compartilham o mesmo `protocolVersion` major.minor; patch só docs/bugfix de validação. **0.2.0** é additive (novos types); **0.1.0** continua válido.
 
 ## 8. Checklist antes de implementar código
 

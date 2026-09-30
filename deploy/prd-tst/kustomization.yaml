@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: qllm-prd
+resources:
+  - k8s/namespace.yaml
+  - k8s/secret.yaml
+  - k8s/postgres.yaml
+  - k8s/clickhouse.yaml
+  - k8s/dynamodb.yaml
+  - k8s/fleet-api.yaml
+  - k8s/qllm.yaml
+  - k8s/networkpolicy.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: qllm-config
+    files:
+      - qllm.preset.yaml=config/qllm.preset.yaml
+      - qllm.catalog.yaml=config/qllm.catalog.yaml
+      - qllm.config.yaml=config/qllm.config.yaml
+      - qllm.env.yaml=config/qllm.env.yaml
+      - qllm.access.yaml=config/qllm.access.yaml
+  - name: fleet-pg-init
+    files:
+      - 01-schema.sql=k8s/init/postgres.sql
+  - name: fleet-ch-init
+    files:
+      - 01-schema.sql=k8s/init/clickhouse.sql
+  - name: fleet-sqlite-seed
+    files:
+      - sqlite_seed.py=k8s/init/sqlite_seed.py
+  - name: fleet-ddb-seed
+    files:
+      - dynamo_seed.sh=k8s/init/dynamo_seed.sh
+  - name: fleet-api-src
+    files:
+      - app.py=fake-api/app.py

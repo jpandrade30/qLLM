@@ -7,6 +7,7 @@ import (
 	"qLLM/internal/protocol"
 )
 
+// duckType implements runtime behavior for this package.
 func duckType(t protocol.LogicalType) string {
 	switch t {
 	case protocol.TypeNumber:
@@ -22,10 +23,12 @@ func duckType(t protocol.LogicalType) string {
 	}
 }
 
+// quoteIdent implements runtime behavior for this package.
 func quoteIdent(s string) string {
 	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 }
 
+// qual implements runtime behavior for this package.
 func qual(bind, col string) string {
 	return quoteIdent(bind) + "." + quoteIdent(col)
 }
@@ -123,6 +126,7 @@ func BuildDuckSQL(spec QuerySpec) (string, []any, error) {
 	return b.String(), args, nil
 }
 
+// whereSQL implements runtime behavior for this package.
 func whereSQL(w *WhereExpr, args *[]any) (string, error) {
 	if w == nil {
 		return "", nil

@@ -2,7 +2,7 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Protocol **0.1.0** — see [planning/](planning/).
+Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md). Hand-authoring YAML from zero: [docs/from-scratch.md](docs/from-scratch.md), field list [docs/field-reference.md](docs/field-reference.md).
 
 ## Quick start (5 minutes)
 
@@ -79,13 +79,15 @@ apps:
 
 ### Docker
 
-Image `/config` is copied **only** from [`deploy/image/config`](deploy/image/config) (preset, catalog, `qllm.config.yaml`, `qllm.env.yaml`). `fixtures/` is not copied into the image except as the `test-api` build context. Process env wins if already set.
+Product [`Dockerfile`](Dockerfile) bakes [`deploy/prd/`](deploy/prd) into `/config`. Compose uses [`Dockerfile.dev`](Dockerfile.dev) + [`deploy/image/config`](deploy/image/config). `fixtures/` is not copied except as the `test-api` build context. Process env wins if already set.
 
 ```bash
 nerdctl compose up --build
 ```
 
 HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Rebuild `test-api` if `fixtures/test-api/data.json` changed. SQL MCP goldens: `pytest fixtures/sqlcheck`.
+
+Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md). Optional **fleet-ops** Kubernetes sim: [`deploy/prd-tst/README.md`](deploy/prd-tst/README.md). Up: `.\scripts\prd-tst-up.ps1` / `./scripts/prd-tst-up.sh` (compose down + image + apply). Down: `.\scripts\prd-tst-down.ps1` / `./scripts/prd-tst-down.sh`. Then port-forward: `.\scripts\prd-tst-port-forward.ps1`. Do not run with compose. Goldens unchanged.
 
 Standalone image (same compose network / `--network`):
 
@@ -146,9 +148,15 @@ client = MultiServerMCPClient({
 tools = await client.get_tools()
 ```
 
-Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`.
+Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`. Each `execute_sql` writes a multiline block to stderr (`---- execute_sql ----` plus the SQL). MCP logs `---- mcp_tool ----` for the other two. Example: `kubectl logs -n qllm-prd deploy/qllm | findstr execute_sql`.
 
-Requires Go **1.25+** toolchain (deps). `mcp-go` is pinned at **v0.48.0**; with Go 1.25.5+ you can later bump toward `v0.56`.
+Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.6-bookworm`). `mcp-go` is pinned at **v0.48.0**.
+
+### Experimental sources (0.2.0)
+
+`mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, and `ksql` (pull) are implemented in the binary. They are **not** in `docker-compose.yml` or SQL goldens. Dynamo/Cassandra/ksql need `binding.accessPath` and equality on that key, or the query fails with `UNSUPPORTED`. Connection keys: [planning/04-connectors.md](planning/04-connectors.md).
+
+Secrets in `qllm.env.yaml` should be `${QLLM_…}`; set the same names in the process or compose `environment:`.
 
 ## Dev harness notes
 

@@ -1,0 +1,22 @@
+# After Argo CD is up: kubectl apply -f deploy/prd-tst/argocd/application.yaml
+# Or: .\scripts\prd-tst-argocd-register-app.ps1
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qllm-prd-sim
+  namespace: argocd
+  labels:
+    qllm.dev/world: fleet-ops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jpandrade30/qLLM.git
+    # Use a branch name, not HEAD (Argo: "revision HEAD must be resolved").
+    targetRevision: master
+    path: deploy/prd-tst
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qllm-prd
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

@@ -2,6 +2,8 @@
 
 Índice do planejamento. **Contratos (schemas) são a fonte da verdade** — código segue estes docs, não o contrário.
 
+Guia operacional (comandos, o que aceitar/recusar ao configurar à mão): [`docs/`](../docs/).
+
 | Doc | Conteúdo |
 |-----|----------|
 | [00-overview.md](00-overview.md) | Visão, problema, não-objetivos |
@@ -25,7 +27,7 @@ Qualquer mudança em formato de conexão, schema de entidade, Query IR ou respos
 
 - Fase 0 (specs/schemas/rules): **completa**.
 - Fases 1–5 (runtime MVP): **implementadas** — CLI, connectors, harness compose, HTTP/MCP.
-- Protocolo: **0.1.0** — ver `03-protocol-schemas.md` + `schemas/`.
+- Protocolo: **0.2.0** — ver `03-protocol-schemas.md` + `schemas/`.
 - Harness: `nerdctl compose up --build` (Rancher containerd) — mundo de teste isolado (D18).
 - Superfície de agente: Query IR + catalog SQL; GraphQL fora (D17).
 

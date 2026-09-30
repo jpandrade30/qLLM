@@ -60,8 +60,8 @@ func TestValidateQueryOK(t *testing.T) {
 	}
 	lim := 50
 	q := &protocol.QueryIR{
-		From: "invoices",
-		Select: []any{"customer_id", map[string]any{"agg": "sum", "field": "total", "as": "revenue"}},
+		From:    "invoices",
+		Select:  []any{"customer_id", map[string]any{"agg": "sum", "field": "total", "as": "revenue"}},
 		GroupBy: []string{"customer_id"},
 		Limit:   &lim,
 	}
@@ -206,5 +206,41 @@ func TestLLMBarePlusAggNeedsGroupBy(t *testing.T) {
 	}
 	if !strings.Contains(err2.Message, "groupBy") {
 		t.Fatalf("expected groupBy message, got %q", err2.Message)
+	}
+}
+
+func TestPresetExperimentalSourceTypes(t *testing.T) {
+	p := &protocol.Preset{
+		ProtocolVersion: "0.2.0",
+		Project:         "exp",
+		Limits: protocol.Limits{
+			MaxSyncMs: 15000, MaxSourceMs: 12000, DefaultLimit: 10, MaxLimit: 100, ReadOnly: true,
+		},
+		Sources: []protocol.Source{
+			{ID: "local_sqlite", Type: protocol.SourceSQLite, Connection: map[string]any{"pathEnv": "QLLM_SQLITE_PATH"}},
+			{ID: "items_ddb", Type: protocol.SourceDynamoDB, Connection: map[string]any{"region": "us-east-1"}},
+			{ID: "ks", Type: protocol.SourceKSQL, Connection: map[string]any{"baseUrlEnv": "QLLM_KSQL_URL"}},
+		},
+	}
+	if err := validate.Preset(p); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCatalogAccessPath(t *testing.T) {
+	c := &protocol.Catalog{
+		ProtocolVersion: "0.2.0",
+		Project:         "exp",
+		Entities: []protocol.Entity{{
+			Name: "items", Source: "items_ddb",
+			Binding: protocol.Binding{
+				Kind: "table", Schema: "main", Table: "items",
+				AccessPath: protocol.AccessPath{PK: []string{"pk"}, SK: "sk"},
+			},
+			Fields: []protocol.Field{{Name: "pk", Type: protocol.TypeString, Physical: "pk"}},
+		}},
+	}
+	if err := validate.Catalog(c); err != nil {
+		t.Fatal(err)
 	}
 }

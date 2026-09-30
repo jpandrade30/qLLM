@@ -29,6 +29,7 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	s.AddTool(mcp.NewTool("how_to_use_me",
 		mcp.WithDescription(d.HowToUseMe),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		fmt.Fprintln(os.Stderr, "---- mcp_tool ----\n  name  how_to_use_me\n------------------")
 		b, err := json.Marshal(agentguide.Build(idx.Preset, idx.CatalogFor(allowFrom(ctx, exec))))
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -39,6 +40,7 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	s.AddTool(mcp.NewTool("describe_catalog",
 		mcp.WithDescription(d.DescribeCatalog),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		fmt.Fprintln(os.Stderr, "---- mcp_tool ----\n  name  describe_catalog\n------------------")
 		b, err := json.Marshal(idx.CatalogResponseFor(allowFrom(ctx, exec)))
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -73,6 +75,7 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	return s
 }
 
+// allowFrom implements runtime behavior for this package.
 func allowFrom(ctx context.Context, exec *executor.Executor) map[string]struct{} {
 	if exec == nil || exec.ACL == nil {
 		return nil

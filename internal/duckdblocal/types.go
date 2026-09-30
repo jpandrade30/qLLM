@@ -69,6 +69,7 @@ type nrow struct {
 	byBind map[string][]any
 }
 
+// copyBind implements runtime behavior for this package.
 func copyBind(m map[string][]any) map[string][]any {
 	out := make(map[string][]any, len(m))
 	for k, v := range m {
@@ -77,6 +78,7 @@ func copyBind(m map[string][]any) map[string][]any {
 	return out
 }
 
+// cell implements runtime behavior for this package.
 func cell(tables map[string]*protocol.TabularResult, byBind map[string][]any, bind, col string) any {
 	row := byBind[bind]
 	tab := tables[bind]
@@ -90,6 +92,7 @@ func cell(tables map[string]*protocol.TabularResult, byBind map[string][]any, bi
 	return row[i]
 }
 
+// projectStructured implements runtime behavior for this package.
 func projectStructured(tables map[string]*protocol.TabularResult, byBind map[string][]any, sels []SelectSpec) []any {
 	out := make([]any, len(sels))
 	for i, s := range sels {
@@ -98,6 +101,7 @@ func projectStructured(tables map[string]*protocol.TabularResult, byBind map[str
 	return out
 }
 
+// matchWhere implements runtime behavior for this package.
 func matchWhere(tables map[string]*protocol.TabularResult, byBind map[string][]any, w *WhereExpr) (bool, error) {
 	if w == nil {
 		return true, nil
@@ -144,6 +148,7 @@ func matchWhere(tables map[string]*protocol.TabularResult, byBind map[string][]a
 	}
 }
 
+// compare implements runtime behavior for this package.
 func compare(left any, op string, right any) (bool, error) {
 	switch strings.ToLower(op) {
 	case "eq":
@@ -209,6 +214,7 @@ func compare(left any, op string, right any) (bool, error) {
 	}
 }
 
+// asAnySlice implements runtime behavior for this package.
 func asAnySlice(v any) ([]any, error) {
 	switch t := v.(type) {
 	case []any:
@@ -220,6 +226,7 @@ func asAnySlice(v any) ([]any, error) {
 	}
 }
 
+// asFloat implements runtime behavior for this package.
 func asFloat(v any) (float64, bool) {
 	switch t := v.(type) {
 	case int:
@@ -239,6 +246,7 @@ func asFloat(v any) (float64, bool) {
 	}
 }
 
+// agg implements runtime behavior for this package.
 func agg(tables map[string]*protocol.TabularResult, rows []nrow, s SelectSpec) any {
 	switch strings.ToLower(s.Agg) {
 	case "count":
@@ -296,6 +304,7 @@ func agg(tables map[string]*protocol.TabularResult, rows []nrow, s SelectSpec) a
 	return nil
 }
 
+// cmpAny implements runtime behavior for this package.
 func cmpAny(a, b any) int {
 	af, aok := asFloat(a)
 	bf, bok := asFloat(b)
@@ -312,6 +321,7 @@ func cmpAny(a, b any) int {
 	return strings.Compare(as, bs)
 }
 
+// colIndex implements runtime behavior for this package.
 func colIndex(tab *protocol.TabularResult, name string) int {
 	for i, c := range tab.Columns {
 		if c.Name == name {
@@ -321,6 +331,7 @@ func colIndex(tab *protocol.TabularResult, name string) int {
 	return -1
 }
 
+// joinMatch implements runtime behavior for this package.
 func joinMatch(tables map[string]*protocol.TabularResult, row nrow, j JoinSpec, rr []any, right *protocol.TabularResult) bool {
 	for _, on := range j.On {
 		lv := row.byBind[on.LeftBind]
@@ -343,6 +354,7 @@ func joinMatch(tables map[string]*protocol.TabularResult, row nrow, j JoinSpec, 
 	return true
 }
 
+// applyOffsetLimit implements runtime behavior for this package.
 func applyOffsetLimit(rows [][]any, offset, limit int) [][]any {
 	if offset > 0 {
 		if offset >= len(rows) {

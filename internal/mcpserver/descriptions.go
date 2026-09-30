@@ -23,6 +23,7 @@ type ToolDescriptions struct {
 	ExecuteSQL      string
 }
 
+// entityNames implements runtime behavior for this package.
 func entityNames(idx *catalogidx.Index) []string {
 	if idx == nil || idx.Catalog == nil {
 		return nil
@@ -34,6 +35,7 @@ func entityNames(idx *catalogidx.Index) []string {
 	return names
 }
 
+// formatNames implements runtime behavior for this package.
 func formatNames(names []string) string {
 	if len(names) == 0 {
 		return "(none — catalog YAML has no entities)"
@@ -45,6 +47,7 @@ func formatNames(names []string) string {
 	return strings.Join(names[:max], ", ") + ", …"
 }
 
+// capRunes implements runtime behavior for this package.
 func capRunes(s string, n int) string {
 	if utf8.RuneCountInString(s) <= n {
 		return s
@@ -56,6 +59,7 @@ func capRunes(s string, n int) string {
 	return string(r[:n-1]) + "…"
 }
 
+// fieldLine implements runtime behavior for this package.
 func fieldLine(f protocol.Field) string {
 	var b strings.Builder
 	b.WriteString(f.Name)
@@ -68,6 +72,7 @@ func fieldLine(f protocol.Field) string {
 	return b.String()
 }
 
+// relationLine implements runtime behavior for this package.
 func relationLine(e protocol.Entity, r protocol.Relation) string {
 	on := "id=id"
 	if len(r.On) > 0 && len(r.On[0]) == 2 {
@@ -84,6 +89,7 @@ func relationLine(e protocol.Entity, r protocol.Relation) string {
 	return name + " " + kind + " " + on
 }
 
+// catalogBody implements runtime behavior for this package.
 func catalogBody(idx *catalogidx.Index) string {
 	if idx == nil || idx.Catalog == nil || len(idx.Catalog.Entities) == 0 {
 		return "Tables: (none — catalog YAML has no entities)."
@@ -125,6 +131,7 @@ func catalogBody(idx *catalogidx.Index) string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
+// executeSQLDescription implements runtime behavior for this package.
 func executeSQLDescription(idx *catalogidx.Index) string {
 	var b strings.Builder
 	b.WriteString("Run a catalog SQL SELECT (DuckDB after fetch). Args: sql (required), version (optional 1|2, omit=latest ")

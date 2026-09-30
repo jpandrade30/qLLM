@@ -1,4 +1,4 @@
-# Test satellites (DBs + test-api). qllm image bakes deploy/image/config only
+# Test satellites (DBs + test-api). qllm image uses Dockerfile.dev (deploy/image/config).
 # (preset, catalog, bind, compose DNS). fixtures/ is seed/API/golden queries — not catalog.
 services:
   postgres:
@@ -57,7 +57,9 @@ services:
       retries: 20
 
   qllm:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     environment:
       QLLM_AUTH_TOKEN: change-me
       QLLM_CRM_PG_PASSWORD: qllm

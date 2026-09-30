@@ -1,0 +1,56 @@
+protocolVersion: "0.2.0"
+project: fleet-ops
+limits:
+  maxSyncMs: 15000
+  maxSourceMs: 12000
+  defaultLimit: 50
+  maxLimit: 500
+  readOnly: true
+sources:
+  - id: fleet_pg
+    type: postgres
+    connection:
+      hostEnv: QLLM_FLEET_PG_HOST
+      port: 5432
+      database: fleet
+      userEnv: QLLM_FLEET_PG_USER
+      passwordEnv: QLLM_FLEET_PG_PASSWORD
+      sslMode: disable
+    options:
+      statementTimeoutMs: 12000
+
+  - id: telem_ch
+    type: clickhouse
+    connection:
+      hostEnv: QLLM_FLEET_CH_HOST
+      port: 9000
+      database: default
+      userEnv: QLLM_FLEET_CH_USER
+      passwordEnv: QLLM_FLEET_CH_PASSWORD
+      secure: false
+
+  - id: yard_sqlite
+    type: sqlite
+    connection:
+      pathEnv: QLLM_FLEET_SQLITE_PATH
+
+  - id: parts_ddb
+    type: dynamodb
+    connection:
+      region: us-east-1
+      endpointEnv: QLLM_FLEET_DDB_ENDPOINT
+
+  - id: crew_api
+    type: rest
+    connection:
+      baseUrlEnv: QLLM_FLEET_API_BASE_URL
+      auth:
+        type: none
+    options:
+      timeoutMs: 8000
+      resources:
+        drivers:
+          list:
+            method: GET
+            path: /drivers
+            queryParams: [limit, offset]

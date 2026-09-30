@@ -1,0 +1,10 @@
+apps:
+  - name: fleet-dispatcher
+    key: ${QLLM_FLEET_AGENT_KEY}
+    tables:
+      - vehicles
+      - depots
+      - gps_samples
+      - shift_notes
+      - stock_items
+      - drivers

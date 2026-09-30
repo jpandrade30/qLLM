@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qllm
+spec:
+  selector: { app: qllm }
+  ports:
+    - { name: http, port: 8088, targetPort: 8088 }
+    - { name: mcp, port: 8089, targetPort: 8089 }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qllm
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: qllm } }
+  template:
+    metadata:
+      labels: { app: qllm, qllm.dev/world: fleet-ops }
+    spec:
+      initContainers:
+        - name: wait-deps
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z fleet-pg 5432; do sleep 2; done
+              until nc -z fleet-ch 9000; do sleep 2; done
+              until nc -z fleet-ddb 8000; do sleep 2; done
+              until nc -z fleet-api 8080; do sleep 2; done
+        - name: seed-sqlite
+          image: python:3.12-alpine
+          command: ["python", "/seed/sqlite_seed.py"]
+          envFrom: [{ secretRef: { name: qllm-prd-secrets } }]
+          volumeMounts:
+            - { name: sqlite, mountPath: /data }
+            - { name: sqlite-seed, mountPath: /seed, readOnly: true }
+        - name: seed-ddb
+          image: amazon/aws-cli:2.17.0
+          command: ["sh", "/seed/dynamo_seed.sh"]
+          envFrom: [{ secretRef: { name: qllm-prd-secrets } }]
+          volumeMounts:
+            - { name: ddb-seed, mountPath: /seed, readOnly: true }
+      containers:
+        - name: qllm
+          image: qllm:local
+          imagePullPolicy: Never
+          args: ["serve", "--http", "--mcp-http", "--config-dir", "/config"]
+          envFrom: [{ secretRef: { name: qllm-prd-secrets } }]
+          ports: [{ containerPort: 8088 }, { containerPort: 8089 }]
+          volumeMounts:
+            - { name: cfg, mountPath: /config, readOnly: true }
+            - { name: sqlite, mountPath: /data }
+          readinessProbe:
+            httpGet: { path: /v1/health, port: 8088 }
+            periodSeconds: 5
+            initialDelaySeconds: 3
+      volumes:
+        - name: cfg
+          configMap: { name: qllm-config }
+        - name: sqlite
+          emptyDir: {}
+        - name: sqlite-seed
+          configMap: { name: fleet-sqlite-seed }
+        - name: ddb-seed
+          configMap: { name: fleet-ddb-seed }

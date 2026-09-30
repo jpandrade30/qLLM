@@ -8,17 +8,17 @@ import (
 )
 
 var sqlOpHints = map[string]string{
-	"=":        "eq",
-	"==":       "eq",
-	"!=":       "neq",
-	"<>":       "neq",
-	">":        "gt",
-	">=":       "gte",
-	"<":        "lt",
-	"<=":       "lte",
-	"like":     "contains",
-	"BETWEEN":  "gte/lte",
-	"between":  "gte/lte",
+	"=":       "eq",
+	"==":      "eq",
+	"!=":      "neq",
+	"<>":      "neq",
+	">":       "gt",
+	">=":      "gte",
+	"<":       "lt",
+	"<=":      "lte",
+	"like":    "contains",
+	"BETWEEN": "gte/lte",
+	"between": "gte/lte",
 }
 
 // lintQueryIRLLM catches common LLM shape mistakes before JSON Schema noise.
@@ -29,6 +29,7 @@ func lintQueryIRLLM(q *protocol.QueryIR) *protocol.ProtocolError {
 	return lintSelectGroupByLLM(q)
 }
 
+// lintWhereLLM implements runtime behavior for this package.
 func lintWhereLLM(w map[string]any) *protocol.ProtocolError {
 	if w == nil {
 		return nil
@@ -67,6 +68,7 @@ func lintWhereLLM(w map[string]any) *protocol.ProtocolError {
 	return nil
 }
 
+// lintSelectGroupByLLM implements runtime behavior for this package.
 func lintSelectGroupByLLM(q *protocol.QueryIR) *protocol.ProtocolError {
 	hasBare := false
 	hasAgg := false

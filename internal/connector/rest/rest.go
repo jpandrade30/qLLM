@@ -34,6 +34,7 @@ type OpenOpts struct {
 	MaxResponseBodyBytes int64
 }
 
+// Open opens a source or engine.
 func Open(src protocol.Source, opts OpenOpts) (*Connector, error) {
 	base, err := config.EnvString(src.Connection, "baseUrlEnv")
 	if err != nil {
@@ -68,11 +69,19 @@ func Open(src protocol.Source, opts OpenOpts) (*Connector, error) {
 	}, nil
 }
 
-func (c *Connector) ID() string                   { return c.id }
-func (c *Connector) Type() protocol.SourceType    { return protocol.SourceREST }
-func (c *Connector) Capabilities() def.Caps { return c.caps }
-func (c *Connector) Close() error                 { return nil }
+// ID implements runtime behavior for this package.
+func (c *Connector) ID() string { return c.id }
 
+// Type implements runtime behavior for this package.
+func (c *Connector) Type() protocol.SourceType { return protocol.SourceREST }
+
+// Capabilities implements runtime behavior for this package.
+func (c *Connector) Capabilities() def.Caps { return c.caps }
+
+// Close releases resources.
+func (c *Connector) Close() error { return nil }
+
+// Query fetches rows from a source.
 func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol.TabularResult, error) {
 	for _, s := range step.Select {
 		if s.Agg != "" {
@@ -189,6 +198,7 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 	return result.New(columns, rows, truncated), nil
 }
 
+// applyAuth implements runtime behavior for this package.
 func (c *Connector) applyAuth(req *http.Request) error {
 	if c.auth == nil {
 		return nil
@@ -218,6 +228,7 @@ func (c *Connector) applyAuth(req *http.Request) error {
 	return nil
 }
 
+// applyWhereParams implements runtime behavior for this package.
 func applyWhereParams(q url.Values, w map[string]any) error {
 	if op, ok := w["op"].(string); ok && (op == "and" || op == "or") {
 		args, _ := w["args"].([]any)
@@ -248,6 +259,7 @@ func applyWhereParams(q url.Values, w map[string]any) error {
 	return nil
 }
 
+// parseList implements runtime behavior for this package.
 func parseList(body []byte) ([]map[string]any, error) {
 	var arr []map[string]any
 	if err := json.Unmarshal(body, &arr); err == nil {
@@ -268,6 +280,7 @@ func parseList(body []byte) ([]map[string]any, error) {
 	return nil, fmt.Errorf("unsupported REST list payload")
 }
 
+// asInt implements runtime behavior for this package.
 func asInt(v any) (int, bool) {
 	switch n := v.(type) {
 	case int:

@@ -14,6 +14,9 @@ type Dialect int
 const (
 	Postgres Dialect = iota
 	MySQL
+	MSSQL
+	SQLite
+	ClickHouse
 )
 
 type Built struct {
@@ -21,6 +24,7 @@ type Built struct {
 	Args []any
 }
 
+// Build builds a value.
 func Build(d Dialect, step def.PushdownStep) (Built, error) {
 	e := step.Entity
 	table := qualifyTable(d, e.Binding)
@@ -34,6 +38,9 @@ func Build(d Dialect, step def.PushdownStep) (Built, error) {
 	}
 
 	b.WriteString("SELECT ")
+	if d == MSSQL && step.Limit > 0 && step.Offset <= 0 {
+		b.WriteString(fmt.Sprintf("TOP (%d) ", step.Limit))
+	}
 	if len(step.Select) == 0 {
 		b.WriteString("*")
 	} else {
@@ -111,16 +118,30 @@ func Build(d Dialect, step def.PushdownStep) (Built, error) {
 		b.WriteString(strings.Join(parts, ", "))
 	}
 
-	if step.Limit > 0 {
-		b.WriteString(fmt.Sprintf(" LIMIT %d", step.Limit))
-	}
-	if step.Offset > 0 {
-		b.WriteString(fmt.Sprintf(" OFFSET %d", step.Offset))
+	if d == MSSQL {
+		if len(step.OrderBy) == 0 && (step.Offset > 0 || (step.Limit > 0 && step.Offset > 0)) {
+			b.WriteString(" ORDER BY (SELECT NULL)")
+		}
+		if step.Offset > 0 {
+			fetch := step.Limit
+			if fetch <= 0 {
+				fetch = 1
+			}
+			b.WriteString(fmt.Sprintf(" OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", step.Offset, fetch))
+		}
+	} else {
+		if step.Limit > 0 {
+			b.WriteString(fmt.Sprintf(" LIMIT %d", step.Limit))
+		}
+		if step.Offset > 0 {
+			b.WriteString(fmt.Sprintf(" OFFSET %d", step.Offset))
+		}
 	}
 
 	return Built{SQL: b.String(), Args: args}, nil
 }
 
+// qualifyTable implements runtime behavior for this package.
 func qualifyTable(d Dialect, bind protocol.Binding) string {
 	if bind.Schema != "" {
 		return quoteIdent(d, bind.Schema) + "." + quoteIdent(d, bind.Table)
@@ -128,13 +149,19 @@ func qualifyTable(d Dialect, bind protocol.Binding) string {
 	return quoteIdent(d, bind.Table)
 }
 
+// quoteIdent implements runtime behavior for this package.
 func quoteIdent(d Dialect, name string) string {
-	if d == MySQL {
+	switch d {
+	case MySQL, SQLite, ClickHouse:
 		return "`" + strings.ReplaceAll(name, "`", "``") + "`"
+	case MSSQL:
+		return "[" + strings.ReplaceAll(name, "]", "]]") + "]"
+	default:
+		return `"` + strings.ReplaceAll(name, `"`, `""`) + `"`
 	}
-	return `"` + strings.ReplaceAll(name, `"`, `""`) + `"`
 }
 
+// whereSQL implements runtime behavior for this package.
 func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph func() string) (string, []any, error) {
 	if op, ok := w["op"].(string); ok {
 		switch op {
@@ -214,6 +241,9 @@ func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph f
 		if d == Postgres {
 			return col + " LIKE '%' || " + p + " || '%' ESCAPE '\\'", *args, nil
 		}
+		if d == MSSQL {
+			return col + " LIKE '%' + " + p + " + '%' ESCAPE '\\'", *args, nil
+		}
 		return col + " LIKE CONCAT('%', " + p + ", '%') ESCAPE '\\\\'", *args, nil
 	default:
 		sqlOp := map[string]string{
@@ -228,6 +258,7 @@ func whereSQL(d Dialect, e *protocol.Entity, w map[string]any, args *[]any, ph f
 	}
 }
 
+// coerceValue implements runtime behavior for this package.
 func coerceValue(e *protocol.Entity, logicalField string, v any) any {
 	switch def.FieldType(e, logicalField) {
 	case protocol.TypeTimestamp:
@@ -256,6 +287,7 @@ func coerceValue(e *protocol.Entity, logicalField string, v any) any {
 	return v
 }
 
+// typedPlaceholder implements runtime behavior for this package.
 func typedPlaceholder(d Dialect, e *protocol.Entity, logicalField string, ph func() string) string {
 	p := ph()
 	if d != Postgres {
@@ -276,14 +308,17 @@ func typedPlaceholder(d Dialect, e *protocol.Entity, logicalField string, ph fun
 	}
 }
 
+// jsonMarshal implements runtime behavior for this package.
 func jsonMarshal(v any) ([]byte, error) {
 	return jsonMarshalImpl(v)
 }
 
+// jsonUnmarshal implements runtime behavior for this package.
 func jsonUnmarshal(b []byte, v any) error {
 	return jsonUnmarshalImpl(b, v)
 }
 
+// escapeLike implements runtime behavior for this package.
 func escapeLike(s string) string {
 	s = strings.ReplaceAll(s, `\`, `\\`)
 	s = strings.ReplaceAll(s, `%`, `\%`)

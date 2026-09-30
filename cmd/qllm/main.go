@@ -21,6 +21,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// main implements runtime behavior for this package.
 func main() {
 	root := &cobra.Command{
 		Use:   "qllm",
@@ -335,6 +336,7 @@ func main() {
 	}
 }
 
+// printErr implements runtime behavior for this package.
 func printErr(err error) error {
 	if pe, ok := err.(*protocol.ProtocolError); ok {
 		enc := json.NewEncoder(os.Stderr)

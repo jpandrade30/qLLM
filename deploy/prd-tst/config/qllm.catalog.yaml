@@ -1,0 +1,68 @@
+protocolVersion: "0.2.0"
+project: fleet-ops
+entities:
+  - name: vehicles
+    description: Fleet vehicles (not CRM customers)
+    source: fleet_pg
+    binding: { kind: table, schema: public, table: vehicles }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: vin, type: string, physical: vin }
+      - { name: depot_id, type: string, physical: depot_id }
+      - { name: status, type: string, physical: status }
+
+  - name: depots
+    description: Yards / depots
+    source: fleet_pg
+    binding: { kind: table, schema: public, table: depots }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: code, type: string, physical: code }
+      - { name: city, type: string, physical: city }
+
+  - name: gps_samples
+    description: ClickHouse telemetry (experimental connector)
+    source: telem_ch
+    binding: { kind: table, schema: default, table: gps_samples }
+    primaryKey: [vehicle_id, ts]
+    fields:
+      - { name: vehicle_id, type: string, physical: vehicle_id }
+      - { name: ts, type: timestamp, physical: ts }
+      - { name: speed_kph, type: number, physical: speed_kph }
+
+  - name: shift_notes
+    description: SQLite yard notes (experimental connector)
+    source: yard_sqlite
+    binding: { kind: table, schema: main, table: shift_notes }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: vehicle_id, type: string, physical: vehicle_id }
+      - { name: body, type: string, physical: body }
+
+  - name: stock_items
+    description: DynamoDB Local spare parts; accessPath required
+    source: parts_ddb
+    binding:
+      kind: table
+      schema: main
+      table: stock_items
+      accessPath: { pk: [pk], sk: sk }
+    primaryKey: [pk, sk]
+    fields:
+      - { name: pk, type: string, physical: pk }
+      - { name: sk, type: string, physical: sk }
+      - { name: sku, type: string, physical: sku }
+      - { name: qty, type: number, physical: qty }
+
+  - name: drivers
+    description: Crew REST (not /users from the harness test-api)
+    source: crew_api
+    binding: { kind: rest_resource, resource: drivers }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: badge, type: string, physical: badge }
+      - { name: full_name, type: string, physical: full_name }

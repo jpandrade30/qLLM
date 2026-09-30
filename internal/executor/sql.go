@@ -2,6 +2,8 @@ package executor
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -15,7 +17,66 @@ import (
 	"github.com/google/uuid"
 )
 
-func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) *protocol.QueryResponse {
+const sqlLogMaxRunes = 4096
+
+// logExecuteSQL implements runtime behavior for this package.
+func logExecuteSQL(req *protocol.SQLRequest, resp *protocol.QueryResponse) {
+	if resp == nil {
+		return
+	}
+	_, _ = os.Stderr.WriteString(formatExecuteSQLLog(req, resp))
+}
+
+// formatExecuteSQLLog implements runtime behavior for this package.
+func formatExecuteSQLLog(req *protocol.SQLRequest, resp *protocol.QueryResponse) string {
+	sql := ""
+	version := ""
+	if req != nil {
+		sql = req.SQL
+		version = req.Version
+	}
+	if r := []rune(sql); len(r) > sqlLogMaxRunes {
+		sql = string(r[:sqlLogMaxRunes]) + "…"
+	}
+	sql = strings.ReplaceAll(sql, "\r\n", "\n")
+	sql = strings.TrimSpace(sql)
+
+	var b strings.Builder
+	b.WriteString("---- execute_sql ----\n")
+	fmt.Fprintf(&b, "  status    %s\n", resp.Status)
+	fmt.Fprintf(&b, "  queryId   %s\n", resp.QueryID)
+	if resp.Meta != nil {
+		fmt.Fprintf(&b, "  elapsed   %dms\n", resp.Meta.ElapsedMs)
+		if resp.Meta.App != "" {
+			fmt.Fprintf(&b, "  app       %s\n", resp.Meta.App)
+		}
+	}
+	if version != "" {
+		fmt.Fprintf(&b, "  dialect   %s\n", version)
+	}
+	if resp.Result != nil {
+		fmt.Fprintf(&b, "  rows      %d\n", len(resp.Result.Rows))
+	}
+	if resp.Error != nil {
+		fmt.Fprintf(&b, "  error     %s  %s\n", resp.Error.Code, resp.Error.Message)
+	}
+	b.WriteString("\n")
+	if sql == "" {
+		b.WriteString("  (empty sql)\n")
+	} else {
+		for _, line := range strings.Split(sql, "\n") {
+			b.WriteString("  ")
+			b.WriteString(strings.TrimRight(line, " \t"))
+			b.WriteByte('\n')
+		}
+	}
+	b.WriteString("--------------------\n")
+	return b.String()
+}
+
+// ExecuteSQL runs a query.
+func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (resp *protocol.QueryResponse) {
+	defer func() { logExecuteSQL(req, resp) }()
 	start := time.Now()
 	queryID := uuid.NewString()
 	mode := "sync"
@@ -128,6 +189,7 @@ type sqlScan struct {
 	selects []def.SelectItem
 }
 
+// planSQLScans implements runtime behavior for this package.
 func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sqlScan, *protocol.ProtocolError) {
 	if len(parsed.Tables) == 0 {
 		return nil, protocol.NewError(protocol.ErrInvalidSQL, "SELECT requires FROM with catalog tables", nil)

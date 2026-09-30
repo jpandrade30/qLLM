@@ -78,3 +78,20 @@ func TestContainsEscapesLikeWildcards(t *testing.T) {
 		t.Fatalf("escaped arg=%q", got)
 	}
 }
+
+func TestMSSQLTop(t *testing.T) {
+	e := &protocol.Entity{
+		Name:    "t",
+		Fields:  []protocol.Field{{Name: "id", Type: protocol.TypeString, Physical: "id"}},
+		Binding: protocol.Binding{Kind: "table", Schema: "dbo", Table: "t"},
+	}
+	built, err := sqlbuild.Build(sqlbuild.MSSQL, def.PushdownStep{
+		Entity: e, Select: []def.SelectItem{{Field: "id", As: "id"}}, Limit: 5,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(built.SQL, "TOP (5)") {
+		t.Fatalf("%s", built.SQL)
+	}
+}
