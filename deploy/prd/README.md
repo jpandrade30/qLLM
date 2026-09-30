@@ -2,7 +2,7 @@
 
 Pasta que o **`Dockerfile`** (não o `.dev`) copia para `/config`. É o caminho “gerar ficheiros de conexão e fazer build”. **Não** sobe Postgres/ClickHouse/Argo.
 
-Cópia inicial de [`deploy/image/config`](../image/config) (projecto `qllm-demo`). Troca hosts/`*Env`/entidades pelos teus. Campos: [`docs/field-reference.md`](../../docs/field-reference.md). Do zero: [`docs/from-scratch.md`](../../docs/from-scratch.md).
+Cópia inicial de [`deploy/image/config`](../image/config) (projecto `qllm-demo`). Troca hosts/`*Env`/entidades pelos teus. Campos: [`docs/pt/field-reference.md`](../../docs/pt/field-reference.md) ([EN](../../docs/en/field-reference.md)). Do zero: [`docs/pt/from-scratch.md`](../../docs/pt/from-scratch.md) ([EN](../../docs/en/from-scratch.md)).
 
 | Ficheiro | O que é |
 |----------|---------|
