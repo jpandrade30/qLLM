@@ -22,8 +22,12 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ### Fixed
 
-- Docker build image is `golang:1.26-bookworm` so `go mod download` matches `go.mod` (was 1.25 with `GOTOOLCHAIN=local`).
+- Docker build image is `golang:1.26.6-bookworm` so `go mod download` matches `go.mod` (was 1.25 with `GOTOOLCHAIN=local`).
 - PRD sim: `qllm:local` uses `imagePullPolicy: Never` so kubelet does not pull `docker.io/library/qllm:local`. Build with `nerdctl --namespace k8s.io`.
+
+### Security
+
+- Toolchain is **Go 1.26.6** so `govulncheck` stdlib findings against 1.26.0 (url/tls/http/x509/net/mail/xml/asn1) are closed. `golang.org/x/crypto` is **v0.56.0** (SSH DoS). Remaining module-only advisory GO-2026-5932 is `x/crypto/openpgp` (unmaintained, no fix; qLLM does not import it).
 
 ## [0.2.0] - 2026-09-29
 
@@ -42,6 +46,7 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ### Security
 
+- Toolchain is **Go 1.26.6** (`go.mod` + `golang:1.26.6-bookworm`) so `govulncheck` stdlib findings on 1.26.0 (url/tls/http/x509/net/mail/xml/asn1) are closed.
 - Bearer compare uses HMAC-SHA256 + `hmac.Equal` (fixed-size digest; no `len` short-circuit). ACL lookup always compares against every app key.
 - Demo tokens/passwords are not baked as literals in `deploy/image/config/qllm.env.yaml`; they come from process/compose env.
 

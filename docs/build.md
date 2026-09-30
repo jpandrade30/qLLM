@@ -2,7 +2,7 @@
 
 ## Go
 
-Requisito: **1.26+** (`go.mod`). Imagem: `golang:1.26-bookworm`.
+Requisito: **1.26.6+** (`go.mod`, `toolchain go1.26.6`). Imagem: `golang:1.26.6-bookworm`.
 
 ```bash
 go build -o qllm ./cmd/qllm

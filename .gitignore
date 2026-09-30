@@ -5,3 +5,4 @@
 tmp/
 *.log
 fixtures/seed/.venv/
+sonar-project.properties

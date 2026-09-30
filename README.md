@@ -150,7 +150,7 @@ tools = await client.get_tools()
 
 Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`. Each `execute_sql` writes a multiline block to stderr (`---- execute_sql ----` plus the SQL). MCP logs `---- mcp_tool ----` for the other two. Example: `kubectl logs -n qllm-prd deploy/qllm | findstr execute_sql`.
 
-Requires Go **1.26+** (`go.mod` and the image build stage `golang:1.26-bookworm`). `mcp-go` is pinned at **v0.48.0**.
+Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.6-bookworm`). `mcp-go` is pinned at **v0.48.0**.
 
 ### Experimental sources (0.2.0)
 
