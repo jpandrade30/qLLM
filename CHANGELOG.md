@@ -9,6 +9,7 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ### Added
 
+- `scripts/prd-tst-up` / `prd-tst-down` (`.ps1` / `.sh`) to apply or remove the fleet-ops Kubernetes sim.
 - `deploy/prd/` example YAML baked by the product `Dockerfile` (copy of harness shapes). Fleet-ops K8s sim lives in `deploy/prd-tst/`.
 - POSIX twins: `scripts/*.sh` for seed, CGO shell, and `prd-tst-*` port-forward/Argo.
 - `docs/` implementer manual: from-scratch, field reference, `Dockerfile` vs `.dev`.

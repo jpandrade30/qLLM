@@ -113,7 +113,7 @@ O que fazes:
 
 1. Substitui `deploy/prd-tst/config/*.yaml` **ou** muda os paths no kustomize.
 2. Segredos: [`deploy/prd-tst/k8s/secret.yaml`](../deploy/prd-tst/k8s/secret.yaml).
-3. `nerdctl --namespace k8s.io build -f Dockerfile.dev -t qllm:local .` então `kubectl apply -k deploy/prd-tst` e `rollout restart deploy/qllm`.
+3. `.\scripts\prd-tst-up.ps1` (ou `./scripts/prd-tst-up.sh`) / rebuild: `-SkipComposeDown`.
 4. Prova: `GET /v1/catalog` → project `fleet-ops` / `vehicles`.
 
 Args do pod: `serve --http --mcp-http --config-dir /config` ([`k8s/qllm.yaml`](../deploy/prd-tst/k8s/qllm.yaml)).

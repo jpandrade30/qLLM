@@ -87,7 +87,7 @@ nerdctl compose up --build
 
 HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Rebuild `test-api` if `fixtures/test-api/data.json` changed. SQL MCP goldens: `pytest fixtures/sqlcheck`.
 
-Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md). Optional **fleet-ops** Kubernetes sim: [`deploy/prd-tst/README.md`](deploy/prd-tst/README.md) (`kubectl apply -k deploy/prd-tst`). Port-forward: `.\scripts\prd-tst-port-forward.ps1` or `./scripts/prd-tst-port-forward.sh`. Do not run with compose. Goldens unchanged.
+Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md). Optional **fleet-ops** Kubernetes sim: [`deploy/prd-tst/README.md`](deploy/prd-tst/README.md). Up: `.\scripts\prd-tst-up.ps1` / `./scripts/prd-tst-up.sh` (compose down + image + apply). Down: `.\scripts\prd-tst-down.ps1` / `./scripts/prd-tst-down.sh`. Then port-forward: `.\scripts\prd-tst-port-forward.ps1`. Do not run with compose. Goldens unchanged.
 
 Standalone image (same compose network / `--network`):
 

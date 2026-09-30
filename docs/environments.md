@@ -43,13 +43,19 @@ Mundo **separado** (D18). Namespace `qllm-prd`. **Não** com compose ao mesmo te
 
 Guia: [`deploy/prd-tst/README.md`](../deploy/prd-tst/README.md).
 
-```bash
-nerdctl compose down -v
-nerdctl --namespace k8s.io build -f Dockerfile.dev -t qllm:local .
-kubectl apply -k deploy/prd-tst
+```powershell
+.\scripts\prd-tst-up.ps1
+.\scripts\prd-tst-port-forward.ps1
+.\scripts\prd-tst-down.ps1
 ```
 
-Port-forward (um processo, Ctrl+C mata todos):
+```bash
+./scripts/prd-tst-up.sh
+./scripts/prd-tst-port-forward.sh
+./scripts/prd-tst-down.sh
+```
+
+`prd-tst-up` faz compose down, build `qllm:local` (`k8s.io`) e `kubectl apply -k deploy/prd-tst`. Port-forward (um processo, Ctrl+C mata todos):
 
 ```powershell
 .\scripts\prd-tst-port-forward.ps1
@@ -72,6 +78,8 @@ Argo é **opcional**. Scripts:
 
 | Script | Função |
 |--------|--------|
+| `prd-tst-up.ps1` / `.sh` | Sobe fleet-ops (compose down + imagem + apply) |
+| `prd-tst-down.ps1` / `.sh` | Derruba overlay + Application Argo |
 | `prd-tst-argocd-up.ps1` / `.sh` | Instala Argo `--insecure` |
 | `prd-tst-argocd-password.ps1` / `.sh` | Password `admin` |
 | `prd-tst-argocd-register-app.ps1` / `.sh` | Application CR |

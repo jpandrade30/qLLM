@@ -2,13 +2,19 @@
 
 This is **not** the compose harness (`qllm-demo` / `customers` / `invoices`). It is a second world: Kubernetes namespace `qllm-prd`, project **`fleet-ops`**. Existing pytest/goldens/`docker-compose.yml` are unchanged.
 
-**Do not run at the same time as compose.** Tear down test containers first:
+**Do not run at the same time as compose.** From the repo root (Rancher Desktop Kubernetes on):
 
-```bash
-nerdctl compose down -v
+```powershell
+.\scripts\prd-tst-up.ps1
+.\scripts\prd-tst-port-forward.ps1
 ```
 
-Then build the same image the harness uses and apply this overlay (Rancher Desktop Kubernetes on).
+```bash
+./scripts/prd-tst-up.sh
+./scripts/prd-tst-port-forward.sh
+```
+
+`prd-tst-up` runs `nerdctl compose down -v`, builds `qllm:local` into the `k8s.io` namespace, applies this overlay, and waits for `deploy/qllm`. Skip those steps with `-SkipComposeDown` / `--skip-compose-down` and `-SkipBuild` / `--skip-build`.
 
 ## What you should see
 
@@ -20,8 +26,9 @@ Connectors exercised here: postgres, clickhouse, sqlite, dynamodb (local), rest.
 
 ## Apply without Argo
 
+Prefer `prd-tst-up`. Manual equivalent (harness binary via `Dockerfile.dev`; ConfigMap still mounts `deploy/prd-tst/config` over `/config`):
+
 ```bash
-# Harness binary (Dockerfile.dev). ConfigMap still mounts deploy/prd-tst/config over /config.
 nerdctl --namespace k8s.io build -f Dockerfile.dev -t qllm:local .
 kubectl apply -k deploy/prd-tst
 kubectl -n qllm-prd rollout restart deploy/qllm
@@ -125,11 +132,17 @@ kubectl logs -n qllm-prd deploy/qllm -f | Select-String "execute_sql|mcp_tool"
 
 ## Tear down PRD sim
 
-```bash
-kubectl delete -k deploy/prd-tst
-# if Argo created the app:
-kubectl -n argocd delete application qllm-prd-sim --ignore-not-found
+Stop port-forward first (Ctrl+C), then:
+
+```powershell
+.\scripts\prd-tst-down.ps1
 ```
+
+```bash
+./scripts/prd-tst-down.sh
+```
+
+That deletes the overlay, Application `qllm-prd-sim` if present, and namespace `qllm-prd`. It does **not** uninstall Argo CD.
 
 Then you can `nerdctl compose up --build` again for goldens.
 
