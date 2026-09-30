@@ -2,6 +2,8 @@
 
 Índice do planejamento. **Contratos (schemas) são a fonte da verdade** — código segue estes docs, não o contrário.
 
+Guia operacional (comandos, o que aceitar/recusar ao configurar à mão): [`docs/`](../docs/).
+
 | Doc | Conteúdo |
 |-----|----------|
 | [00-overview.md](00-overview.md) | Visão, problema, não-objetivos |

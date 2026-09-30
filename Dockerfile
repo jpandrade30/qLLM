@@ -12,7 +12,9 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /config
 COPY --from=build /out/qllm /usr/local/bin/qllm
-# Data-plane + serve config live only under deploy/image/config (not fixtures/).
+# Bake harness/demo YAML only (deploy/image/config). This is not fleet-ops and not
+# a customer project. Override at runtime: docker -v …:/config or K8s ConfigMap
+# on /config (deploy/prd). Rebuild after editing image/config; mounts hide these files.
 COPY deploy/image/config/qllm.preset.yaml deploy/image/config/qllm.catalog.yaml /config/
 COPY deploy/image/config/qllm.config.yaml deploy/image/config/qllm.env.yaml /config/
 

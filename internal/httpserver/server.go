@@ -90,14 +90,14 @@ func (s *Server) createSQL(w http.ResponseWriter, r *http.Request) {
 	if resp.Status == protocol.StatusFailed && resp.Error != nil {
 		status = httpStatus(resp.Error.Code)
 	}
-	attrs := []any{"queryId", resp.QueryID, "status", string(resp.Status)}
+	attrs := []any{"queryId", resp.QueryID, "status", string(resp.Status), "via", "http"}
 	if resp.Meta != nil {
 		attrs = append(attrs, "elapsedMs", resp.Meta.ElapsedMs, "app", resp.Meta.App)
 	}
 	if resp.Error != nil {
 		attrs = append(attrs, "error.code", string(resp.Error.Code))
 	}
-	s.logger().Info("execute_sql", attrs...)
+	s.logger().Info("http_execute_sql", attrs...)
 	writeJSON(w, status, resp)
 }
 

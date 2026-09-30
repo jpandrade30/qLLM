@@ -9,10 +9,12 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ### Added
 
+- `docs/` implementer manual: from-scratch checklist, every accepted YAML field, how to point `--config-dir` / Docker `/config` / `deploy/prd/config`, plus CLI/HTTP/SQL (contracts stay in `planning/`).
+- `execute_sql` logs a multiline block on stderr (status, queryId, SQL as written). MCP logs `how_to_use_me` / `describe_catalog` the same way.
 - `deploy/prd/` Kubernetes simulation of a separate **fleet-ops** system. Not the compose harness; do not run both at once.
 - `.\scripts\prd-port-forward.ps1` forwards qLLM, DBs, crew API, and Argo CD if present.
 - `.\scripts\prd-argocd-up.ps1` installs Argo CD with `--insecure` so `http://127.0.0.1:18081` is real HTTP (stock server is TLS even on Service port 80).
-- `.\scripts\prd-argocd-register-app.ps1` creates Application `qllm-prd-sim` (Argo UI is empty until this CR exists).
+- `.\scripts\prd-argocd-add-ssh-repo.ps1` copies an OpenSSH private key into an Argo `repository` Secret (git-gui/ssh-agent is not used in-cluster).
 
 ### Fixed
 

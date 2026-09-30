@@ -2,7 +2,7 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) and [CHANGELOG.md](CHANGELOG.md).
+Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md). Hand-authoring YAML from zero: [docs/from-scratch.md](docs/from-scratch.md), field list [docs/field-reference.md](docs/field-reference.md).
 
 ## Quick start (5 minutes)
 
@@ -148,7 +148,7 @@ client = MultiServerMCPClient({
 tools = await client.get_tools()
 ```
 
-Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`.
+Tools: `how_to_use_me`, `describe_catalog`, `execute_sql`. Each `execute_sql` writes a multiline block to stderr (`---- execute_sql ----` plus the SQL). MCP logs `---- mcp_tool ----` for the other two. Example: `kubectl logs -n qllm-prd deploy/qllm | findstr execute_sql`.
 
 Requires Go **1.26+** (`go.mod` and the image build stage `golang:1.26-bookworm`). `mcp-go` is pinned at **v0.48.0**.
 

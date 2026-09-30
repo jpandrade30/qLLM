@@ -86,7 +86,18 @@ Then register the app so it **appears in the UI** (this is a separate kubectl; k
 .\scripts\prd-argocd-register-app.ps1
 ```
 
-Refresh the Argo browser tab. You should see **qllm-prd-sim**. Do not use Git `HEAD` as revision (Argo error: *revision HEAD must be resolved*) — the register script sets `targetRevision` to your current branch. Push that branch (including `deploy/prd`) if it is only local. Private repo: Settings → Repositories.
+Refresh the Argo browser tab. You should see **qllm-prd-sim**. Do not use Git `HEAD` as revision.
+
+**SSH “no key found”:** the key in git-gui lives on **your PC**. Argo CD runs **inside the cluster** and does not use `ssh-agent`. Register the OpenSSH **private** key as a Secret:
+
+```powershell
+.\scripts\prd-argocd-add-ssh-repo.ps1
+# or: .\scripts\prd-argocd-add-ssh-repo.ps1 -KeyPath $env:USERPROFILE\.ssh\id_ed25519
+```
+
+Use the private key file, not `.pub`. PuTTY `.ppk` must be exported as OpenSSH in PuTTYgen. Then remove the broken repo entry in Argo **Settings → Repositories** (if you added SSH there without a key) and Refresh.
+
+Alternatively connect **HTTPS + PAT** in Settings → Repositories (`https://github.com/jpandrade30/qLLM.git`) and keep `repoURL` as HTTPS — no SSH needed.
 
 Password (`admin`):
 
@@ -97,6 +108,20 @@ Password (`admin`):
 (`prd-argocd-up.ps1` also prints it once.) If that Secret is gone, Argo was already reconfigured — reset with `argocd account update-password`.
 
 Local-only without Argo: fleet-ops still works with `kubectl apply -k deploy/prd`.
+
+## MCP Inspector (Streamable HTTP)
+
+URL: `http://127.0.0.1:18089/mcp` (keep `prd-port-forward` running). Transport: Streamable HTTP. Prefer **Via Proxy**.
+
+Custom header: name `Authorization`, value `Bearer fleet-prd-token`. **Enable the header toggle** — off means the token is not sent and the Inspector reports a generic proxy/token error.
+
+CORS on this sim is empty; **Direct** from the browser can fail even with a valid token.
+
+Watch agent SQL (needs an image rebuilt after this logging landed):
+
+```powershell
+kubectl logs -n qllm-prd deploy/qllm -f | Select-String "execute_sql|mcp_tool"
+```
 
 ## Tear down PRD sim
 
