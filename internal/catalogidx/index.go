@@ -83,7 +83,7 @@ func (idx *Index) Field(e *protocol.Entity, name string) (*protocol.Field, bool)
 
 // DefaultCapabilities implements runtime behavior for this package.
 func DefaultCapabilities(t protocol.SourceType) protocol.Capabilities {
-	switch t {
+	switch protocol.WireFamily(t) {
 	case protocol.SourcePostgres, protocol.SourceMySQL, protocol.SourceMSSQL, protocol.SourceSQLite, protocol.SourceClickHouse:
 		return protocol.Capabilities{
 			Filter: true, Project: true, Agg: true, GroupBy: true,

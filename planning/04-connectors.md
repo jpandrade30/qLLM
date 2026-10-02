@@ -6,6 +6,8 @@ Harness / CI: postgres, mysql, mongodb, rest.
 
 Experimental 0.2.0 (no compose, no goldens): mssql, sqlite, clickhouse, dynamodb, cassandra, ksql pull.
 
+Wire aliases (same driver as the parent, experimental, no harness): mysql → `mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`; postgres → `cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`.
+
 | Capacidade | postgres | mysql | mssql | sqlite | clickhouse | mongodb | rest | dynamodb | cassandra | ksql |
 |------------|----------|-------|-------|--------|------------|---------|------|----------|-----------|------|
 | filter | yes | yes | yes | yes | yes | yes | partial | partial (key eq) | partial (partition eq) | partial (key eq) |
@@ -26,13 +28,13 @@ Dynamo/Cassandra/ksql: missing `binding.accessPath` equality in WHERE → `UNSUP
 3. Se join cross-source ou REST/KV agg → fetch com filter/limit máximos → DuckDB.
 4. Se op pedida é impossível sem scan absurdo → `UNSUPPORTED` (não “puxar a tabela inteira”).
 
-Authoring (não é query): `qllm catalog from-openapi` gera entities `rest_resource` e um fragmento `options.resources` a partir de GET listáveis. O connector continua lendo só o YAML já no preset. `introspect` continua postgres/mysql only.
+Authoring (não é query): `qllm catalog from-openapi` gera entities `rest_resource` e um fragmento `options.resources` a partir de GET listáveis. O connector lê `list` e, quando o WHERE tem igualdade nos path params, `getById` (`{id}` é substituído). `list.itemsKey` escolhe a chave do array; `maxPages`/`pageSize` paginam por offset. `introspect` é postgres/mysql e os aliases de fio.
 
 ## Bindings físicos
 
 | type | `binding.kind` | Campos |
 |------|----------------|--------|
-| postgres/mysql/mssql/sqlite/clickhouse | `table` | `schema`, `table` (sqlite: `schema: main`) |
+| postgres/mysql (+ aliases)/mssql/sqlite/clickhouse | `table` | `schema`, `table` (sqlite: `schema: main`) |
 | mongodb | `collection` | `collection` |
 | rest | `rest_resource` | `resource` |
 | dynamodb | `table` | `table` + `accessPath.pk` / `partition`, optional `sk`/`sort` |

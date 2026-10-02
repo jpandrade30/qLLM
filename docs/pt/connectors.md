@@ -6,8 +6,8 @@ Matriz normativa: [`planning/04-connectors.md`](../../planning/04-connectors.md)
 
 | `type` | Harness/CI | Observações |
 |--------|------------|-------------|
-| `postgres` | sim | `sslMode`, `statementTimeoutMs` |
-| `mysql` | sim | |
+| `postgres` | sim | `sslMode`, `statementTimeoutMs`. Aliases: `cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift` |
+| `mysql` | sim | Aliases: `mariadb` `tidb` `vitess` `aurora_mysql` `planetscale` |
 | `mongodb` | sim | `uriEnv`, `database`; join na mesma fonte passa pelo DuckDB |
 | `rest` | sim | `baseUrlEnv`, auth `none`\|`bearer`\|`header`\|`basic`; agregações no DuckDB; `options.resources` |
 | `mssql` | experimental | `encrypt` |
@@ -19,7 +19,7 @@ Matriz normativa: [`planning/04-connectors.md`](../../planning/04-connectors.md)
 
 Experimental significa que o tipo está no binário, mas **não** tem Compose nem goldens neste repositório. Só considere que funciona depois de testar na sua própria instância.
 
-Não são suportados: Oracle, BigQuery, Snowflake, Elasticsearch, fonte GraphQL, S3 como tabela e similares.
+Não são um tipo próprio: Oracle, BigQuery, Snowflake, Elasticsearch, GraphQL, S3 como tabela. Muitas APIs HTTP JSON usam `rest`.
 
 ## Binding no catálogo
 
@@ -39,7 +39,7 @@ Um Query IR **sem** igualdade na chave KV ou de stream retorna `UNSUPPORTED`; o 
 - **Escritas:** nunca.
 - **Join na mesma fonte:** engines SQL fazem pushdown; mongo, rest e KV buscam os dados e fazem o join no DuckDB.
 - **Join entre fontes:** sempre no DuckDB.
-- **REST:** só filtros `eq`, `limit` e `offset` chegam à API (como query params); uma requisição, sem paginação; agregações rodam no DuckDB. `getById` é só documentação. Veja [`resources` do REST em detalhe](field-reference.md#resources-do-rest-em-detalhe).
+- **REST:** filtros `eq`, `limit` e `offset` chegam à API; `getById` roda quando os path params estão preenchidos; `maxPages` pagina por offset; agregações no DuckDB. Veja [`resources` do REST em detalhe](field-reference.md#resources-do-rest-em-detalhe).
 - **Timeout:** `min(options.timeoutMs|statementTimeoutMs, limits.maxSourceMs)` mais cancelamento do contexto.
 
 No **caminho de SQL de catálogo**, o runtime busca um conjunto mais amplo e o DuckDB faz o trabalho. A matriz de pushdown do IR **não** se aplica ao `WHERE` do SQL.
@@ -55,7 +55,7 @@ No **caminho de SQL de catálogo**, o runtime busca um conjunto mais amplo e o D
 
 ## Criação do catálogo
 
-- `qllm catalog introspect`: **somente postgres e mysql**.
+- `qllm catalog introspect`: postgres, mysql e os aliases de fio.
 - `qllm catalog from-openapi`: gera um rascunho REST; você precisa colar `resources` no preset.
 
 A descoberta automática de "sample collection" do Mongo está fora do escopo deste MVP.

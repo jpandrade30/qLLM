@@ -100,7 +100,7 @@ func OpenPostgres(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	db.SetMaxOpenConns(5)
 	db.SetConnMaxLifetime(30 * time.Minute)
 	return &SQLConnector{
-		id: src.ID, srcType: protocol.SourcePostgres, db: db,
+		id: src.ID, srcType: src.Type, db: db,
 		dialect: sqlbuild.Postgres,
 		caps: def.Caps{
 			Filter: true, Project: true, Agg: true, GroupBy: true,
@@ -151,7 +151,7 @@ func OpenMySQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	db := sql.OpenDB(connector)
 	db.SetMaxOpenConns(5)
 	return &SQLConnector{
-		id: src.ID, srcType: protocol.SourceMySQL, db: db,
+		id: src.ID, srcType: src.Type, db: db,
 		dialect: sqlbuild.MySQL,
 		caps: def.Caps{
 			Filter: true, Project: true, Agg: true, GroupBy: true,

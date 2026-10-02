@@ -52,7 +52,20 @@
             "clickhouse",
             "dynamodb",
             "cassandra",
-            "ksql"
+            "ksql",
+            "mariadb",
+            "tidb",
+            "vitess",
+            "aurora_mysql",
+            "planetscale",
+            "cockroach",
+            "yugabyte",
+            "alloydb",
+            "aurora_postgres",
+            "neon",
+            "supabase",
+            "timescale",
+            "redshift"
           ]
         },
         "connection": { "type": "object" },
@@ -60,11 +73,7 @@
       },
       "allOf": [
         {
-          "if": { "properties": { "type": { "const": "postgres" } } },
-          "then": { "properties": { "connection": { "$ref": "#/$defs/sqlConnection" } } }
-        },
-        {
-          "if": { "properties": { "type": { "const": "mysql" } } },
+          "if": { "properties": { "type": { "enum": ["postgres", "cockroach", "yugabyte", "alloydb", "aurora_postgres", "neon", "supabase", "timescale", "redshift", "mysql", "mariadb", "tidb", "vitess", "aurora_mysql", "planetscale"] } } },
           "then": { "properties": { "connection": { "$ref": "#/$defs/sqlConnection" } } }
         },
         {

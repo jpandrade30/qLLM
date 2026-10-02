@@ -50,7 +50,7 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 	for _, s := range p.Sources {
 		var c def.Connector
 		var err error
-		switch s.Type {
+		switch protocol.WireFamily(s.Type) {
 		case protocol.SourcePostgres:
 			c, err = sqldb.OpenPostgres(s, maxSourceMs)
 		case protocol.SourceMySQL:
@@ -98,19 +98,21 @@ func validateReadOnlyREST(p *protocol.Preset) error {
 		resources, _ := s.Options["resources"].(map[string]any)
 		for name, raw := range resources {
 			resDef, _ := raw.(map[string]any)
-			list, _ := resDef["list"].(map[string]any)
-			if list == nil {
-				continue
-			}
-			method, _ := list["method"].(string)
-			if method == "" {
-				method = http.MethodGet
-			}
-			m := strings.ToUpper(method)
-			if m != http.MethodGet && m != http.MethodHead {
-				return protocol.NewError(protocol.ErrConfigError,
-					fmt.Sprintf("readOnly preset forbids REST resource %q method %s on source %s", name, m, s.ID),
-					map[string]any{"source": s.ID, "resource": name, "method": m})
+			for _, opName := range []string{"list", "getById"} {
+				op, _ := resDef[opName].(map[string]any)
+				if op == nil {
+					continue
+				}
+				method, _ := op["method"].(string)
+				if method == "" {
+					method = http.MethodGet
+				}
+				m := strings.ToUpper(method)
+				if m != http.MethodGet && m != http.MethodHead {
+					return protocol.NewError(protocol.ErrConfigError,
+						fmt.Sprintf("readOnly preset forbids REST resource %q %s method %s on source %s", name, opName, m, s.ID),
+						map[string]any{"source": s.ID, "resource": name, "method": m})
+				}
 			}
 		}
 	}

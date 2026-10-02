@@ -220,6 +220,12 @@ func TestPresetExperimentalSourceTypes(t *testing.T) {
 			{ID: "local_sqlite", Type: protocol.SourceSQLite, Connection: map[string]any{"pathEnv": "QLLM_SQLITE_PATH"}},
 			{ID: "items_ddb", Type: protocol.SourceDynamoDB, Connection: map[string]any{"region": "us-east-1"}},
 			{ID: "ks", Type: protocol.SourceKSQL, Connection: map[string]any{"baseUrlEnv": "QLLM_KSQL_URL"}},
+			{ID: "crdb", Type: protocol.SourceCockroach, Connection: map[string]any{
+				"hostEnv": "H", "port": 26257, "database": "app", "userEnv": "U", "passwordEnv": "P",
+			}},
+			{ID: "maria", Type: protocol.SourceMariaDB, Connection: map[string]any{
+				"hostEnv": "H", "port": 3306, "database": "app", "userEnv": "U", "passwordEnv": "P",
+			}},
 		},
 	}
 	if err := validate.Preset(p); err != nil {

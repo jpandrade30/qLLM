@@ -5,6 +5,18 @@ All notable changes to qLLM are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses currently advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid.
 
+## [Unreleased]
+
+### Added
+
+- Experimental wire-compatible source types (same driver as the parent, no harness): MySQL family `mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`; Postgres family `cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`.
+- REST `getById` is executed when every `{name}` in the path has an `eq` filter. `list.itemsKey` (or resource-level) picks the JSON array key; `maxPages` / `pageSize` / `limitParam` / `offsetParam` walk offset pages (capped at 20).
+- `scripts/init-standalone.py` (`.ps1` / `.sh` wrappers) writes a slim folder (`qllm-<user>`) with the Go runtime, blank SQLite YAML, and a Dockerfile so the project can be hosted without harness or docs.
+
+### Changed
+
+- Root README is reorganized (why, how it works, connector table, quick start, configuration, serving, containers, behavior, development).
+
 ## [0.2.0] - 2026-09-30
 
 ### Added

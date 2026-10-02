@@ -1,6 +1,6 @@
 # 03 — Protocol Schemas (fonte da verdade)
 
-`protocolVersion`: **0.2.0** (additive; **0.1.0** preset/catalog/IR files remain valid). New experimental source types: `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (pull). No harness coverage.
+`protocolVersion`: **0.2.0** (additive; **0.1.0** preset/catalog/IR files remain valid). Experimental source types: `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (pull), plus MySQL-wire aliases (`mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`) and Postgres-wire aliases (`cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`). No harness coverage for experimental types.
 
 Todos os exemplos abaixo são normativos para o MVP. JSON Schema máquina-legível: [`schemas/`](schemas/).
 
@@ -298,7 +298,7 @@ sources:
 | `limits` | object | ver abaixo |
 | `sources` | array | min 1 |
 | `sources[].id` | string | `[a-z][a-z0-9_]*` |
-| `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` \| `mssql` \| `sqlite` \| `clickhouse` \| `dynamodb` \| `cassandra` \| `ksql` |
+| `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` \| `mssql` \| `sqlite` \| `clickhouse` \| `dynamodb` \| `cassandra` \| `ksql` \| MySQL-wire aliases (`mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`) \| Postgres-wire aliases (`cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`) |
 | `sources[].connection` | object | por tipo (ver schemas) |
 
 ### `limits`

@@ -48,13 +48,13 @@ Obligatorios: `id`, `type`, `connection`.
 | Campo | Tipo | Valores |
 |-------|------|---------|
 | `id` | cadena | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` más alias de cable MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) y Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | La forma depende del `type` (abajo). Las claves adicionales son un error |
 | `options` | object | Libre en el JSON schema; el runtime lee solo lo que conoce (abajo) |
 
 ### `connection` según `type`
 
-**postgres** y **mysql** (`sqlConnection`): obligatorios `hostEnv`, `port`, `database`, `userEnv`, `passwordEnv`.
+**postgres**, **mysql** y sus alias de cable (`sqlConnection`): obligatorios `hostEnv`, `port`, `database`, `userEnv`, `passwordEnv`.
 
 | Campo | Tipo | Notas |
 |-------|------|-------|
@@ -94,7 +94,7 @@ Obligatorio: `type`.
 
 | Clave | Se aplica a | Por defecto | Significado |
 |-------|-------------|-------------|-------------|
-| `statementTimeoutMs` | postgres, mysql, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Timeout del statement. Vale el **menor** entre `statementTimeoutMs`, `timeoutMs` y `maxSourceMs` |
+| `statementTimeoutMs` | postgres, mysql, alias, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Timeout del statement. Vale el **menor** entre `statementTimeoutMs`, `timeoutMs` y `maxSourceMs` |
 | `timeoutMs` | SQL (misma regla), REST, ksql | REST 10000, ksql 12000 | Timeout del cliente HTTP en REST y ksql. En SQL es un segundo tope, como `statementTimeoutMs` |
 | `resources` | REST, **obligatorio** para consultar | ninguno | Mapa de nombre de recurso a operaciones `list` / `getById` (ver abajo) |
 
@@ -124,33 +124,36 @@ Cada clave de `resources` es el nombre de un recurso. Una entidad del catálogo 
 
 | Operación | Obligatoria | Para qué sirve |
 |-----------|-------------|----------------|
-| `list` | sí | La petición que el runtime envía en **cada** consulta de la entidad |
-| `getById` | no | Documenta cómo obtener un solo elemento. `from-openapi` la genera a partir de rutas con `{id}`. **El runtime no la llama hoy** |
+| `list` | sí* | Se usa cuando `getById` no puede ejecutarse (faltan path params). Obligatoria si alguna consulta no es por id |
+| `getById` | no | Se usa cuando cada `{nombre}` de `path` tiene un filtro `eq`. `from-openapi` la genera a partir de rutas con `{id}` |
 
 Campos de cada operación (`list` y `getById`):
 
 | Campo | Tipo | Por defecto | Significado |
 |-------|------|-------------|-------------|
 | `method` | string | `GET` | Método HTTP. Con `limits.readOnly: true` solo se aceptan `GET` y `HEAD`; otro método falla al iniciar con `CONFIG_ERROR` |
-| `path` | string | ninguno | Se concatena a la URL base de `baseUrlEnv` (se quita la `/` final de la base). Empieza con `/` |
+| `path` | string | ninguno | Se concatena a la URL base de `baseUrlEnv` (se quita la `/` final de la base). Empieza con `/`. `{nombre}` se sustituye con filtros `eq` en `getById` |
 | `queryParams` | lista de strings | ninguno | Parámetros de query que acepta la API. Documenta qué filtros existen; `from-openapi` lo rellena. El runtime **no** lo valida |
+| `itemsKey` | string | `data`/`items`/`results`/`users` (list) o `data`/`item`/`result` (getById) | Clave JSON del array o del objeto. También vale en el recurso |
+| `maxPages` | int | 1 | Páginas por offset (`list`). Tope 20 |
+| `pageSize` | int | el `limit` de la consulta | Tamaño de página enviado en el parámetro de limit cuando `maxPages` > 1 |
+| `limitParam` | string | `limit` | Nombre del parámetro de tamaño de página |
+| `offsetParam` | string | `offset` | Nombre del parámetro de offset |
 
-Por qué `getById` parece sin uso: qLLM no tiene una llamada "obtener por id". Para leer un elemento, filtra el listado:
+Ejemplo de `getById`: `WHERE id = '42'` con `path: /users/{id}` se convierte en `GET /users/42`. Los demás `eq` quedan como query params. Si falta un placeholder, el runtime usa `list`.
 
 ```sql
 SELECT id, email FROM users WHERE id = '42' LIMIT 1
 ```
 
-El runtime envía `GET /users?id=42&limit=1`. Solo funciona si el endpoint de listado de la API acepta `id` como parámetro de query; por eso añádelo a `list.queryParams`. Un `{id}` en `path` **no** se sustituye.
-
 Cómo una consulta se convierte en petición HTTP:
 
 - **Columnas:** cada campo seleccionado se lee del elemento de la respuesta por su nombre `physical`. Solo se leen claves de primer nivel; un `physical` con punto, como `addr.city`, no devuelve nada en REST.
-- **`WHERE`:** solo se envía `eq` (y `eq` combinados con `and`), como `?<campo>=<valor>`. El nombre del parámetro es el nombre **lógico** del campo tal como se escribió en la consulta; mantén iguales el nombre lógico y el físico en los campos que filtras. Otro operador (`neq`, `gt`, `in`, `contains`, …) no se empuja al conector REST y allí devuelve `UNSUPPORTED`.
-- **`LIMIT` / `OFFSET`:** se envían como parámetros `limit` y `offset`. La API debe aceptar esos nombres.
-- **Paginación:** el runtime hace una sola petición y **no** sigue enlaces a la página siguiente.
+- **`WHERE`:** solo se envía `eq` (y `eq` combinados con `and`), como `?<campo>=<valor>` (o path param en `getById`). El nombre del parámetro es el nombre **lógico** del campo; mantén iguales el nombre lógico y el físico en los campos que filtras. Otro operador (`neq`, `gt`, `in`, `contains`, …) no se empuja al conector REST y allí devuelve `UNSUPPORTED`.
+- **`LIMIT` / `OFFSET`:** se envían como `limitParam` / `offsetParam` (por defecto `limit` y `offset`).
+- **Paginación:** `maxPages: 1` (por defecto) es una petición. Valores mayores recorren el offset hasta una página corta, el límite de filas o 20 páginas.
 - **Agregaciones:** nunca se empujan; se ejecutan en DuckDB.
-- **Forma de la respuesta:** un array JSON, o un objeto cuya clave `data`, `items`, `results` o `users` contiene el array. Cualquier otra cosa devuelve `SOURCE_ERROR`.
+- **Forma de la respuesta:** un array JSON, o un objeto cuya `itemsKey` (o las claves por defecto) contiene el array. `getById` también acepta un objeto suelto.
 - **Errores:** un estado HTTP 400 o mayor devuelve `SOURCE_ERROR`; una respuesta mayor que `serve.maxRestResponseBytes` se rechaza; superar el timeout devuelve `TIMEOUT`.
 
 Ejemplo completo con las dos operaciones:

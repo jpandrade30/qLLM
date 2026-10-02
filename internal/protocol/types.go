@@ -66,7 +66,35 @@ const (
 	SourceDynamoDB   SourceType = "dynamodb"
 	SourceCassandra  SourceType = "cassandra"
 	SourceKSQL       SourceType = "ksql"
+
+	SourceMariaDB     SourceType = "mariadb"
+	SourceTiDB        SourceType = "tidb"
+	SourceVitess      SourceType = "vitess"
+	SourceAuroraMySQL SourceType = "aurora_mysql"
+	SourcePlanetScale SourceType = "planetscale"
+
+	SourceCockroach      SourceType = "cockroach"
+	SourceYugabyte       SourceType = "yugabyte"
+	SourceAlloyDB        SourceType = "alloydb"
+	SourceAuroraPostgres SourceType = "aurora_postgres"
+	SourceNeon           SourceType = "neon"
+	SourceSupabase       SourceType = "supabase"
+	SourceTimescale      SourceType = "timescale"
+	SourceRedshift       SourceType = "redshift"
 )
+
+// WireFamily maps a source type to the driver it reuses (itself if none).
+func WireFamily(t SourceType) SourceType {
+	switch t {
+	case SourceMariaDB, SourceTiDB, SourceVitess, SourceAuroraMySQL, SourcePlanetScale:
+		return SourceMySQL
+	case SourceCockroach, SourceYugabyte, SourceAlloyDB, SourceAuroraPostgres,
+		SourceNeon, SourceSupabase, SourceTimescale, SourceRedshift:
+		return SourcePostgres
+	default:
+		return t
+	}
+}
 
 type Source struct {
 	ID         string         `json:"id" yaml:"id"`

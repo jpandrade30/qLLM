@@ -64,7 +64,7 @@ func IntrospectSQL(ctx context.Context, preset *protocol.Preset, sourceID string
 	var conn *sqldb.SQLConnector
 	var err error
 	var q string
-	switch src.Type {
+	switch protocol.WireFamily(src.Type) {
 	case protocol.SourcePostgres:
 		conn, err = sqldb.OpenPostgres(*src, maxSourceMs)
 		q = pgColumnsSQL
@@ -73,7 +73,7 @@ func IntrospectSQL(ctx context.Context, preset *protocol.Preset, sourceID string
 		q = mysqlColumnsSQL
 	default:
 		return nil, protocol.NewError(protocol.ErrUnsupported,
-			"catalog introspect supports postgres and mysql only", map[string]any{"source": sourceID, "type": string(src.Type)})
+			"catalog introspect supports postgres/mysql and their wire aliases only", map[string]any{"source": sourceID, "type": string(src.Type)})
 	}
 	if err != nil {
 		return nil, err
