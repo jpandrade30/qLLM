@@ -1,5 +1,9 @@
 # qLLM
 
+<p align="center">
+  <img src="StudyingCat.png" alt="A cat studying at a laptop screen" width="360">
+</p>
+
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
 Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
