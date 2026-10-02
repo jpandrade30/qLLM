@@ -48,7 +48,7 @@ Obrigatórios: `id`, `type`, `connection`.
 | Campo | Tipo | Valores |
 |-------|------|---------|
 | `id` | string | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` e aliases de fio MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) e Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` e aliases de fio MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) e Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | O formato depende do `type` (abaixo). Chaves extras são erro |
 | `options` | object | Livre no JSON schema; o runtime lê apenas o que conhece (abaixo) |
 
@@ -78,6 +78,10 @@ Obrigatórios: `id`, `type`, `connection`.
 **dynamodb**: obrigatório `region` (valor literal, por exemplo `us-east-1`). Opcional `endpointEnv` (Dynamo Local). As credenciais da AWS vêm da cadeia de credenciais do processo, não de campos do YAML.
 
 **cassandra**: o schema exige `keyspace`. Na prática, o código usa `hostsEnv` (uma lista) **ou** `hostEnv`. Opcionais: `port`, `userEnv`, `passwordEnv`.
+
+**redis**: `addrEnv` ou `hostEnv`+`port`. Opcionais: `db`, `userEnv`, `passwordEnv`, `tls`, `readReplica`.
+
+**kafka**: obrigatório `brokersEnv`. Opcionais: `tls`, `sasl` (`none`/`plain`/`scram`), `userEnv`, `passwordEnv`. Options: `timeoutMs`, `maxRecords`, `maxScanRecords`.
 
 ### `connection.auth` (REST / ksql)
 
@@ -210,6 +214,8 @@ Obrigatório: `kind`.
 | `table` | `schema`, `table` | postgres/mysql/mssql/sqlite (`schema: main`)/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest; uma chave de `options.resources` |
+| `key` | `keyPattern`, `accessPath.partition` | redis (`user:{id}`) |
+| `topic` | `topic`, `accessPath` (partition / `key` / timestamp) | kafka |
 
 `schema` / `table` / `collection` / `resource`: `^[A-Za-z_][A-Za-z0-9_]*$`.
 

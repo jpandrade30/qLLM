@@ -62,6 +62,8 @@ Harness / CI covers **postgres**, **mysql**, **mongodb**, and **rest**. Everythi
 | `dynamodb` | experimental | key equality, project, limit | `binding.accessPath` pk/sk required or `UNSUPPORTED` |
 | `cassandra` | experimental | partition equality, project, limit | `accessPath.partition` required or `UNSUPPORTED` |
 | `ksql` | experimental | key equality, project, limit | **pull only**; `accessPath.ksqlKey` required or `UNSUPPORTED` |
+| `redis` | experimental | key equality, project, limit | `binding.kind: key` + `keyPattern`; GET/HGETALL/LRANGE/SSCAN/ZRANGE/XRANGE only; never deletes, pops, or `KEYS` |
+| `kafka` | experimental | partition+offset / key / time | `binding.kind: topic`; no consumer group, no offset commit; JSON/raw values; never produces |
 
 Wire-compatible aliases (same driver and connection shape as the parent; experimental, no harness):
 

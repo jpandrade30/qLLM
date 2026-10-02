@@ -12,6 +12,7 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 - Experimental wire-compatible source types (same driver as the parent, no harness): MySQL family `mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`; Postgres family `cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`.
 - REST `getById` is executed when every `{name}` in the path has an `eq` filter. `list.itemsKey` (or resource-level) picks the JSON array key; `maxPages` / `pageSize` / `limitParam` / `offsetParam` walk offset pages (capped at 20).
 - `scripts/init-standalone.py` (`.ps1` / `.sh` wrappers) writes a slim folder (`qllm-<user>`) with the Go runtime, blank SQLite YAML, and a Dockerfile so the project can be hosted without harness or docs.
+- Experimental read-only `redis` and `kafka` sources (D19): Redis allowlists GET/HGETALL/LRANGE/SSCAN/ZRANGE/XRANGE; Kafka fetches without a consumer group or offset commit. Missing key/offset predicates return `UNSUPPORTED`. No harness.
 
 ### Changed
 

@@ -110,3 +110,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** Compose, seeds e `fixtures/` existem para **provar** o runtime. O processo qLLM **só vê** preset/catalog/config/access/env do `--config-dir` (ou `--preset`+`--catalog` / `--project` / CWD com esses arquivos). Sem YAML descrevendo fonte/entidade/host, isso **não existe** para `describe_catalog`, IR ou SQL.
 - **Por quê:** Se o binário ou defaults de produção incorporarem DNS `postgres`, entidades `invoices` do demo, token `change-me`, o próximo ambiente real quebra ou finge que o demo é o produto.
 - **Consequência:** Zero lista de hosts/entidades de demo em `internal/`. Sem YAML válido → `CONFIG_ERROR`, nunca fallback para `fixtures/`. A imagem **deste repo** bakeia `deploy/image/config` (o “projeto” desta instância de harness). `fixtures/` não descreve schema. Produção: outro diretório/ConfigMap, não reutilizar seed/compose. Introspect/from-openapi escrevem no config-dir alvo.
+
+### D19 — Fontes chave/stream são só leitura e não destrutivas
+
+- **Decisão:** `redis` e `kafka` (experimentais, sem harness) leem sem alterar dado, chave, offset, grupo ou TTL. Redis: allowlist `GET`/`HGET*`/`HGETALL`/`LRANGE`/`SSCAN`/`ZRANGE`/`XRANGE`/`TYPE`/`EXISTS`; nunca `DEL`/`SET`/`POP*`/`XACK`/`KEYS`. Kafka: fetch direto na partição **sem** consumer group, sem `CommitOffsets`, sem produce. Query sem igualdade no `accessPath` (Redis key; Kafka partition+offset, key, ou timestamp) → `UNSUPPORTED`.
+- **Por quê:** Consumer group commita offset no broker; `XACK`/`DEL`/`SET` mudam o store. O agente não pode “marcar como lido” nem apagar.
+- **Consequência:** ACL recomendada no Redis/Kafka (só Read/Describe) é a barreira real; o runtime é a segunda. Sem Avro/Protobuf no Kafka (fase 1: JSON/raw). Sem `SCAN`/`KEYS` no Redis. Sem compose.

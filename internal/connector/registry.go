@@ -8,8 +8,10 @@ import (
 	"qLLM/internal/connector/cassandra"
 	"qLLM/internal/connector/def"
 	"qLLM/internal/connector/dynamodb"
+	"qLLM/internal/connector/kafka"
 	"qLLM/internal/connector/ksql"
 	"qLLM/internal/connector/mongo"
+	"qLLM/internal/connector/redis"
 	"qLLM/internal/connector/rest"
 	"qLLM/internal/connector/sqldb"
 	"qLLM/internal/protocol"
@@ -74,6 +76,10 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 			c, err = cassandra.Open(s)
 		case protocol.SourceKSQL:
 			c, err = ksql.Open(s)
+		case protocol.SourceRedis:
+			c, err = redis.Open(s)
+		case protocol.SourceKafka:
+			c, err = kafka.Open(s)
 		default:
 			err = protocol.NewError(protocol.ErrConfigError, "unknown source type: "+string(s.Type), nil)
 		}

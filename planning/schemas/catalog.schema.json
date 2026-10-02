@@ -67,7 +67,7 @@
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["table", "collection", "rest_resource"]
+          "enum": ["table", "collection", "rest_resource", "key", "topic"]
         },
         "schema": {
           "type": "string",
@@ -85,6 +85,8 @@
           "type": "string",
           "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
         },
+        "keyPattern": { "type": "string", "minLength": 1 },
+        "topic": { "type": "string", "minLength": 1 },
         "accessPath": { "$ref": "#/$defs/accessPath" }
       },
       "allOf": [
@@ -99,13 +101,21 @@
         {
           "if": { "properties": { "kind": { "const": "rest_resource" } } },
           "then": { "required": ["resource"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "key" } } },
+          "then": { "required": ["keyPattern"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "topic" } } },
+          "then": { "required": ["topic"] }
         }
       ]
     },
     "accessPath": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Required predicates for dynamodb/cassandra/ksql pull. Missing eq on these fields → UNSUPPORTED (no table scan).",
+      "description": "Required predicates for dynamodb/cassandra/ksql/redis/kafka. Missing eq on these fields → UNSUPPORTED (no table scan).",
       "properties": {
         "partition": {
           "type": "array",
@@ -117,7 +127,8 @@
         },
         "sort": { "type": "string", "minLength": 1 },
         "sk": { "type": "string", "minLength": 1 },
-        "ksqlKey": { "type": "string", "minLength": 1 }
+        "ksqlKey": { "type": "string", "minLength": 1 },
+        "key": { "type": "string", "minLength": 1 }
       }
     },
     "field": {

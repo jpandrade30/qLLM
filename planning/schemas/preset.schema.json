@@ -53,6 +53,8 @@
             "dynamodb",
             "cassandra",
             "ksql",
+            "redis",
+            "kafka",
             "mariadb",
             "tidb",
             "vitess",
@@ -107,6 +109,14 @@
         {
           "if": { "properties": { "type": { "const": "ksql" } } },
           "then": { "properties": { "connection": { "$ref": "#/$defs/ksqlConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "redis" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/redisConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "kafka" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/kafkaConnection" } } }
         }
       ]
     },
@@ -199,6 +209,32 @@
         "hostsEnv": { "type": "string", "minLength": 1 },
         "keyspace": { "type": "string", "minLength": 1 },
         "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "userEnv": { "type": "string", "minLength": 1 },
+        "passwordEnv": { "type": "string", "minLength": 1 }
+      }
+    },
+    "redisConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "addrEnv": { "type": "string", "minLength": 1 },
+        "hostEnv": { "type": "string", "minLength": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "db": { "type": "integer", "minimum": 0 },
+        "userEnv": { "type": "string", "minLength": 1 },
+        "passwordEnv": { "type": "string", "minLength": 1 },
+        "tls": { "type": "boolean" },
+        "readReplica": { "type": "boolean" }
+      }
+    },
+    "kafkaConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brokersEnv"],
+      "properties": {
+        "brokersEnv": { "type": "string", "minLength": 1 },
+        "tls": { "type": "boolean" },
+        "sasl": { "type": "string", "enum": ["none", "plain", "scram"] },
         "userEnv": { "type": "string", "minLength": 1 },
         "passwordEnv": { "type": "string", "minLength": 1 }
       }

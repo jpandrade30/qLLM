@@ -16,6 +16,8 @@ Matriz normativa: [`planning/04-connectors.md`](../../planning/04-connectors.md)
 | `dynamodb` | experimental | credenciais AWS e `region`; `endpointEnv` (Local); `accessPath` pk/sk |
 | `cassandra` | experimental | `hostEnv`/`hostsEnv`, keyspace; `accessPath.partition` |
 | `ksql` | experimental | **somente pull queries**; `baseUrlEnv`; `accessPath.ksqlKey` |
+| `redis` | experimental | `addrEnv` ou `hostEnv`+`port`; `binding.kind: key` + `keyPattern`; nunca altera chaves |
+| `kafka` | experimental | `brokersEnv`; `binding.kind: topic`; sem grupo, sem commit; JSON/raw |
 
 Experimental significa que o tipo está no binário, mas **não** tem Compose nem goldens neste repositório. Só considere que funciona depois de testar na sua própria instância.
 
@@ -31,6 +33,8 @@ Não são um tipo próprio: Oracle, BigQuery, Snowflake, Elasticsearch, GraphQL,
 | dynamodb | `table` | `table` e `accessPath.pk`/`partition`, `sk`/`sort` opcional |
 | cassandra | `table` | `table` e `accessPath.partition` (nomes **lógicos**) |
 | ksql | `table` | `table` e `accessPath.ksqlKey` |
+| redis | `key` | `keyPattern` (`user:{id}`) e `accessPath.partition` |
+| kafka | `topic` | `topic` e igualdade em partition+offset, `accessPath.key` ou timestamp |
 
 Um Query IR **sem** igualdade na chave KV ou de stream retorna `UNSUPPORTED`; o runtime nunca faz varredura completa.
 
@@ -52,6 +56,8 @@ No **caminho de SQL de catálogo**, o runtime busca um conjunto mais amplo e o D
 - REST e ksql: `none` / `bearer` / `header` / `basic`.
 - Dynamo: cadeia de credenciais da AWS; `region` é um valor literal.
 - Cassandra: host(s) mais usuário e senha opcionais.
+- Redis: `addrEnv`; user/password/tls opcionais. Prefira ACL só com get/hget/hgetall/lrange/sscan/zrange/xrange/type/exists.
+- Kafka: `brokersEnv`; TLS/SASL opcionais. Prefira `Read`+`Describe` no tópico e **sem** grupo. Fase 1: JSON/raw.
 
 ## Criação do catálogo
 

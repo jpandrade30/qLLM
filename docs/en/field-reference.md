@@ -48,7 +48,7 @@ Required: `id`, `type`, `connection`.
 | Field | Type | Values |
 |-------|------|--------|
 | `id` | string | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` plus MySQL-wire aliases (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) and Postgres-wire aliases (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` plus MySQL-wire aliases (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) and Postgres-wire aliases (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | Shape depends on `type` (below). Extra keys are an error |
 | `options` | object | Free-form in the JSON schema; the runtime reads only what it knows (below) |
 
@@ -79,6 +79,10 @@ Required: `id`, `type`, `connection`.
 
 **cassandra**: the schema requires `keyspace`. In practice the code uses `hostsEnv` (a list) **or** `hostEnv`. Optional: `port`, `userEnv`, `passwordEnv`.
 
+**redis**: `addrEnv` or `hostEnv`+`port`. Optional: `db`, `userEnv`, `passwordEnv`, `tls`, `readReplica` (documented hint; the driver does not send writes).
+
+**kafka**: required `brokersEnv`. Optional: `tls`, `sasl` (`none`/`plain`/`scram`), `userEnv`, `passwordEnv`. Options: `timeoutMs`, `maxRecords`, `maxScanRecords`.
+
 ### `connection.auth` (REST / ksql)
 
 Required: `type`.
@@ -95,7 +99,7 @@ Required: `type`.
 | Key | Applies to | Default | Meaning |
 |-----|------------|---------|---------|
 | `statementTimeoutMs` | postgres, mysql, their aliases, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Statement timeout. The effective value is the **smallest** of `statementTimeoutMs`, `timeoutMs`, and `maxSourceMs` |
-| `timeoutMs` | SQL sources (same rule as above), REST, ksql | REST 10000, ksql 12000 | HTTP client timeout for REST and ksql. For SQL it is a second cap, like `statementTimeoutMs` |
+| `timeoutMs` | SQL sources (same rule as above), REST, ksql, redis, kafka | REST 10000, ksql/kafka 12000, redis 10000 | Client timeout |
 | `resources` | REST, **required** to query | none | Map of resource name to `list` / `getById` operations (see below) |
 
 Every other source type (mongodb, dynamodb, cassandra) reads no `options` keys today. Unknown keys are accepted by the schema and ignored by the runtime, so a typo fails silently.
@@ -210,6 +214,8 @@ Required: `kind`.
 | `table` | `schema`, `table` | postgres/mysql/mssql/sqlite (`schema: main`)/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest; a key of `options.resources` |
+| `key` | `keyPattern`, `accessPath.partition` | redis (`user:{id}`) |
+| `topic` | `topic`, `accessPath` (partition / `key` / timestamp) | kafka |
 
 `schema` / `table` / `collection` / `resource`: `^[A-Za-z_][A-Za-z0-9_]*$`.
 

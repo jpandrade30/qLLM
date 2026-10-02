@@ -48,7 +48,7 @@ Obligatorios: `id`, `type`, `connection`.
 | Campo | Tipo | Valores |
 |-------|------|---------|
 | `id` | cadena | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` más alias de cable MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) y Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` más alias de cable MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) y Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | La forma depende del `type` (abajo). Las claves adicionales son un error |
 | `options` | object | Libre en el JSON schema; el runtime lee solo lo que conoce (abajo) |
 
@@ -78,6 +78,10 @@ Obligatorios: `id`, `type`, `connection`.
 **dynamodb**: obligatorio `region` (valor literal, por ejemplo `us-east-1`). Opcional `endpointEnv` (Dynamo Local). Las credenciales de AWS provienen de la cadena de credenciales del proceso, no de campos del YAML.
 
 **cassandra**: el schema exige `keyspace`. En la práctica, el código usa `hostsEnv` (una lista) **o** `hostEnv`. Opcionales: `port`, `userEnv`, `passwordEnv`.
+
+**redis**: `addrEnv` o `hostEnv`+`port`. Opcionales: `db`, `userEnv`, `passwordEnv`, `tls`, `readReplica`.
+
+**kafka**: obligatorio `brokersEnv`. Opcionales: `tls`, `sasl` (`none`/`plain`/`scram`), `userEnv`, `passwordEnv`. Options: `timeoutMs`, `maxRecords`, `maxScanRecords`.
 
 ### `connection.auth` (REST / ksql)
 
@@ -210,6 +214,8 @@ Obligatorio: `kind`.
 | `table` | `schema`, `table` | postgres/mysql/mssql/sqlite (`schema: main`)/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest; una clave de `options.resources` |
+| `key` | `keyPattern`, `accessPath.partition` | redis (`user:{id}`) |
+| `topic` | `topic`, `accessPath` (partition / `key` / timestamp) | kafka |
 
 `schema` / `table` / `collection` / `resource`: `^[A-Za-z_][A-Za-z0-9_]*$`.
 

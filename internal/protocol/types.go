@@ -66,6 +66,8 @@ const (
 	SourceDynamoDB   SourceType = "dynamodb"
 	SourceCassandra  SourceType = "cassandra"
 	SourceKSQL       SourceType = "ksql"
+	SourceRedis      SourceType = "redis"
+	SourceKafka      SourceType = "kafka"
 
 	SourceMariaDB     SourceType = "mariadb"
 	SourceTiDB        SourceType = "tidb"
@@ -126,6 +128,7 @@ type AccessPath struct {
 	Sort      string   `json:"sort,omitempty" yaml:"sort,omitempty"`
 	SK        string   `json:"sk,omitempty" yaml:"sk,omitempty"`
 	KsqlKey   string   `json:"ksqlKey,omitempty" yaml:"ksqlKey,omitempty"`
+	Key       string   `json:"key,omitempty" yaml:"key,omitempty"`
 }
 
 // PartitionKeys implements runtime behavior for this package.
@@ -144,12 +147,22 @@ func (a AccessPath) SortKey() string {
 	return a.SK
 }
 
+// MessageKey is the Kafka record-key field (or ksqlKey fallback).
+func (a AccessPath) MessageKey() string {
+	if a.Key != "" {
+		return a.Key
+	}
+	return a.KsqlKey
+}
+
 type Binding struct {
 	Kind       string     `json:"kind" yaml:"kind"`
 	Schema     string     `json:"schema,omitempty" yaml:"schema,omitempty"`
 	Table      string     `json:"table,omitempty" yaml:"table,omitempty"`
 	Collection string     `json:"collection,omitempty" yaml:"collection,omitempty"`
 	Resource   string     `json:"resource,omitempty" yaml:"resource,omitempty"`
+	KeyPattern string     `json:"keyPattern,omitempty" yaml:"keyPattern,omitempty"`
+	Topic      string     `json:"topic,omitempty" yaml:"topic,omitempty"`
 	AccessPath AccessPath `json:"accessPath,omitempty" yaml:"accessPath,omitempty"`
 }
 

@@ -16,6 +16,8 @@
 | `dynamodb` | 实验性 | AWS 凭证与 `region`；`endpointEnv`（Local）；`accessPath` pk/sk |
 | `cassandra` | 实验性 | `hostEnv`/`hostsEnv`、keyspace；`accessPath.partition` |
 | `ksql` | 实验性 | **仅支持 pull 查询**；`baseUrlEnv`；`accessPath.ksqlKey` |
+| `redis` | 实验性 | `addrEnv` 或 `hostEnv`+`port`；`binding.kind: key` + `keyPattern`；从不改写键 |
+| `kafka` | 实验性 | `brokersEnv`；`binding.kind: topic`；无消费组、不提交 offset；JSON/raw |
 
 “实验性”表示该类型已包含在二进制文件中，但本仓库**没有**对应的 Compose 或 golden 测试。只有在你自己的实例上测试通过之后，才应认为它可用。
 
@@ -31,6 +33,8 @@
 | dynamodb | `table` | `table` 以及 `accessPath.pk`/`partition`，可选 `sk`/`sort` |
 | cassandra | `table` | `table` 以及 `accessPath.partition`（**逻辑**名称） |
 | ksql | `table` | `table` 以及 `accessPath.ksqlKey` |
+| redis | `key` | `keyPattern`（`user:{id}`）以及 `accessPath.partition` |
+| kafka | `topic` | `topic` 以及 partition+offset、`accessPath.key` 或 timestamp 等值条件 |
 
 如果 Query IR **没有**对 KV 或流的键使用等值条件，则返回 `UNSUPPORTED`；运行时绝不会做全量扫描。
 
@@ -52,6 +56,8 @@
 - REST 和 ksql：`none` / `bearer` / `header` / `basic`。
 - Dynamo：AWS 凭证链；`region` 为字面值。
 - Cassandra：主机，以及可选的用户名和密码。
+- Redis：`addrEnv`；可选用户/密码/TLS。建议 ACL 仅允许 get/hget/hgetall/lrange/sscan/zrange/xrange/type/exists。
+- Kafka：`brokersEnv`；可选 TLS/SASL。建议主题 `Read`+`Describe`，**不要**授权消费组。第一阶段仅 JSON/raw。
 
 ## 创作 catalog
 

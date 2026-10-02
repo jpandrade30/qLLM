@@ -226,6 +226,8 @@ func TestPresetExperimentalSourceTypes(t *testing.T) {
 			{ID: "maria", Type: protocol.SourceMariaDB, Connection: map[string]any{
 				"hostEnv": "H", "port": 3306, "database": "app", "userEnv": "U", "passwordEnv": "P",
 			}},
+			{ID: "cache", Type: protocol.SourceRedis, Connection: map[string]any{"addrEnv": "QLLM_REDIS_ADDR"}},
+			{ID: "bus", Type: protocol.SourceKafka, Connection: map[string]any{"brokersEnv": "QLLM_KAFKA_BROKERS"}},
 		},
 	}
 	if err := validate.Preset(p); err != nil {
