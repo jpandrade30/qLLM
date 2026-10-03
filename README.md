@@ -6,7 +6,7 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Release **0.3.0**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
+Release **0.3.1**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Why qLLM
 
@@ -268,7 +268,7 @@ Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.
 
 ### Start a standalone repo
 
-To host a working copy on GitHub or GitLab without this repo’s docs, fixtures, or harness:
+Prefer the **`qllm-standalone-<ver>.zip`** asset on the [GitHub Release](https://github.com/jpandrade30/qLLM/releases) (unzip and `docker build`). To generate a named folder from a clone:
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..
@@ -276,4 +276,4 @@ python scripts/standalone/init-standalone.py --user Alice --out ..
 # or: .\scripts\standalone\init-standalone.ps1 --user Alice --out ..
 ```
 
-That writes `../qllm-alice/` (Go runtime, `config/`, a tiny SQLite `data/app.db`, and a Dockerfile). Build and run there with Docker on Windows, Linux, or macOS.
+That writes `../qllm-alice/` (Go runtime, `config/`, a tiny SQLite `data/app.db`, LICENSE, and a Dockerfile). Build and run there with Docker on Windows, Linux, or macOS.

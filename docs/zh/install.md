@@ -1,6 +1,6 @@
 # 安装指南
 
-本页介绍运行 qLLM 的所有方式：每个选项做什么、需要什么，以及如何确认成功。目前尚未发布预编译二进制，所以你需要从源码编译，或构建容器镜像。
+本页介绍运行 qLLM 的所有方式：每个选项做什么、需要什么，以及如何确认成功。GitHub Release 提供精简源码 zip（`qllm-standalone-<ver>.zip`）；仍需自行编译二进制或构建镜像。
 
 ## 1. 选择方案
 
@@ -9,7 +9,7 @@
 | **A. 容器镜像**（`Dockerfile`） | Docker、nerdctl 或 podman | 完整构建（内嵌 DuckDB），已包含 `deploy/prd` 的 YAML | 生产环境，或不想装 C 工具链 |
 | **B. Go 构建（纯 Go）** | Go 1.26.6+ | 不含 CGO 的 `qllm`，不支持目录 SQL | 快速 `validate`、Query IR、无 CGO 的 CI |
 | **C. Go 构建（内嵌 DuckDB，`-tags duckdb`）** | Go 1.26.6+、CGO、C 编译器（Windows 还需 `duckdblib`） | 全部功能，含 `execute_sql` / `qllm sql` | 本地开发完整产品 |
-| **D. 独立仓库**（`scripts/standalone/init-standalone.*`） | Python 3（生成）、Docker（运行） | 可托管到 GitHub/GitLab 的小型目录 | 不带文档、fixtures、harness 的自有副本 |
+| **D. 独立 zip / 仓库**（Release 资源或 `init-standalone.*`） | Docker（运行）；仅重新生成时需要 Python 3 | 可托管到 GitHub/GitLab 的小型目录 | 不带文档、fixtures、harness 的自有副本 |
 | **E. Compose harness**（`docker-compose.yml`） | nerdctl compose（Rancher Desktop） | qLLM + Postgres、MySQL、MongoDB、模拟 API | 运行 golden 测试、体验演示 |
 | **F. Kubernetes 模拟**（`deploy/prd-tst`） | 启用 Kubernetes 的 Rancher Desktop | fleet-ops 风格集群 | 测试发布。独立环境，见 [environments.md](environments.md) |
 | **G. 作用域密钥演示**（`docker-compose.enforced.yml`） | nerdctl/docker compose | qLLM + Postgres + LangGraph 代理 | 端到端查看行级作用域（D21） |
@@ -156,9 +156,9 @@ go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 
 之后要在普通终端运行 `qllm.exe`，请让 `duckdb.dll` 与可执行文件同目录，或位于 `PATH` 中。
 
-## 6. 方案 D：独立仓库
+## 6. 方案 D：独立 zip / 仓库
 
-生成一个小型项目目录，可托管到 GitHub 或 GitLab，不带本仓库的文档、fixtures 和 harness。
+从 [GitHub Release](https://github.com/jpandrade30/qLLM/releases) 下载 **`qllm-standalone-<ver>.zip`**，解压后按该目录 README 执行 `docker build`。也可从克隆仓库生成命名目录（不含文档、fixtures、harness）：
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..
@@ -180,7 +180,7 @@ python scripts/standalone/init-standalone.py --user Alice --out ..
 | `config/` | 面向一个 SQLite 源（含一张表 `items`）的 `qllm.preset.yaml`、`qllm.catalog.yaml`、`qllm.config.yaml`、`qllm.env.yaml`、`qllm.access.yaml` |
 | `data/app.db` | SQLite 文件（`items`：`id=1`、`name=hello`） |
 | `Dockerfile` | 同样的两阶段 `-tags duckdb` 构建，内置 `config/` 和 `data/` |
-| `.env.example`、`.gitignore`、`README.md` | 令牌模板、忽略规则、运行说明 |
+| `LICENSE.md`、`.env.example`、`.gitignore`、`README.md` | MIT 许可证、令牌模板、忽略规则、运行说明 |
 
 在新目录中运行：
 

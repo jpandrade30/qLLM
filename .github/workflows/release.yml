@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if ! grep -qE "^## \\[${VERSION}\\]" CHANGELOG.md; then
+            echo "CHANGELOG.md has no section ## [$VERSION]" >&2
+            exit 1
+          fi
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate slim folder
+        run: python scripts/standalone/init-standalone.py --user standalone --out dist --force
+
+      - name: Build and validate slim folder
+        working-directory: dist/qllm-standalone
+        env:
+          QLLM_SQLITE_PATH: data/app.db
+          QLLM_AUTH_TOKEN: ci
+        run: |
+          go build -o qllm ./cmd/qllm
+          ./qllm validate --config-dir ./config
+          rm -f qllm
+
+      - name: Zip standalone
+        run: |
+          (cd dist && zip -r "../qllm-standalone-${{ steps.ver.outputs.version }}.zip" qllm-standalone)
+
+      - name: Extract changelog section
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          python - <<'PY'
+          import os, re, pathlib
+          version = os.environ["VERSION"]
+          text = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+          pat = re.compile(
+              rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## |\Z)",
+              re.M | re.S,
+          )
+          m = pat.search(text)
+          if not m:
+              raise SystemExit(f"could not extract ## [{version}] from CHANGELOG.md")
+          body = f"## [{version}]\n{m.group(1).strip()}\n"
+          pathlib.Path("release-notes.md").write_text(body, encoding="utf-8")
+          print(body)
+          PY
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: qLLM ${{ steps.ver.outputs.version }}
+          body_path: release-notes.md
+          files: qllm-standalone-${{ steps.ver.outputs.version }}.zip
+          fail_on_unmatched_files: true
