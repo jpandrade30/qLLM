@@ -97,7 +97,8 @@ func TestSQLDialect2SetOpsAndWindows(t *testing.T) {
 	ctx := context.Background()
 	seedInvoicesCustomers(t, eng, ctx)
 
-	tab, err := eng.ExecSQL(ctx, `SELECT id FROM invoices LIMIT 10 UNION ALL SELECT id FROM customers LIMIT 10`)
+	// DuckDB needs parentheses when each arm has LIMIT (LIMIT binds tighter than UNION).
+	tab, err := eng.ExecSQL(ctx, `(SELECT id FROM invoices LIMIT 10) UNION ALL (SELECT id FROM customers LIMIT 10)`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,8 @@ func TestSQLDialect2SetOpsAndWindows(t *testing.T) {
 		t.Fatal("window")
 	}
 
-	tab, err = eng.ExecSQL(ctx, `SELECT TRUE XOR FALSE AS x FROM invoices LIMIT 1`)
+	// Dialect "XOR" for booleans is expressed as <> (DuckDB has no boolean XOR / xor(bool,bool)).
+	tab, err = eng.ExecSQL(ctx, `SELECT (status = 'paid') <> (total > 60) AS x FROM invoices LIMIT 1`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,9 +141,13 @@ func TestSQLDialect2Qualify(t *testing.T) {
 	ctx := context.Background()
 	seedInvoicesCustomers(t, eng, ctx)
 
-	_, err = eng.ExecSQL(ctx, `SELECT status FROM invoices GROUP BY status QUALIFY COUNT(*) >= 2 LIMIT 10`)
+	// QUALIFY requires a window function (aggregates after GROUP BY use HAVING).
+	tab, err := eng.ExecSQL(ctx, `SELECT status FROM invoices QUALIFY COUNT(*) OVER (PARTITION BY status) >= 2 LIMIT 10`)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if tab.RowCount < 1 {
+		t.Fatalf("qualify rows=%d", tab.RowCount)
 	}
 }
 

@@ -3,9 +3,20 @@
 All notable changes to qLLM are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.0**.
+Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.1**.
 
 ## [Unreleased]
+
+## [0.3.1] - 2026-10-03
+
+### Added
+
+- GitHub Actions CI (`go vet` / `go test`, `-tags duckdb` job, generate + build + validate the slim folder).
+- GitHub Release workflow on tags `v*`: builds `qllm-standalone-<ver>.zip` from `scripts/standalone/init-standalone.py` (LICENSE included) and attaches it using the matching `CHANGELOG.md` section as the release body.
+
+### Fixed
+
+- DuckDB dialect unit tests: parenthesize `UNION ALL` arms that use `LIMIT`, use a window in `QUALIFY`, and express boolean XOR as `<>` (DuckDB has no boolean `XOR` / `xor(bool,bool)`).
 
 ## [0.3.0] - 2026-10-03
 

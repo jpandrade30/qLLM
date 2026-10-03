@@ -1,6 +1,6 @@
 # Installation guide
 
-This page covers every way to get qLLM running: what each option does, what it needs, and how to check it worked. No prebuilt binaries are published yet, so you either build from source or build a container image.
+This page covers every way to get qLLM running: what each option does, what it needs, and how to check it worked. GitHub Releases ship a slim source zip (`qllm-standalone-<ver>.zip`); you still build the binary or image yourself.
 
 ## 1. Pick an option
 
@@ -9,7 +9,7 @@ This page covers every way to get qLLM running: what each option does, what it n
 | **A. Container image** (`Dockerfile`) | Docker, nerdctl, or podman | Full build (embedded DuckDB) with your `deploy/prd` YAML baked in | Production, or you do not want a C toolchain |
 | **B. Go build, pure Go** | Go 1.26.6+ | `qllm` without CGO. No catalog SQL | Quick `validate`, Query IR, CI without CGO |
 | **C. Go build, embedded DuckDB** (`-tags duckdb`) | Go 1.26.6+, CGO, a C compiler (+ `duckdblib` on Windows) | Everything, including `execute_sql` / `qllm sql` | Local development of the full product |
-| **D. Standalone repo** (`scripts/standalone/init-standalone.*`) | Python 3 (to generate), Docker (to run) | A small folder you can host on GitHub/GitLab | Your own copy without docs, fixtures, or harness |
+| **D. Standalone zip / repo** (Release asset or `init-standalone.*`) | Docker (to run); Python 3 only if regenerating | A small folder you can host on GitHub/GitLab | Your own copy without docs, fixtures, or harness |
 | **E. Compose harness** (`docker-compose.yml`) | nerdctl compose (Rancher Desktop) | qLLM + Postgres, MySQL, MongoDB, fake API | Running the goldens and trying the demo |
 | **F. Kubernetes simulation** (`deploy/prd-tst`) | Rancher Desktop with Kubernetes | A fleet-ops style cluster | Testing rollouts. Separate world, see [environments.md](environments.md) |
 | **G. Scoped-key demo** (`docker-compose.enforced.yml`) | nerdctl/docker compose | qLLM + Postgres + a LangGraph agent | Seeing row scope (D21) end to end |
@@ -156,9 +156,9 @@ go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 
 To run `qllm.exe` from a normal terminal later, make sure `duckdb.dll` is next to the executable or on `PATH`.
 
-## 6. Option D: standalone repo
+## 6. Option D: standalone zip / repo
 
-Creates a small project folder you can host on GitHub or GitLab, without this repository's docs, fixtures, or harness.
+Download **`qllm-standalone-<ver>.zip`** from the [GitHub Release](https://github.com/jpandrade30/qLLM/releases), unzip, then `docker build` as in that folder's README. Or generate a named folder from a clone (no docs, fixtures, or harness):
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..
@@ -180,7 +180,7 @@ The result is `<out>/qllm-<slug>/` and the script prints that path. It contains:
 | `config/` | `qllm.preset.yaml`, `qllm.catalog.yaml`, `qllm.config.yaml`, `qllm.env.yaml`, `qllm.access.yaml` for a SQLite source with one table, `items` |
 | `data/app.db` | The SQLite file (`items`: `id=1`, `name=hello`) |
 | `Dockerfile` | Same two-stage build with `-tags duckdb`, bakes `config/` and `data/` |
-| `.env.example`, `.gitignore`, `README.md` | Token template, ignores, run instructions |
+| `LICENSE.md`, `.env.example`, `.gitignore`, `README.md` | MIT license, token template, ignores, run instructions |
 
 Run it in the new folder:
 
