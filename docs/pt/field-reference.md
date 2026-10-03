@@ -152,7 +152,7 @@ SELECT id, email FROM users WHERE id = '42' LIMIT 1
 
 Como uma consulta vira requisição HTTP:
 
-- **Colunas:** cada campo selecionado é lido do item da resposta pelo nome `physical`. Só chaves de primeiro nível são lidas; um `physical` com ponto, como `addr.city`, não retorna nada em REST.
+- **Colunas:** cada campo selecionado é lido do item da resposta pelo nome `physical`. Só chaves de primeiro nível são lidas; um `physical` com ponto, como `addr.city`, não retorna nada em REST. Campo com `fromFilter: true` é preenchido a partir de um `eq` de topo (ou `and` de `eq`) quando o corpo omite a chave; sem esse `eq` a consulta retorna `INVALID_IR`; valor diferente no corpo retorna `SOURCE_ERROR`.
 - **`WHERE`:** só `eq` (e `eq` combinados com `and`) é enviado, como `?<campo>=<valor>` (ou path param no `getById`). O nome do parâmetro é o nome **lógico** do campo; mantenha nome lógico e físico iguais nos campos que você filtra. Outro operador (`neq`, `gt`, `in`, `contains`, …) não é empurrado ao conector REST e retorna `UNSUPPORTED` ali.
 - **`LIMIT` / `OFFSET`:** enviados como `limitParam` / `offsetParam` (padrões `limit` e `offset`).
 - **Paginação:** `maxPages: 1` (padrão) é uma requisição. Valores maiores andam o offset até página curta, limite de linhas ou 20 páginas.
@@ -239,6 +239,7 @@ Obrigatórios: `name`, `type`, `physical`.
 | `type` | `string` `number` `boolean` `timestamp` `json` |
 | `physical` | coluna ou chave; caminhos com ponto são permitidos (`addr.city`) |
 | `description` | string opcional |
+| `fromFilter` | bool opcional; só REST. A API não devolve o campo; o qLLM copia o valor de um `eq` de topo (D20) |
 
 ### `relations[]`
 

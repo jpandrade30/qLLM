@@ -43,7 +43,7 @@
 - **写入：**永不支持。
 - **同源 join：**SQL 引擎会下推；mongo、rest 和 KV 会先取回数据，再在 DuckDB 中 join。
 - **跨源 join：**始终在 DuckDB 中执行。
-- **REST：**`eq` 过滤、`limit` 和 `offset` 会到达 API；路径参数齐全时走 `getById`；`maxPages` 按 offset 翻页；聚合在 DuckDB 中执行。详见 [REST `resources` 详解](field-reference.md#rest-resources-详解)。
+- **REST：**`eq` 过滤、`limit` 和 `offset` 会到达 API；路径参数齐全时走 `getById`；`maxPages` 按 offset 翻页；聚合在 DuckDB 中执行。若 API 在请求中接收键但 JSON 省略它（例如 `{"saldo":5300}`），将 `fields[].fromFilter: true`，以便 `GROUP BY` 和连接仍有该列。详见 [REST `resources` 详解](field-reference.md#rest-resources-详解)。
 - **超时：**`min(options.timeoutMs|statementTimeoutMs, limits.maxSourceMs)`，外加 context 取消。
 
 在**目录 SQL 路径**上，运行时会取回范围更大的数据，再由 DuckDB 完成计算。IR 的下推矩阵**不**适用于 SQL 的 `WHERE`。

@@ -426,6 +426,7 @@ entities:
 - `entities[].aliases` opcional; cada alias único no catalog; também resolvível no `from`.
 - `source` deve existir no preset (`sources[].id`).
 - `fields[].name` = nome lógico na entidade; `physical` = coluna/path na fonte (pode repetir entre entidades).
+- `fields[].fromFilter` (bool, opcional, D20): só em entidades cuja fonte é `rest`. A API não devolve o campo; o runtime preenche com o `eq` de topo do WHERE. Sem `eq` → `INVALID_IR`. Corpo com valor diferente → `SOURCE_ERROR`. `or`/`not` não alimentam o valor.
 - Tipos lógicos v0.1: `string` | `number` | `boolean` | `timestamp` | `json`
 - `relations` são **hints** para o agente e para joins no IR; não criam FK automática no banco.
 
@@ -447,6 +448,8 @@ resources:
 ```
 
 IR para REST no MVP: filter/project/limit mapeáveis a query params; agg/join → DuckDB local após fetch limitado.
+
+Quando a API recebe a chave no path/query e omite no JSON (`{"saldo":5300}`), marque o campo com `fromFilter: true` para o runtime ecoar o `eq` na linha (necessário para `GROUP BY` / join nessa chave).
 
 ---
 

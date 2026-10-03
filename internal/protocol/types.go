@@ -171,6 +171,7 @@ type Field struct {
 	Type        LogicalType `json:"type" yaml:"type"`
 	Physical    string      `json:"physical" yaml:"physical"`
 	Description string      `json:"description,omitempty" yaml:"description,omitempty"`
+	FromFilter  bool        `json:"fromFilter,omitempty" yaml:"fromFilter,omitempty"`
 }
 
 type Relation struct {

@@ -55,7 +55,7 @@ Harness / CI covers **postgres**, **mysql**, **mongodb**, and **rest**. Everythi
 | `postgres` | stable | filter, project, agg, groupBy, order, limit, same-source join | `sslMode`; `statementTimeoutMs` |
 | `mysql` | stable | same as postgres | |
 | `mongodb` | stable | filter, project, agg, groupBy, order, limit | same-source join goes through DuckDB |
-| `rest` | stable | `eq` filter, project, limit/offset | `options.resources` required; aggregations in DuckDB; optional `getById`, `itemsKey`, offset pagination |
+| `rest` | stable | `eq` filter, project, limit/offset | `options.resources` required; aggregations in DuckDB; optional `getById`, `itemsKey`, offset pagination; `fromFilter` fills keys the API omits |
 | `mssql` | experimental | same as postgres | `encrypt` |
 | `sqlite` | experimental | same as postgres | `pathEnv`; `binding.schema: main` |
 | `clickhouse` | experimental | same as postgres | native port is typically 9000 |

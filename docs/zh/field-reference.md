@@ -152,7 +152,7 @@ SELECT id, email FROM users WHERE id = '42' LIMIT 1
 
 一次查询如何变成 HTTP 请求：
 
-- **列：**每个被选中的字段按其 `physical` 名称从响应条目中读取。只读取顶层键；带点的 `physical`（如 `addr.city`）在 REST 上取不到值。
+- **列：**每个被选中的字段按其 `physical` 名称从响应条目中读取。只读取顶层键；带点的 `physical`（如 `addr.city`）在 REST 上取不到值。带 `fromFilter: true` 的字段在正文省略时从顶层 `eq`（或 `eq` 的 `and`）填充；没有该 `eq` 则返回 `INVALID_IR`；正文值不一致则返回 `SOURCE_ERROR`。
 - **`WHERE`：**只发送 `eq`（以及用 `and` 组合的 `eq`），形式为 `?<字段>=<值>`（或作为 `getById` 的路径参数）。参数名是查询中书写的**逻辑**字段名，所以对需要过滤的字段，请让逻辑名和物理名保持一致。其他运算符（`neq`、`gt`、`in`、`contains` 等）不会下推到 REST 连接器，在那里返回 `UNSUPPORTED`。
 - **`LIMIT` / `OFFSET`：**作为 `limitParam` / `offsetParam` 发送（默认 `limit` 和 `offset`）。
 - **分页：**`maxPages: 1`（默认）只发一次请求。更大的值会按 offset 翻页，直到短页、行数上限或 20 页。
@@ -239,6 +239,7 @@ sources:
 | `type` | `string` `number` `boolean` `timestamp` `json` |
 | `physical` | 列名或键；允许使用点号路径（`addr.city`） |
 | `description` | 可选字符串 |
+| `fromFilter` | 可选布尔；仅 REST。API 不返回该字段；qLLM 从顶层 `eq` 过滤器复制值（D20） |
 
 ### `relations[]`
 

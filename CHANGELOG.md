@@ -13,6 +13,7 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 - REST `getById` is executed when every `{name}` in the path has an `eq` filter. `list.itemsKey` (or resource-level) picks the JSON array key; `maxPages` / `pageSize` / `limitParam` / `offsetParam` walk offset pages (capped at 20).
 - `scripts/init-standalone.py` (`.ps1` / `.sh` wrappers) writes a slim folder (`qllm-<user>`) with the Go runtime, blank SQLite YAML, and a Dockerfile so the project can be hosted without harness or docs.
 - Experimental read-only `redis` and `kafka` sources (D19): Redis allowlists GET/HGETALL/LRANGE/SSCAN/ZRANGE/XRANGE; Kafka fetches without a consumer group or offset commit. Missing key/offset predicates return `UNSUPPORTED`. No harness.
+- REST catalog field `fromFilter` (D20): when the API omits a key it already received as `eq` (for example `{"saldo":5300}`), qLLM fills that column so `GROUP BY` and joins work. Missing `eq` is `INVALID_IR`; a mismatched body value is `SOURCE_ERROR`.
 
 ### Changed
 

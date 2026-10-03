@@ -146,7 +146,11 @@
           "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$",
           "description": "Physical column/key; optional dotted path for nested docs"
         },
-        "description": { "type": "string" }
+        "description": { "type": "string" },
+        "fromFilter": {
+          "type": "boolean",
+          "description": "REST only: fill this field from a top-level AND of eq filters when the API omits it (D20)"
+        }
       }
     },
     "relation": {

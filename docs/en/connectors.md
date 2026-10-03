@@ -43,7 +43,7 @@ A Query IR **without** an equality on the KV or stream key returns `UNSUPPORTED`
 - **Writes:** never.
 - **Same-source join:** SQL engines push it down; mongo, rest, and KV stores fetch and join in DuckDB.
 - **Cross-source join:** always DuckDB.
-- **REST:** `eq` filters, `limit`, and `offset` reach the API; `getById` runs when path params are all filled; `maxPages` walks offset pages; aggregations run in DuckDB. See [REST `resources` in detail](field-reference.md#rest-resources-in-detail).
+- **REST:** `eq` filters, `limit`, and `offset` reach the API; `getById` runs when path params are all filled; `maxPages` walks offset pages; aggregations run in DuckDB. Set `fields[].fromFilter: true` when the API takes a key in the request but omits it from the JSON (for example `{"saldo":5300}`) so `GROUP BY` and joins still have that column. See [REST `resources` in detail](field-reference.md#rest-resources-in-detail).
 - **Timeout:** `min(options.timeoutMs|statementTimeoutMs, limits.maxSourceMs)` plus context cancellation.
 
 On the **catalog SQL path** the runtime fetches a wider set and DuckDB does the work. The IR pushdown matrix does **not** apply to SQL `WHERE`.

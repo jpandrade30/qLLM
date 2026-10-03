@@ -43,7 +43,7 @@ Um Query IR **sem** igualdade na chave KV ou de stream retorna `UNSUPPORTED`; o 
 - **Escritas:** nunca.
 - **Join na mesma fonte:** engines SQL fazem pushdown; mongo, rest e KV buscam os dados e fazem o join no DuckDB.
 - **Join entre fontes:** sempre no DuckDB.
-- **REST:** filtros `eq`, `limit` e `offset` chegam à API; `getById` roda quando os path params estão preenchidos; `maxPages` pagina por offset; agregações no DuckDB. Veja [`resources` do REST em detalhe](field-reference.md#resources-do-rest-em-detalhe).
+- **REST:** filtros `eq`, `limit` e `offset` chegam à API; `getById` roda quando os path params estão preenchidos; `maxPages` pagina por offset; agregações no DuckDB. Use `fields[].fromFilter: true` quando a API recebe a chave na request mas omite no JSON (por exemplo `{"saldo":5300}`) para `GROUP BY` e joins ainda terem essa coluna. Veja [`resources` do REST em detalhe](field-reference.md#resources-do-rest-em-detalhe).
 - **Timeout:** `min(options.timeoutMs|statementTimeoutMs, limits.maxSourceMs)` mais cancelamento do contexto.
 
 No **caminho de SQL de catálogo**, o runtime busca um conjunto mais amplo e o DuckDB faz o trabalho. A matriz de pushdown do IR **não** se aplica ao `WHERE` do SQL.

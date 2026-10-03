@@ -143,6 +143,7 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 		}
 	}
 
+	fillEqs := strictTopLevelEqs(step.Where)
 	columns := []protocol.Column{}
 	for _, s := range step.Select {
 		as := s.As
@@ -155,8 +156,11 @@ func (c *Connector) Query(ctx context.Context, step def.PushdownStep) (*protocol
 	for _, item := range items {
 		row := make([]any, len(step.Select))
 		for i, s := range step.Select {
-			phys := def.PhysicalName(step.Entity, s.Field)
-			row[i] = item[phys]
+			val, err := projectCell(c.id, step.Entity, s.Field, item, fillEqs)
+			if err != nil {
+				return nil, err
+			}
+			row[i] = val
 		}
 		rows = append(rows, row)
 	}
@@ -349,6 +353,129 @@ func fillPath(path string, eqs map[string]string) (string, map[string]string, bo
 		delete(remain, name)
 	}
 	return out, remain, true
+}
+
+func projectCell(sourceID string, ent *protocol.Entity, field string, item map[string]any, fillEqs map[string]any) (any, error) {
+	f := lookupField(ent, field)
+	phys := def.PhysicalName(ent, field)
+	if f == nil || !f.FromFilter {
+		return item[phys], nil
+	}
+	filterVal, ok := fillEqs[field]
+	if !ok {
+		return nil, protocol.NewError(protocol.ErrInvalidIR,
+			"field "+field+" is not returned by the source; filter it with eq",
+			map[string]any{"field": field})
+	}
+	filled := castFilterValue(f.Type, filterVal)
+	if bodyVal, present := item[phys]; present {
+		if !sameAsTyped(f.Type, bodyVal, filled) {
+			return nil, protocol.NewError(protocol.ErrSourceError,
+				fmt.Sprintf("source %s returned %s that does not match the filter", sourceID, field),
+				map[string]any{"source": sourceID, "field": field})
+		}
+		return castFilterValue(f.Type, bodyVal), nil
+	}
+	return filled, nil
+}
+
+func lookupField(e *protocol.Entity, name string) *protocol.Field {
+	if e == nil {
+		return nil
+	}
+	for i := range e.Fields {
+		if e.Fields[i].Name == name {
+			return &e.Fields[i]
+		}
+	}
+	return nil
+}
+
+// strictTopLevelEqs collects eq values from a single eq or an AND of eqs.
+// Predicates under or/not are ignored and cannot feed fromFilter.
+func strictTopLevelEqs(w map[string]any) map[string]any {
+	out := map[string]any{}
+	collectStrictEq(w, out)
+	return out
+}
+
+func collectStrictEq(w map[string]any, out map[string]any) {
+	if w == nil {
+		return
+	}
+	op, _ := w["op"].(string)
+	if op == "or" || op == "not" {
+		return
+	}
+	if op == "and" {
+		args, _ := w["args"].([]any)
+		for _, a := range args {
+			m, _ := a.(map[string]any)
+			collectStrictEq(m, out)
+		}
+		return
+	}
+	field, _ := w["field"].(string)
+	if field == "" {
+		return
+	}
+	if i := strings.LastIndex(field, "."); i >= 0 {
+		field = field[i+1:]
+	}
+	if op != "eq" && op != "" {
+		return
+	}
+	out[field] = w["value"]
+}
+
+func castFilterValue(t protocol.LogicalType, v any) any {
+	if v == nil {
+		return nil
+	}
+	switch t {
+	case protocol.TypeNumber:
+		switch n := v.(type) {
+		case float64:
+			return n
+		case float32:
+			return float64(n)
+		case int:
+			return float64(n)
+		case int64:
+			return float64(n)
+		case json.Number:
+			f, err := n.Float64()
+			if err != nil {
+				return fmt.Sprint(v)
+			}
+			return f
+		default:
+			f, err := strconv.ParseFloat(fmt.Sprint(v), 64)
+			if err != nil {
+				return fmt.Sprint(v)
+			}
+			return f
+		}
+	case protocol.TypeBoolean:
+		switch b := v.(type) {
+		case bool:
+			return b
+		case string:
+			return b == "true" || b == "1"
+		default:
+			s := strings.ToLower(fmt.Sprint(v))
+			return s == "true" || s == "1"
+		}
+	default:
+		if s, ok := v.(string); ok {
+			return s
+		}
+		return fmt.Sprint(v)
+	}
+}
+
+func sameAsTyped(t protocol.LogicalType, body, want any) bool {
+	return fmt.Sprint(castFilterValue(t, body)) == fmt.Sprint(castFilterValue(t, want))
 }
 
 func collectEqFilters(w map[string]any) (map[string]string, error) {

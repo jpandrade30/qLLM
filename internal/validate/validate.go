@@ -167,7 +167,35 @@ func Bundle(preset *protocol.Preset, catalog *protocol.Catalog) (*catalogidx.Ind
 	if err := Catalog(catalog); err != nil {
 		return nil, err
 	}
-	return catalogidx.New(preset, catalog)
+	idx, err := catalogidx.New(preset, catalog)
+	if err != nil {
+		return nil, err
+	}
+	if err := checkFromFilter(idx); err != nil {
+		return nil, err
+	}
+	return idx, nil
+}
+
+func checkFromFilter(idx *catalogidx.Index) *protocol.ProtocolError {
+	for i := range idx.Catalog.Entities {
+		e := &idx.Catalog.Entities[i]
+		src, ok := idx.Source(e.Source)
+		if !ok {
+			continue
+		}
+		for _, f := range e.Fields {
+			if !f.FromFilter {
+				continue
+			}
+			if protocol.WireFamily(src.Type) != protocol.SourceREST {
+				return protocol.NewError(protocol.ErrConfigError,
+					"fromFilter is only allowed on REST entities: "+e.Name+"."+f.Name,
+					map[string]any{"entity": e.Name, "field": f.Name})
+			}
+		}
+	}
+	return nil
 }
 
 type binding struct {

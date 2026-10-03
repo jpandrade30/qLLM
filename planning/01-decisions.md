@@ -116,3 +116,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** `redis` e `kafka` (experimentais, sem harness) leem sem alterar dado, chave, offset, grupo ou TTL. Redis: allowlist `GET`/`HGET*`/`HGETALL`/`LRANGE`/`SSCAN`/`ZRANGE`/`XRANGE`/`TYPE`/`EXISTS`; nunca `DEL`/`SET`/`POP*`/`XACK`/`KEYS`. Kafka: fetch direto na partição **sem** consumer group, sem `CommitOffsets`, sem produce. Query sem igualdade no `accessPath` (Redis key; Kafka partition+offset, key, ou timestamp) → `UNSUPPORTED`.
 - **Por quê:** Consumer group commita offset no broker; `XACK`/`DEL`/`SET` mudam o store. O agente não pode “marcar como lido” nem apagar.
 - **Consequência:** ACL recomendada no Redis/Kafka (só Read/Describe) é a barreira real; o runtime é a segunda. Sem Avro/Protobuf no Kafka (fase 1: JSON/raw). Sem `SCAN`/`KEYS` no Redis. Sem compose.
+
+### D20 — Campo REST omitido pela API (`fromFilter`)
+
+- **Decisão:** `fields[].fromFilter: true` (só entidades cuja fonte é `rest`) diz que a API **não devolve** aquele campo; o runtime preenche a coluna com o valor de um `eq` no topo do WHERE (`eq` sozinho ou `and` de `eq`). Sem esse `eq` → `INVALID_IR`. Se o corpo **trouxer** o campo com valor diferente do filtro → `SOURCE_ERROR`. Valores sob `or` / `not` não alimentam o preenchimento. Não é coluna calculada: só ecoa um filtro que o caller já enviou.
+- **Por quê:** APIs de saldo/perfil recebem `user_id` na query/path e devolvem `{"saldo":5300}`. Sem o eco, `GROUP BY` / join na chave viram `null`.
+- **Consequência:** schema de catalog ganha `fromFilter` opcional (aditivo; `protocolVersion` 0.2.0). A API continua responsável por filtrar; o qLLM só reconstrói a chave para agregação/join.

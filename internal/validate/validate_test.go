@@ -252,3 +252,45 @@ func TestCatalogAccessPath(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFromFilterOnlyREST(t *testing.T) {
+	p, c := sampleBundle(t)
+	c.Entities[0].Fields[0].FromFilter = true
+	_, err := validate.Bundle(p, c)
+	if err == nil || err.Code != protocol.ErrConfigError {
+		t.Fatalf("expected CONFIG_ERROR got %#v", err)
+	}
+	if !strings.Contains(err.Message, "fromFilter") {
+		t.Fatalf("message %s", err.Message)
+	}
+}
+
+func TestFromFilterRESTOK(t *testing.T) {
+	p := &protocol.Preset{
+		ProtocolVersion: "0.2.0",
+		Project:         "test",
+		Limits: protocol.Limits{
+			MaxSyncMs: 15000, MaxSourceMs: 12000, DefaultLimit: 100, MaxLimit: 1000, ReadOnly: true,
+		},
+		Sources: []protocol.Source{{
+			ID: "bank_api", Type: protocol.SourceREST,
+			Connection: map[string]any{"baseUrlEnv": "QLLM_REST_URL"},
+			Options:    map[string]any{"resources": map[string]any{"balance": map[string]any{"list": map[string]any{"path": "/balance"}}}},
+		}},
+	}
+	c := &protocol.Catalog{
+		ProtocolVersion: "0.2.0",
+		Project:         "test",
+		Entities: []protocol.Entity{{
+			Name: "balance", Source: "bank_api",
+			Binding: protocol.Binding{Kind: "rest_resource", Resource: "balance"},
+			Fields: []protocol.Field{
+				{Name: "user_id", Type: protocol.TypeString, Physical: "user_id", FromFilter: true},
+				{Name: "saldo", Type: protocol.TypeNumber, Physical: "saldo"},
+			},
+		}},
+	}
+	if _, err := validate.Bundle(p, c); err != nil {
+		t.Fatal(err)
+	}
+}

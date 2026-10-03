@@ -28,7 +28,7 @@ Dynamo/Cassandra/ksql/redis/kafka: missing `binding.accessPath` equality in WHER
 3. Se join cross-source ou REST/KV agg → fetch com filter/limit máximos → DuckDB.
 4. Se op pedida é impossível sem scan absurdo → `UNSUPPORTED` (não “puxar a tabela inteira”).
 
-Authoring (não é query): `qllm catalog from-openapi` gera entities `rest_resource` e um fragmento `options.resources` a partir de GET listáveis. O connector lê `list` e, quando o WHERE tem igualdade nos path params, `getById` (`{id}` é substituído). `list.itemsKey` escolhe a chave do array; `maxPages`/`pageSize` paginam por offset. `introspect` é postgres/mysql e os aliases de fio.
+Authoring (não é query): `qllm catalog from-openapi` gera entities `rest_resource` e um fragmento `options.resources` a partir de GET listáveis. O connector lê `list` e, quando o WHERE tem igualdade nos path params, `getById` (`{id}` é substituído). `list.itemsKey` escolhe a chave do array; `maxPages`/`pageSize` paginam por offset. Campo de catálogo `fromFilter: true` (D20, só REST) preenche uma coluna omitida no JSON com o `eq` do WHERE. `introspect` é postgres/mysql e os aliases de fio.
 
 ## Bindings físicos
 

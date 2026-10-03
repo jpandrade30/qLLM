@@ -152,7 +152,7 @@ SELECT id, email FROM users WHERE id = '42' LIMIT 1
 
 How a query becomes an HTTP request:
 
-- **Columns:** each selected field is read from the response item using its `physical` name. Only top-level keys are read; a dotted `physical` such as `addr.city` returns nothing on REST.
+- **Columns:** each selected field is read from the response item using its `physical` name. Only top-level keys are read; a dotted `physical` such as `addr.city` returns nothing on REST. A field with `fromFilter: true` is filled from a top-level `eq` (or `and` of `eq`) when the body omits it; without that `eq` the query returns `INVALID_IR`; a different value in the body returns `SOURCE_ERROR`.
 - **`WHERE`:** only `eq` (and `and`-combined `eq`) is sent, as `?<field>=<value>` (or as a path param on `getById`). The parameter name is the **logical** field name as written in the query, so keep the logical and physical names equal for fields you filter on. Any other operator (`neq`, `gt`, `in`, `contains`, …) is not pushed down to the REST connector and returns `UNSUPPORTED` there.
 - **`LIMIT` / `OFFSET`:** sent as `limitParam` / `offsetParam` (defaults `limit` and `offset`).
 - **Pagination:** `maxPages: 1` (default) is one request. Higher values walk offset until a short page, the row limit, or 20 pages.
@@ -239,6 +239,7 @@ Required: `name`, `type`, `physical`.
 | `type` | `string` `number` `boolean` `timestamp` `json` |
 | `physical` | column or key; dotted paths allowed (`addr.city`) |
 | `description` | optional string |
+| `fromFilter` | optional bool; REST only. The API does not return this field; qLLM copies the value from a top-level `eq` filter (D20) |
 
 ### `relations[]`
 
