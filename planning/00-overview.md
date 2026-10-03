@@ -36,7 +36,7 @@ Clients Python/Node ficam para depois; o protocolo (HTTP e/ou MCP) é a API.
 - SDKs Python/Node no MVP
 - DSL textual humana (açúcar sobre o IR pode vir depois)
 - Raw SQL/Mongo livre como interface principal do agente
-- GraphQL como API qLLM (tool, endpoint ou tradução IR↔GraphQL) — superfície é Query IR + catalog SQL (D17)
+- GraphQL como API qLLM (tool, endpoint ou tradução IR↔GraphQL) — superfície é Query IR + catalog SQL (D17). Fonte experimental `type: graphql` (document query-only) é outra coisa e é permitida.
 - Incorporar o harness compose/`fixtures` no binário como “projeto default” (D18)
 
 ## Princípio de produto

@@ -64,6 +64,7 @@ Harness / CI covers **postgres**, **mysql**, **mongodb**, and **rest**. Everythi
 | `ksql` | experimental | key equality, project, limit | **pull only**; `accessPath.ksqlKey` required or `UNSUPPORTED` |
 | `redis` | experimental | key equality, project, limit | `binding.kind: key` + `keyPattern`; GET/HGETALL/LRANGE/SSCAN/ZRANGE/XRANGE only; never deletes, pops, or `KEYS` |
 | `kafka` | experimental | partition+offset / key / time | `binding.kind: topic`; no consumer group, no offset commit; JSON/raw values; never produces |
+| `graphql` | experimental | `eq` → variables, project, optional limit var | `binding.kind: graphql_operation`; `options.operations` with query-only `document` + `itemsPath`; mutations forbidden |
 
 Wire-compatible aliases (same driver and connection shape as the parent; experimental, no harness):
 
@@ -74,7 +75,7 @@ Wire-compatible aliases (same driver and connection shape as the parent; experim
 
 Redshift and Cockroach may need extra dialect work for introspection; `qllm catalog introspect` still only talks the parent wire protocol (postgres or mysql).
 
-Not a source type: Oracle, BigQuery, Snowflake, Elasticsearch, GraphQL, S3-as-table. Many HTTP JSON APIs are already reachable as `rest` plus `from-openapi`.
+Not a source type: Oracle, BigQuery, Snowflake, Elasticsearch, S3-as-table. GraphQL is a **source** (`type: graphql`) only — never the agent API (use Query IR / catalog SQL). Many HTTP JSON APIs are already reachable as `rest` plus `from-openapi`.
 
 ## Quick start (5 minutes)
 
@@ -268,7 +269,7 @@ Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.
 
 ### Start a standalone repo
 
-Prefer the **`qllm-standalone-<ver>.zip`** asset on the [GitHub Release](https://github.com/jpandrade30/qLLM/releases) (unzip and `docker build`). To generate a named folder from a clone:
+Prefer the **`qllm-standalone-<ver>.zip`** asset on the [GitHub Release](https://github.com/jpandrade30/qLLM/releases) (unzip and `docker build`). Ignore **Source code (zip/tar.gz)** — GitHub always attaches those for the whole tag (docs, fixtures, harness). To generate a named folder from a clone:
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..

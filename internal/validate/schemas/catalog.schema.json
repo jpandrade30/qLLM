@@ -68,7 +68,7 @@
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["table", "collection", "rest_resource", "key", "topic"]
+          "enum": ["table", "collection", "rest_resource", "graphql_operation", "key", "topic"]
         },
         "schema": {
           "type": "string",

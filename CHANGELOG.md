@@ -7,12 +7,16 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ## [Unreleased]
 
+### Added
+
+- Experimental source type `graphql` (no harness): HTTP POST to `baseUrlEnv`, catalog binding `graphql_operation` + `options.operations.<name>` (`document`, `itemsPath`, optional `variables` / `limitVariable`). Documents must be GraphQL **`query` only** — `mutation` / `subscription` and write keywords (`INSERT`, `UPDATE`, `DELETE`, …) fail at open/fetch with `CONFIG_ERROR` before any HTTP. Not a GraphQL agent API (D17 unchanged).
+
 ## [0.3.1] - 2026-10-03
 
 ### Added
 
 - GitHub Actions CI (`go vet` / `go test`, `-tags duckdb` job, generate + build + validate the slim folder).
-- GitHub Release workflow on tags `v*`: builds `qllm-standalone-<ver>.zip` from `scripts/standalone/init-standalone.py` (LICENSE included) and attaches it using the matching `CHANGELOG.md` section as the release body.
+- GitHub Release workflow on tags `v*`: builds `qllm-standalone-<ver>.zip` from `scripts/standalone/init-standalone.py` (LICENSE included) and attaches it using the matching `CHANGELOG.md` section as the release body. Release notes warn that GitHub’s automatic **Source code** archives are the full monorepo — use only the `qllm-standalone-*.zip` asset.
 
 ### Fixed
 

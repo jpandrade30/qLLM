@@ -1,6 +1,6 @@
 # 03 — Protocol Schemas (fonte da verdade)
 
-`protocolVersion`: **0.2.0** (additive; **0.1.0** preset/catalog/IR files remain valid). Experimental source types: `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (pull), `redis`, `kafka`, plus MySQL-wire aliases (`mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`) and Postgres-wire aliases (`cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`). No harness coverage for experimental types.
+`protocolVersion`: **0.2.0** (additive; **0.1.0** preset/catalog/IR files remain valid). Experimental source types: `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (pull), `redis`, `kafka`, `graphql` (HTTP GraphQL **query** only; never agent API — D17), plus MySQL-wire aliases (`mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`) and Postgres-wire aliases (`cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`). No harness coverage for experimental types.
 
 Todos os exemplos abaixo são normativos para o MVP. JSON Schema máquina-legível: [`schemas/`](schemas/).
 
@@ -298,7 +298,27 @@ sources:
     type: ksql
     connection:
       baseUrlEnv: QLLM_KSQL_URL
+  - id: shop_gql
+    type: graphql
+    connection:
+      baseUrlEnv: QLLM_GQL_URL
+      auth:
+        type: bearer
+        tokenEnv: QLLM_GQL_TOKEN
+    options:
+      timeoutMs: 10000
+      operations:
+        users:
+          document: |
+            query Users($id: ID) {
+              users(id: $id) { id name email }
+            }
+          variables: [id]
+          itemsPath: data.users
+          limitVariable: first
 ```
+
+GraphQL source notes: `options.operations.<name>.document` must be a GraphQL **`query`** (anonymous or named). `mutation` / `subscription` and write keywords (`INSERT`, `UPDATE`, `DELETE`, …) are rejected at open/fetch (`CONFIG_ERROR`). Binding: `{ kind: graphql_operation, resource: <operation name> }`. This is **not** a GraphQL agent API (D17).
 
 ### Campos obrigatórios
 
@@ -309,7 +329,7 @@ sources:
 | `limits` | object | ver abaixo |
 | `sources` | array | min 1 |
 | `sources[].id` | string | `[a-z][a-z0-9_]*` |
-| `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` \| `mssql` \| `sqlite` \| `clickhouse` \| `dynamodb` \| `cassandra` \| `ksql` \| `redis` \| `kafka` \| MySQL-wire aliases (`mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`) \| Postgres-wire aliases (`cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`) |
+| `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` \| `mssql` \| `sqlite` \| `clickhouse` \| `dynamodb` \| `cassandra` \| `ksql` \| `redis` \| `kafka` \| `graphql` \| MySQL-wire aliases (`mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`) \| Postgres-wire aliases (`cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`) |
 | `sources[].connection` | object | por tipo (ver schemas) |
 
 ### `limits`

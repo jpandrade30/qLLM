@@ -4,22 +4,22 @@
 
 Harness / CI: postgres, mysql, mongodb, rest.
 
-Experimental 0.2.0 (no compose, no goldens): mssql, sqlite, clickhouse, dynamodb, cassandra, ksql pull, redis, kafka.
+Experimental 0.2.0+ (no compose, no goldens): mssql, sqlite, clickhouse, dynamodb, cassandra, ksql pull, redis, kafka, graphql (query-only documents).
 
 Wire aliases (same driver as the parent, experimental, no harness): mysql → `mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`; postgres → `cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`.
 
-| Capacidade | postgres | mysql | mssql | sqlite | clickhouse | mongodb | rest | dynamodb | cassandra | ksql | redis | kafka |
-|------------|----------|-------|-------|--------|------------|---------|------|----------|-----------|------|-------|-------|
-| filter | yes | yes | yes | yes | yes | yes | partial | partial (key eq) | partial (partition eq) | partial (key eq) | key eq | partition+offset / key / time |
-| project | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| orderBy | yes | yes | yes | yes | yes | yes | partial | no | no | no | no | no |
-| limit/offset | yes | yes | yes (TOP/OFFSET) | yes | yes | yes | partial | limit | limit | limit | limit | limit |
-| agg + groupBy | yes | yes | yes | yes | yes | yes | no → DuckDB | no | no | no | no | no |
-| join same source | yes | yes | yes | yes | yes | no → DuckDB | no | no | no | no | no | no |
-| join cross source | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB |
-| writes | no | no | no | no | no | no | no | no | no | no | no (D19) | no (D19) |
+| Capacidade | postgres | mysql | mssql | sqlite | clickhouse | mongodb | rest | dynamodb | cassandra | ksql | redis | kafka | graphql |
+|------------|----------|-------|-------|--------|------------|---------|------|----------|-----------|------|-------|-------|---------|
+| filter | yes | yes | yes | yes | yes | yes | partial | partial (key eq) | partial (partition eq) | partial (key eq) | key eq | partition+offset / key / time | eq → variables |
+| project | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
+| orderBy | yes | yes | yes | yes | yes | yes | partial | no | no | no | no | no | no |
+| limit/offset | yes | yes | yes (TOP/OFFSET) | yes | yes | yes | partial | limit | limit | limit | limit | limit | limit via `limitVariable` |
+| agg + groupBy | yes | yes | yes | yes | yes | yes | no → DuckDB | no | no | no | no | no | no → DuckDB |
+| join same source | yes | yes | yes | yes | yes | no → DuckDB | no | no | no | no | no | no | no |
+| join cross source | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB | DuckDB |
+| writes | no | no | no | no | no | no | no | no | no | no | no (D19) | no (D19) | no (query only) |
 
-Dynamo/Cassandra/ksql/redis/kafka: missing `binding.accessPath` equality in WHERE → `UNSUPPORTED` (no Scan / ALLOW FILTERING / EMIT CHANGES / `KEYS` / unbounded consume). Redis never mutates keys; Kafka never joins a group or commits offsets.
+Dynamo/Cassandra/ksql/redis/kafka: missing `binding.accessPath` equality in WHERE → `UNSUPPORTED` (no Scan / ALLOW FILTERING / EMIT CHANGES / `KEYS` / unbounded consume). Redis never mutates keys; Kafka never joins a group or commits offsets. GraphQL: `mutation`/`subscription` and write keywords in `document` → `CONFIG_ERROR` before HTTP; missing required `variables` eq → `UNSUPPORTED`.
 
 ## Pushdown vs DuckDB
 
@@ -37,6 +37,7 @@ Authoring (não é query): `qllm catalog from-openapi` gera entities `rest_resou
 | postgres/mysql (+ aliases)/mssql/sqlite/clickhouse | `table` | `schema`, `table` (sqlite: `schema: main`) |
 | mongodb | `collection` | `collection` |
 | rest | `rest_resource` | `resource` |
+| graphql | `graphql_operation` | `resource` (key of `options.operations`) |
 | dynamodb | `table` | `table` + `accessPath.pk` / `partition`, optional `sk`/`sort` |
 | cassandra | `table` | `table` + `accessPath.partition` (logical field names) |
 | ksql | `table` | `table` + `accessPath.ksqlKey` (pull only) |
@@ -48,7 +49,7 @@ Authoring (não é query): `qllm catalog from-openapi` gera entities `rest_resou
 - **SQL (pg/mysql/mssql/ch):** user/password via env; `sslMode` postgres; `encrypt` mssql; `secure` clickhouse
 - **SQLite:** `pathEnv` (file path)
 - **Mongo:** `uriEnv`
-- **REST / ksql:** `none` \| `bearer` \| `header` \| `basic`
+- **REST / ksql / graphql:** `none` \| `bearer` \| `header` \| `basic` (GraphQL POST to `baseUrlEnv`; operation body in `options.operations`)
 - **DynamoDB:** AWS default credential chain; `region` literal; optional `endpointEnv`
 - **Cassandra:** `hostEnv` or `hostsEnv`; optional user/password env
 - **Redis:** `addrEnv` (or `hostEnv`+`port`); optional `db`, `userEnv`, `passwordEnv`, `tls`, `readReplica` (READONLY). Recommended ACL: `+get +hget +hgetall +lrange +sscan +zrange +xrange +type +exists`

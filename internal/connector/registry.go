@@ -8,6 +8,7 @@ import (
 	"qLLM/internal/connector/cassandra"
 	"qLLM/internal/connector/def"
 	"qLLM/internal/connector/dynamodb"
+	"qLLM/internal/connector/graphql"
 	"qLLM/internal/connector/kafka"
 	"qLLM/internal/connector/ksql"
 	"qLLM/internal/connector/mongo"
@@ -88,6 +89,10 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 			c, err = redis.Open(s)
 		case protocol.SourceKafka:
 			c, err = kafka.Open(s)
+		case protocol.SourceGraphQL:
+			c, err = graphql.Open(s, graphql.OpenOpts{
+				MaxResponseBodyBytes: opts.MaxRestResponseBytes,
+			})
 		default:
 			err = protocol.NewError(protocol.ErrConfigError, "unknown source type: "+string(s.Type), nil)
 		}
