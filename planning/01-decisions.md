@@ -53,9 +53,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ### D09 — Fontes v1 + experimentais 0.2.0
 
-- **Decisão:** v1 no harness: Postgres, MySQL, MongoDB, REST. **0.2.0 experimental (sem CI/compose):** `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (só pull). Dynamo/Cassandra/ksql exigem `binding.accessPath`; query sem eq na chave → `UNSUPPORTED`.
-- **Por quê:** SQL tabular extra vs KV/stream com access path. Comunidade valida drivers.
-- **Consequência:** Capability flags por connector; REST/KV sem pretender ser SQL completo. Harness D08 **não** sobe these engines.
+- **Decisão:** v1 no harness: Postgres, MySQL, MongoDB, REST. **0.2.0+ experimental (sem CI/compose):** `mssql`, `sqlite`, `clickhouse`, `dynamodb`, `cassandra`, `ksql` (só pull), `redis`, `kafka`, **`graphql`** (só `query` no document). Dynamo/Cassandra/ksql/redis/kafka exigem predicados de chave; query sem eq na chave → `UNSUPPORTED`. GraphQL rejeita `mutation`/`subscription` e palavras de escrita no document antes do HTTP.
+- **Por quê:** SQL tabular extra vs KV/stream/HTTP. Comunidade valida drivers. GraphQL-as-source ≠ GraphQL API do agente (D17).
+- **Consequência:** Capability flags por connector; REST/KV/GraphQL sem pretender ser SQL completo. Harness D08 **não** sobe these engines.
 
 ### D10 — Segurança default
 

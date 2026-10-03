@@ -48,7 +48,7 @@ Obrigatórios: `id`, `type`, `connection`.
 | Campo | Tipo | Valores |
 |-------|------|---------|
 | `id` | string | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` e aliases de fio MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) e Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` `graphql` e aliases de fio MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) e Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | O formato depende do `type` (abaixo). Chaves extras são erro |
 | `options` | object | Livre no JSON schema; o runtime lê apenas o que conhece (abaixo) |
 
@@ -215,6 +215,7 @@ Obrigatório: `kind`.
 | `table` | `schema`, `table` | postgres/mysql/mssql/sqlite (`schema: main`)/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest; uma chave de `options.resources` |
+| `graphql_operation` | `resource` | graphql; uma chave de `options.operations` |
 | `key` | `keyPattern`, `accessPath.partition` | redis (`user:{id}`) |
 | `topic` | `topic`, `accessPath` (partition / `key` / timestamp) | kafka |
 

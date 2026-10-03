@@ -55,6 +55,7 @@
             "ksql",
             "redis",
             "kafka",
+            "graphql",
             "mariadb",
             "tidb",
             "vitess",
@@ -117,6 +118,10 @@
         {
           "if": { "properties": { "type": { "const": "kafka" } } },
           "then": { "properties": { "connection": { "$ref": "#/$defs/kafkaConnection" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "graphql" } } },
+          "then": { "properties": { "connection": { "$ref": "#/$defs/graphqlConnection" } } }
         }
       ]
     },
@@ -240,6 +245,15 @@
       }
     },
     "ksqlConnection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrlEnv"],
+      "properties": {
+        "baseUrlEnv": { "type": "string", "minLength": 1 },
+        "auth": { "$ref": "#/$defs/restAuth" }
+      }
+    },
+    "graphqlConnection": {
       "type": "object",
       "additionalProperties": false,
       "required": ["baseUrlEnv"],

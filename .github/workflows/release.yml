@@ -63,7 +63,13 @@ jobs:
           m = pat.search(text)
           if not m:
               raise SystemExit(f"could not extract ## [{version}] from CHANGELOG.md")
-          body = f"## [{version}]\n{m.group(1).strip()}\n"
+          zip_name = f"qllm-standalone-{version}.zip"
+          notice = (
+              f"> **Slim package:** download **`{zip_name}`** only.\n"
+              f"> The automatic **Source code (zip/tar.gz)** assets are the full monorepo "
+              f"(docs, fixtures, harness) — not the minimal runtime.\n\n"
+          )
+          body = notice + f"## [{version}]\n{m.group(1).strip()}\n"
           pathlib.Path("release-notes.md").write_text(body, encoding="utf-8")
           print(body)
           PY
@@ -74,3 +80,4 @@ jobs:
           body_path: release-notes.md
           files: qllm-standalone-${{ steps.ver.outputs.version }}.zip
           fail_on_unmatched_files: true
+          make_latest: true

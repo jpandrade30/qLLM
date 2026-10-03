@@ -48,7 +48,7 @@ Required: `id`, `type`, `connection`.
 | Field | Type | Values |
 |-------|------|--------|
 | `id` | string | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` plus MySQL-wire aliases (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) and Postgres-wire aliases (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` `graphql` plus MySQL-wire aliases (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) and Postgres-wire aliases (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | Shape depends on `type` (below). Extra keys are an error |
 | `options` | object | Free-form in the JSON schema; the runtime reads only what it knows (below) |
 
@@ -83,6 +83,8 @@ Required: `id`, `type`, `connection`.
 
 **kafka**: required `brokersEnv`. Optional: `tls`, `sasl` (`none`/`plain`/`scram`), `userEnv`, `passwordEnv`. Options: `timeoutMs`, `maxRecords`, `maxScanRecords`.
 
+**graphql**: required `baseUrlEnv`. Optional `auth` (`none`/`bearer`/`header`/`basic`, same as REST). Options: `timeoutMs`, `operations` map — each operation needs `document` (GraphQL **query** only) and `itemsPath` (dotted path to an array or object under the JSON response). Optional `variables` (logical field names that must appear as `eq` filters → GraphQL variables) and `limitVariable` (maps IR `limit` into a variable). `mutation` / `subscription` and write keywords in `document` are rejected at open.
+
 ### `connection.auth` (REST / ksql)
 
 Required: `type`.
@@ -99,7 +101,7 @@ Required: `type`.
 | Key | Applies to | Default | Meaning |
 |-----|------------|---------|---------|
 | `statementTimeoutMs` | postgres, mysql, their aliases, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Statement timeout. The effective value is the **smallest** of `statementTimeoutMs`, `timeoutMs`, and `maxSourceMs` |
-| `timeoutMs` | SQL sources (same rule as above), REST, ksql, redis, kafka | REST 10000, ksql/kafka 12000, redis 10000 | Client timeout |
+| `timeoutMs` | SQL sources (same rule as above), REST, ksql, redis, kafka, graphql | REST/graphql 10000, ksql/kafka 12000, redis 10000 | Client timeout |
 | `resources` | REST, **required** to query | none | Map of resource name to `list` / `getById` operations (see below) |
 
 Every other source type (mongodb, dynamodb, cassandra) reads no `options` keys today. Unknown keys are accepted by the schema and ignored by the runtime, so a typo fails silently.
@@ -215,6 +217,7 @@ Required: `kind`.
 | `table` | `schema`, `table` | postgres/mysql/mssql/sqlite (`schema: main`)/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest; a key of `options.resources` |
+| `graphql_operation` | `resource` | graphql; a key of `options.operations` |
 | `key` | `keyPattern`, `accessPath.partition` | redis (`user:{id}`) |
 | `topic` | `topic`, `accessPath` (partition / `key` / timestamp) | kafka |
 
