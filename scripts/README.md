@@ -6,7 +6,7 @@ Operator helpers, grouped by job. Paths below are from the repo root.
 |--------|------------|
 | [`dev/`](dev/) | Local CGO/DuckDB shell, harness seed, DuckDB smoke |
 | [`prd-tst/`](prd-tst/) | Kubernetes fleet-ops sim (up, down, port-forward, optional Argo CD) |
-| [`standalone/`](standalone/) | Slim copy of the runtime for GitHub/GitLab |
+| [`standalone/`](standalone/) | Slim copy of the runtime for GitHub/GitLab (also shipped as `qllm-standalone-<ver>.zip` on Releases) |
 
 ```powershell
 .\scripts\dev\dev-shell.ps1

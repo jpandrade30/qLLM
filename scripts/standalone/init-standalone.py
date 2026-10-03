@@ -269,6 +269,9 @@ def main(argv: list[str] | None = None) -> int:
         shutil.rmtree(dest)
     dest.mkdir(parents=True)
     copy_runtime(dest)
+    license_src = REPO / "LICENSE.md"
+    if license_src.is_file():
+        shutil.copy2(license_src, dest / "LICENSE.md")
     generate_config(dest, project)
     write_sqlite(dest / "data" / "app.db")
     generate_dockerfile(dest)
