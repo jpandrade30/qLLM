@@ -23,6 +23,7 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ### Fixed
 
+- Kafka connector no longer sets `DisableAutoCommit` (invalid without a consumer group), which made `Open()` fail and kept qLLM from starting whenever a Kafka source was in the preset. Still no group, no commits, `read_committed`.
 - Catalog SQL (`execute_sql` / `POST /v1/sql`) now applies entity `scope` on each source fetch (inject). Without this, a scoped key only constrained Query IR.
 
 ## [0.2.0] - 2026-09-30

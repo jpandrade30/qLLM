@@ -75,7 +75,8 @@ func Open(src protocol.Source) (*Connector, error) {
 	}
 	opts := []kgo.Opt{
 		kgo.SeedBrokers(splitCSV(brokers)...),
-		kgo.DisableAutoCommit(),
+		// No consumer group and no commits (D19): DisableAutoCommit is invalid
+		// without a group, so it must not be set here.
 		kgo.FetchIsolationLevel(kgo.ReadCommitted()),
 		kgo.ConnIdleTimeout(timeout),
 	}
