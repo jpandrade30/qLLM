@@ -237,10 +237,11 @@ Obligatorios: `name`, `type`, `physical`.
 | Campo | Valores |
 |-------|---------|
 | `name` | id lógico (`email`) |
-| `type` | `string` `number` `boolean` `timestamp` `json` |
-| `physical` | columna o clave; se permiten rutas con puntos (`addr.city`) |
+| `type` | `string` `number` `boolean` `timestamp` `json`. `number` es DOUBLE en DuckDB: los ids > 2^53 deben ser `string` |
+| `physical` | columna o clave; se permiten rutas con puntos (`addr.city`) excepto en REST (solo claves de primer nivel) |
 | `description` | cadena opcional |
 | `fromFilter` | bool opcional; solo REST. La API no devuelve el campo; qLLM copia el valor de un `eq` de primer nivel (D20) |
+| `shape` | texto libre opcional; solo `type: json`. Estructura interna para el LLM (`{street, city}`, `string[]`). Sale en `describe_catalog`. No se valida (D22) |
 
 ### `relations[]`
 

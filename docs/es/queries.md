@@ -69,6 +69,6 @@ JSON con `additionalProperties: false`. Obligatorios: `from`, `select`.
 
 ## Respuesta
 
-Un envoltorio con `protocolVersion`, `queryId`, `status` (`succeeded` / `failed` / `accepted`), un `result` tabular, `meta` (`elapsedMs`, `app`, `plan.usedDuckDB`, steps) o un `error` tipado.
+Un envoltorio con `protocolVersion`, `queryId`, `status` (`succeeded` / `failed` / `accepted`), un `result` tabular, `meta` (`elapsedMs`, `app`, `plan.usedDuckDB`, steps) o un `error` tipado. Ejemplos y tabla de tipos: [responses.md](responses.md).
 
 No trates HTTP 200 como éxito sin comprobar `status` y `error`.

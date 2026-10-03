@@ -128,3 +128,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** `qllm.access.yaml` tem **uma entrada por tipo de app** (`mobile`, `admin`), nunca por usuário. O código do usuário vive na chave derivada `app.scopeValue.expiryUnix.hmac` (HMAC-SHA256 do `keySecret`, Base64URL). O catálogo marca entidades com `scope.field` (coluna opcional `scope.column`). O runtime força `eq` nessa coluna. `scopeMode` default `reject` (filtro conflitante → `FORBIDDEN_SCOPE`); `inject` faz AND. Tools de query **sem** campo novo. Variante estática `scope: { user_id: "acme" }` só para poucos principals fixos. MCP stdio: `QLLM_SCOPE` / `--scope`.
 - **Por quê:** Se o modelo pudesse passar o `user_id` na tool, trocaria 42 por 7.
 - **Consequência:** `key` e `keySecret` são mutuamente exclusivos. App com `scope` precisa que cada `tables[]` tenha `scope` no catalog ou esteja em `unscopedTables`. App sem `scope` (admin) não injeta. Sem denylist; revogação = expiração curta ou rotacionar o segredo. RLS/view no banco continua recomendado.
+
+### D22 — Célula `json` é JSON parseado; tipo de coluna vem da fonte/DuckDB
+
+- **Decisão:** Uma coluna `type: json` devolve o valor **já parseado** (objeto ou lista) em Query IR e em catalog SQL. `result.rows` aceita `array`. `fields[].shape` (texto livre, opcional) descreve a estrutura interna para o LLM; aparece no `describe_catalog`. O SQL path infere `columns[].type` a partir do tipo DuckDB (não força `string`). Inteiros acima de 2^53 devem ser `string` no catálogo: `number` materializa como `DOUBLE`.
+- **Por quê:** Sem isso, `execute_sql` mentia o tipo, `jsonb` virava texto, e uma lista de tags violava o schema de resposta. O LLM precisa saber o que tem dentro de um objeto.
+- **Consequência:** Aditivo; `protocolVersion` permanece **0.2.0**. REST continua lendo só chaves de topo. Sem filtro/agregação dentro do JSON. Sem caminho pontilhado no REST.

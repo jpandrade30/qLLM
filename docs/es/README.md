@@ -13,11 +13,13 @@ El contrato normativo (JSON Schema, Query IR, errores) sigue en [`planning/`](..
 | [project-files.md](project-files.md) | Descubrimiento de archivos y precedencia |
 | [cli.md](cli.md) | Todos los comandos y flags |
 | [http-mcp.md](http-mcp.md) | HTTP `/v1`, MCP, autenticación, bind y CORS |
+| [responses.md](responses.md) | Sobre de salida, tipos de columna, celdas json, `shape` |
 | [queries.md](queries.md) | SQL de catálogo vs Query IR: qué se acepta y qué se rechaza |
 | [connectors.md](connectors.md) | Tipos de fuente, bindings y pushdown |
 | [errors.md](errors.md) | Códigos de error tipados |
 | [multi-user-safety.md](multi-user-safety.md) | Alcance por fila en la credencial (D21) |
 | [environments.md](environments.md) | Compose, imágenes, simulación PRD y scripts |
+| [install.md](install.md) | Todas las opciones de instalación: imagen, Go, DuckDB (`duckdblib` en Windows), standalone |
 | [build.md](build.md) | Go, `-tags duckdb` y Docker |
 
 Lee primero [scope.md](scope.md) y [project-files.md](project-files.md). Sin un preset y un catálogo válidos, el binario falla con `CONFIG_ERROR`; no hay ningún respaldo hacia `fixtures/`.

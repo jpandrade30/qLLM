@@ -42,6 +42,6 @@ Protocol advertised in responses: **0.2.0**. **0.1.0** preset, catalog, and IR f
 | World | Where | Typical entities |
 |-------|-------|------------------|
 | Demo / goldens | `nerdctl compose` plus `deploy/image/config` | `customers`, `invoices`, … |
-| fleet-ops simulation | `scripts/prd-tst-up` (`deploy/prd-tst`) | `vehicles`, `depots`, `gps_samples`, … |
+| fleet-ops simulation | `scripts/prd-tst/prd-tst-up` (`deploy/prd-tst`) | `vehicles`, `depots`, `gps_samples`, … |
 
 Do not run both at the same time. The process **only sees** the `--config-dir` (or CWD / `--project`). Compose does not "inject" a catalog into the binary.

@@ -98,12 +98,28 @@ def _as_number(v: Any) -> float | None:
     return None
 
 
+def _as_json_text(v: Any) -> str | None:
+    if isinstance(v, (dict, list)):
+        return json.dumps(v, sort_keys=True, default=str, separators=(",", ":"))
+    if isinstance(v, str):
+        s = v.strip()
+        if s.startswith("{") or s.startswith("["):
+            try:
+                return json.dumps(json.loads(s), sort_keys=True, default=str, separators=(",", ":"))
+            except json.JSONDecodeError:
+                return None
+    return None
+
+
 def cells_equal(a: Any, b: Any, rel: float = 1e-6) -> bool:
     if a is None and b is None:
         return True
     ta, tb = _parse_ts(a), _parse_ts(b)
     if ta is not None and tb is not None:
         return abs((ta - tb).total_seconds()) < 1.01
+    ja, jb = _as_json_text(a), _as_json_text(b)
+    if ja is not None and jb is not None:
+        return ja == jb
     if isinstance(a, bool) and isinstance(b, bool):
         return a is b
     na, nb = _as_number(a), _as_number(b)

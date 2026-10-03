@@ -71,8 +71,7 @@ nerdctl run --rm -p 8088:8088 -p 8089:8089 `
 产品的 [`Dockerfile`](../../Dockerfile) 会执行：
 
 ```text
-COPY deploy/prd/qllm.preset.yaml …
-COPY deploy/prd/qllm.access.yaml …
+COPY deploy/prd/default/ /config/
 CMD serve --http --mcp-http --config-dir /config
 ```
 
@@ -111,7 +110,7 @@ configMapGenerator:
 
 1. 替换 `deploy/prd-tst/config/*.yaml`，**或者**修改 kustomize 中的路径。
 2. 密钥：[`deploy/prd-tst/k8s/secret.yaml`](../../deploy/prd-tst/k8s/secret.yaml)。
-3. 运行 `.\scripts\prd-tst-up.ps1`（或 `./scripts/prd-tst-up.sh`）。重新构建时如需跳过 compose down，请使用 `-SkipComposeDown`。
+3. 运行 `.\scripts\prd-tst\prd-tst-up.ps1`（或 `./scripts/prd-tst/prd-tst-up.sh`）。重新构建时如需跳过 compose down，请使用 `-SkipComposeDown`。
 4. 确认：`GET /v1/catalog` 显示项目 `fleet-ops` 和 `vehicles`。
 
 Pod 参数：`serve --http --mcp-http --config-dir /config`（[`k8s/qllm.yaml`](../../deploy/prd-tst/k8s/qllm.yaml)）。

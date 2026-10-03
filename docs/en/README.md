@@ -14,10 +14,12 @@ The normative contract (JSON Schema, Query IR, errors) stays in [`planning/`](..
 | [cli.md](cli.md) | Every command and flag |
 | [http-mcp.md](http-mcp.md) | HTTP `/v1`, MCP, auth, bind, CORS |
 | [queries.md](queries.md) | Catalog SQL vs Query IR: what is accepted and refused |
+| [responses.md](responses.md) | Output envelope, column types, json cells, `shape` |
 | [connectors.md](connectors.md) | Source types, bindings, pushdown |
 | [errors.md](errors.md) | Typed error codes |
 | [multi-user-safety.md](multi-user-safety.md) | Row scope on the credential (D21) |
 | [environments.md](environments.md) | Compose, images, PRD simulation, scripts |
+| [install.md](install.md) | Every install option: image, Go, DuckDB (Windows `duckdblib`), standalone |
 | [build.md](build.md) | Go, `-tags duckdb`, Docker |
 
 Read [scope.md](scope.md) and [project-files.md](project-files.md) first. Without a valid preset and catalog the binary fails with `CONFIG_ERROR`; there is no fallback to `fixtures/`.

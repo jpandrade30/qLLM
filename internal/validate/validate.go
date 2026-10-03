@@ -24,6 +24,7 @@ var (
 	accessSchema  *jsonschema.Schema
 	sqlReqSchema  *jsonschema.Schema
 	envFileSchema *jsonschema.Schema
+	queryRespSchema *jsonschema.Schema
 )
 
 // init registers package defaults.
@@ -45,6 +46,7 @@ func init() {
 	mustAdd("access.schema.json")
 	mustAdd("sql-request.schema.json")
 	mustAdd("env-file.schema.json")
+	mustAdd("query-response.schema.json")
 	var err error
 	presetSchema, err = c.Compile("https://qllm.dev/schemas/preset.schema.json")
 	if err != nil {
@@ -67,6 +69,10 @@ func init() {
 		panic(err)
 	}
 	envFileSchema, err = c.Compile("https://qllm.dev/schemas/env-file.schema.json")
+	if err != nil {
+		panic(err)
+	}
+	queryRespSchema, err = c.Compile("https://qllm.dev/schemas/query-response.schema.json")
 	if err != nil {
 		panic(err)
 	}
@@ -131,6 +137,11 @@ func SQLRequest(r *protocol.SQLRequest) *protocol.ProtocolError {
 // EnvFile implements runtime behavior for this package.
 func EnvFile(e *protocol.EnvFile) *protocol.ProtocolError {
 	return validateSchema(envFileSchema, e, protocol.ErrConfigError)
+}
+
+// QueryResponse checks a serialized response against the public schema (tests and contract).
+func QueryResponse(r *protocol.QueryResponse) *protocol.ProtocolError {
+	return validateSchema(queryRespSchema, r, protocol.ErrInternal)
 }
 
 // EnforceACL implements runtime behavior for this package.

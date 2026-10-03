@@ -173,6 +173,7 @@ type Field struct {
 	Physical    string      `json:"physical" yaml:"physical"`
 	Description string      `json:"description,omitempty" yaml:"description,omitempty"`
 	FromFilter  bool        `json:"fromFilter,omitempty" yaml:"fromFilter,omitempty"`
+	Shape       string      `json:"shape,omitempty" yaml:"shape,omitempty"`
 }
 
 type Relation struct {

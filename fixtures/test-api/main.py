@@ -15,7 +15,7 @@ DATA_PATH = Path(__file__).with_name("data.json")
 def load_data() -> dict:
     if DATA_PATH.exists():
         return json.loads(DATA_PATH.read_text(encoding="utf-8"))
-    return {"users": [], "products": [], "tickets": []}
+    return {"users": [], "products": [], "tickets": [], "profiles": []}
 
 
 DATA = load_data()
@@ -80,6 +80,18 @@ def list_tickets(
         rows = [t for t in rows if t.get("status") == status]
     if customer_id:
         rows = [t for t in rows if t.get("customer_id") == customer_id]
+    return _paginate(rows, limit, offset)
+
+
+@app.get("/profiles")
+def list_profiles(
+    city: str | None = None,
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = 0,
+):
+    rows = DATA.get("profiles", [])
+    if city:
+        rows = [p for p in rows if (p.get("address") or {}).get("city") == city]
     return _paginate(rows, limit, offset)
 
 

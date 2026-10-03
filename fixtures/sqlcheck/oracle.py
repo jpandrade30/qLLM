@@ -44,6 +44,8 @@ def _select_sql(entity: str, fields: list[tuple[str, str]], view: str) -> str:
             parts.append(f'CAST({ident} AS TIMESTAMP) AS {ident}')
         elif typ == "boolean":
             parts.append(f'CAST({ident} AS BOOLEAN) AS {ident}')
+        elif typ == "json":
+            parts.append(f'CAST({ident} AS JSON) AS {ident}')
         else:
             parts.append(ident)
     return f'CREATE OR REPLACE VIEW "{entity}" AS SELECT {", ".join(parts)} FROM {view}'

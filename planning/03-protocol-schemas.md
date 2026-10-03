@@ -438,6 +438,7 @@ entities:
 - `source` deve existir no preset (`sources[].id`).
 - `fields[].name` = nome lógico na entidade; `physical` = coluna/path na fonte (pode repetir entre entidades).
 - `fields[].fromFilter` (bool, opcional, D20): só em entidades cuja fonte é `rest`. A API não devolve o campo; o runtime preenche com o `eq` de topo do WHERE. Sem `eq` → `INVALID_IR`. Corpo com valor diferente → `SOURCE_ERROR`. `or`/`not` não alimentam o valor.
+- `fields[].shape` (string, opcional, D22): hint da estrutura interna de um campo `type: json` (ex.: `{street, city}` ou `string[]`). Só documentação para o LLM; o runtime não valida.
 - `entities[].scope` (D21): `{ field, column? }`. O runtime força `eq` na coluna (`column` ou `field`) com o valor da credencial. Sem `scope` a entidade não é protegida.
 - Tipos lógicos v0.1: `string` | `number` | `boolean` | `timestamp` | `json`
 - `relations` são **hints** para o agente e para joins no IR; não criam FK automática no banco.

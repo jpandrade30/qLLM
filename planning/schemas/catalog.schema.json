@@ -151,6 +151,10 @@
         "fromFilter": {
           "type": "boolean",
           "description": "REST only: fill this field from a top-level AND of eq filters when the API omits it (D20)"
+        },
+        "shape": {
+          "type": "string",
+          "description": "Free-text hint of the inner structure of a type: json field (D22). Shown in describe_catalog."
         }
       }
     },

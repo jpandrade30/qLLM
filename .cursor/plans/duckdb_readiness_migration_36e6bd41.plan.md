@@ -78,7 +78,7 @@ Keep the stable façade D01 already assumes: `Open` / `Materialize` / `Execute` 
   - Map all Phase-0 ops: joins, where (including in/contains/null/or), agg, groupBy, orderBy, limit, offset
 - Wire [`executor.go`](internal/executor/executor.go) to `duckdblocal.Open()` only (factory picks impl via build tags).
 - Restore dependency only under the DuckDB tag / document `go build -tags duckdb`.
-- Windows: reuse existing [`duckdblib/`](duckdblib/) + [`scripts/dev-shell.ps1`](scripts/dev-shell.ps1); restore a smoke test under `scripts/` (not gitignored `tmp/`).
+- Windows: reuse existing [`duckdblib/`](duckdblib/) + [`scripts/dev/dev-shell.ps1`](scripts/dev/dev-shell.ps1); restore a smoke test under `scripts/` (not gitignored `tmp/`).
 - Linux/macCI: install libduckdb or use duckdb-go bindings’ platform libs.
 
 ### SQL generation rules (DuckDB backend)

@@ -69,6 +69,6 @@ JSON，`additionalProperties: false`。必填：`from`、`select`。
 
 ## 响应
 
-一个信封，包含 `protocolVersion`、`queryId`、`status`（`succeeded` / `failed` / `accepted`）、表格形式的 `result`、`meta`（`elapsedMs`、`app`、`plan.usedDuckDB`、steps），或者类型化的 `error`。
+一个信封，包含 `protocolVersion`、`queryId`、`status`（`succeeded` / `failed` / `accepted`）、表格形式的 `result`、`meta`（`elapsedMs`、`app`、`plan.usedDuckDB`、steps），或者类型化的 `error`。完整示例与类型表见 [responses.md](responses.md)。
 
 不要在没有检查 `status` 和 `error` 的情况下，就把 HTTP 200 当作成功。

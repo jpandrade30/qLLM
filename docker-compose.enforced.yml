@@ -1,5 +1,7 @@
-# Standalone scoped-key demo (not the harness). Ports offset to avoid compose clash.
+# Standalone scoped-key demo (not the harness). Own compose project name so
+# `qllm-postgres-1` / `qllm-qllm-1` from docker-compose.yml are not recreated.
 # nerdctl compose -f docker-compose.enforced.yml up --build
+name: qllm-enforced
 services:
   postgres:
     image: postgres:16-alpine

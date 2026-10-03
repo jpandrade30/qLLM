@@ -35,7 +35,7 @@ You write two project files: which sources exist (`qllm.preset.yaml`) and which 
 
 ## Documentation
 
-Pick the folder for your language. Each one has the same 13 guides, including writing your YAML from zero (`from-scratch.md`) and the full field list (`field-reference.md`).
+Pick the folder for your language. Each one has the same 15 guides, including the response format (`responses.md`), installation options (`install.md`), writing your YAML from zero (`from-scratch.md`) and the full field list (`field-reference.md`).
 
 | Language | Docs |
 |----------|------|
@@ -211,13 +211,13 @@ tools = await client.get_tools()
 
 ## Running with containers
 
-Product [`Dockerfile`](Dockerfile) bakes [`deploy/prd/`](deploy/prd) into `/config`. Compose uses [`Dockerfile.dev`](Dockerfile.dev) + [`deploy/image/config`](deploy/image/config). `fixtures/` is not copied except as the `test-api` build context.
+Product [`Dockerfile`](Dockerfile) bakes [`deploy/prd/default/`](deploy/prd/default) into `/config`. Compose builds [`Dockerfile.dev`](Dockerfile.dev) and mounts [`deploy/image/config`](deploy/image/config) plus `fixtures/test-api/data.json`.
 
 ```bash
 nerdctl compose up --build
 ```
 
-HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Rebuild `test-api` if `fixtures/test-api/data.json` changed. SQL MCP goldens: `pytest fixtures/sqlcheck`.
+HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Recreate `test-api` after seed (`nerdctl compose up -d test-api`). SQL MCP goldens: `.\scripts\dev\check-live.ps1`.
 
 Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md). Scoped-key + LangGraph demo (own compose, not the harness): [`deploy/prd/enforced/README.md`](deploy/prd/enforced/README.md) and [`docker-compose.enforced.yml`](docker-compose.enforced.yml).
 
@@ -228,7 +228,7 @@ nerdctl build -t qllm .
 nerdctl run --rm -p 8088:8088 -p 8089:8089 qllm
 ```
 
-Optional **fleet-ops** Kubernetes sim: [`deploy/prd-tst/README.md`](deploy/prd-tst/README.md). Up: `.\scripts\prd-tst-up.ps1` / `./scripts/prd-tst-up.sh` (compose down + image + apply). Down: `.\scripts\prd-tst-down.ps1` / `./scripts/prd-tst-down.sh`. Then port-forward: `.\scripts\prd-tst-port-forward.ps1`. Do not run the sim together with compose. Goldens unchanged.
+Optional **fleet-ops** Kubernetes sim: [`deploy/prd-tst/README.md`](deploy/prd-tst/README.md). Up: `.\scripts\prd-tst\prd-tst-up.ps1` / `./scripts/prd-tst/prd-tst-up.sh` (compose down + image + apply). Down: `.\scripts\prd-tst\prd-tst-down.ps1` / `./scripts/prd-tst/prd-tst-down.sh`. Then port-forward: `.\scripts\prd-tst\prd-tst-port-forward.ps1`. Do not run the sim together with compose. Goldens unchanged.
 
 Compose DBs use weak passwords, open Mongo, and `sslMode: disable` for **local** use — do not publish those ports beyond localhost.
 
@@ -252,11 +252,13 @@ CGO_ENABLED=1 go test -tags duckdb ./internal/duckdblocal/
 CGO_ENABLED=1 go build -tags duckdb -o qllm ./cmd/qllm
 
 # Windows — load gcc + duckdblib first
-.\scripts\dev-shell.ps1
+.\scripts\dev\dev-shell.ps1
 go test -tags duckdb ./internal/duckdblocal/
 go build -tags duckdb -o qllm.exe ./cmd/qllm
-go run -tags duckdb .\scripts\duckdb_smoke.go
+go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 ```
+
+**Windows users:** download the DuckDB C/C++ library (`duckdb.dll` and `duckdb.lib`) from the [official DuckDB site](https://duckdb.org/docs/installation/) (the `libduckdb-windows-amd64` zip) and place both files in the `duckdblib/` folder at the repo root before using `-tags duckdb`. `scripts/dev/dev-shell.ps1` expects them there.
 
 Without `-tags duckdb`, `go test ./...` stays CGO-free.
 
@@ -269,9 +271,9 @@ Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.
 To host a working copy on GitHub or GitLab without this repo’s docs, fixtures, or harness:
 
 ```bash
-python scripts/init-standalone.py --user Alice --out ..
-# or: ./scripts/init-standalone.sh --user Alice --out ..
-# or: .\scripts\init-standalone.ps1 --user Alice --out ..
+python scripts/standalone/init-standalone.py --user Alice --out ..
+# or: ./scripts/standalone/init-standalone.sh --user Alice --out ..
+# or: .\scripts\standalone\init-standalone.ps1 --user Alice --out ..
 ```
 
 That writes `../qllm-alice/` (Go runtime, `config/`, a tiny SQLite `data/app.db`, and a Dockerfile). Build and run there with Docker on Windows, Linux, or macOS.

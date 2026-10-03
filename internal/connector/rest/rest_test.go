@@ -318,3 +318,46 @@ func TestQueryFromFilterMismatch(t *testing.T) {
 		t.Fatalf("err %#v", err)
 	}
 }
+
+func TestQueryJSONFieldUntouched(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_ = json.NewEncoder(w).Encode([]map[string]any{{
+			"id":   "1",
+			"addr": map[string]any{"city": "SP", "zip": "01000"},
+			"tags": []any{"a", "b"},
+		}})
+	}))
+	defer srv.Close()
+
+	ent := &protocol.Entity{
+		Name:    "users",
+		Binding: protocol.Binding{Kind: "rest_resource", Resource: "users"},
+		Fields: []protocol.Field{
+			{Name: "id", Type: protocol.TypeString, Physical: "id"},
+			{Name: "addr", Type: protocol.TypeJSON, Physical: "addr", Shape: "{city, zip}"},
+			{Name: "tags", Type: protocol.TypeJSON, Physical: "tags", Shape: "string[]"},
+		},
+	}
+	c := openTest(t, srv.URL, map[string]any{
+		"users": map[string]any{"list": map[string]any{"method": "GET", "path": "/users"}},
+	})
+	res, err := c.Query(context.Background(), def.PushdownStep{
+		Entity: ent,
+		Select: []def.SelectItem{{Field: "id"}, {Field: "addr"}, {Field: "tags"}},
+		Limit:  10,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Columns[1].Type != protocol.TypeJSON || res.Columns[2].Type != protocol.TypeJSON {
+		t.Fatalf("cols %#v", res.Columns)
+	}
+	addr, ok := res.Rows[0][1].(map[string]any)
+	if !ok || addr["city"] != "SP" {
+		t.Fatalf("addr %#v", res.Rows[0][1])
+	}
+	tags, ok := res.Rows[0][2].([]any)
+	if !ok || len(tags) != 2 {
+		t.Fatalf("tags %#v", res.Rows[0][2])
+	}
+}

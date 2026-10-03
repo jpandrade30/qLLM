@@ -1,0 +1,95 @@
+{
+  "columns": [
+    {
+      "name": "city",
+      "type": "string"
+    },
+    {
+      "name": "n",
+      "type": "number"
+    }
+  ],
+  "rows": [
+    [
+      "Alyssaview",
+      1
+    ],
+    [
+      "Andreaside",
+      1
+    ],
+    [
+      "Arnoldfurt",
+      1
+    ],
+    [
+      "Bruceborough",
+      1
+    ],
+    [
+      "Corystad",
+      1
+    ],
+    [
+      "Crosbyview",
+      1
+    ],
+    [
+      "East Brandonton",
+      1
+    ],
+    [
+      "East Steven",
+      1
+    ],
+    [
+      "Elizabethmouth",
+      1
+    ],
+    [
+      "Finleyfort",
+      1
+    ],
+    [
+      "Grimesmouth",
+      1
+    ],
+    [
+      "Jefferyborough",
+      1
+    ],
+    [
+      "Knightburgh",
+      1
+    ],
+    [
+      "Lake Colton",
+      1
+    ],
+    [
+      "Lindamouth",
+      1
+    ],
+    [
+      "Loriport",
+      1
+    ],
+    [
+      "Martinezbury",
+      1
+    ],
+    [
+      "Martinside",
+      1
+    ],
+    [
+      "Mollymouth",
+      1
+    ],
+    [
+      "New Julieport",
+      1
+    ]
+  ],
+  "rowCount": 20
+}

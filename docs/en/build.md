@@ -1,5 +1,7 @@
 # Build and tags
 
+For every install option and the Windows `duckdblib` setup, see [install.md](install.md).
+
 ## Go
 
 Requirement: **Go 1.26.6+** (`go.mod`, `toolchain go1.26.6`). Image: `golang:1.26.6-bookworm`.
@@ -26,10 +28,10 @@ CGO_ENABLED=1 go build -tags duckdb -o qllm ./cmd/qllm
 Windows:
 
 ```powershell
-.\scripts\dev-shell.ps1
+.\scripts\dev\dev-shell.ps1
 go test -tags duckdb ./internal/duckdblocal/
 go build -tags duckdb -o qllm.exe ./cmd/qllm
-go run -tags duckdb .\scripts\duckdb_smoke.go
+go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 ```
 
 [`Dockerfile`](../../Dockerfile) and [`Dockerfile.dev`](../../Dockerfile.dev) both run `go build -tags duckdb`. The product image copies `deploy/prd`; Compose uses `.dev` plus `deploy/image/config`.

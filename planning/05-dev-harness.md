@@ -35,7 +35,7 @@ fixtures/
   queries/                  # Query IR golden (testes, não schema)
   sql/manual-examples.md
   openapi/                  # spec mínima para CLI from-openapi
-scripts/dev-seed-fake.ps1 / .sh
+scripts/dev/dev-seed-fake.ps1 / .sh
 ```
 
 `fixtures/` = satélites de teste (processos + dados fake + queries de regressão). **Não** descreve formato das APIs/DBs. Isso é só `deploy/image/config`. Sem `deploy/dev` K8s no path default.
@@ -49,9 +49,9 @@ nerdctl compose up --build
 # DBs: localhost 5432/3306/27017; test-api 18080; qllm 8088/8089
 
 # seed from frozen fixtures/datasets/v1 (host → published ports)
-.\scripts\dev-seed-fake.ps1
+.\scripts\dev\dev-seed-fake.ps1
 # only when the generator changed:
-.\scripts\dev-seed-fake.ps1 --regenerate
+.\scripts\dev\dev-seed-fake.ps1 --regenerate
 # se data.json mudou: nerdctl compose up --build -d test-api
 
 # SQL goldens (oracle, no compose):

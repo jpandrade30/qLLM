@@ -18,6 +18,7 @@
     "audit_logs.json": "3294a7ccd323db2150e302644201519ab8ec6d31e72437e7c83eb57c221b05c7",
     "legacy_users.json": "32ce5f81d741ade1cd8c17b2f6cfa7b080e60419ec5a761400dc88d372023027",
     "api_products.json": "073298ec6e295dc924073fbe37b2f9ed7d182c16d7c17bc2569cfb0fc0145fb1",
-    "api_tickets.json": "8bc836248d0cc8a42860485954758db9ea30567e81d77b020c6a9b9fe23fbe7b"
+    "api_tickets.json": "8bc836248d0cc8a42860485954758db9ea30567e81d77b020c6a9b9fe23fbe7b",
+    "api_profiles.json": "f657ed374185be1a04df53151d198440a12773c852261689f2407f1868f3d111"
   }
 }

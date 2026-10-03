@@ -104,9 +104,16 @@ func scanDuckRows(rows *sql.Rows, spec QuerySpec) (*protocol.TabularResult, erro
 	if err != nil {
 		return nil, err
 	}
+	colTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return nil, err
+	}
 	columns := make([]protocol.Column, len(colNames))
 	for i, n := range colNames {
 		typ := protocol.TypeString
+		if i < len(colTypes) && colTypes[i] != nil {
+			typ = logicalFromDuckName(colTypes[i].DatabaseTypeName())
+		}
 		for _, s := range spec.Select {
 			as := s.As
 			if as == "" {
@@ -134,6 +141,18 @@ func scanDuckRows(rows *sql.Rows, spec QuerySpec) (*protocol.TabularResult, erro
 		}
 		row := make([]any, len(raw))
 		for i, v := range raw {
+			typ := protocol.TypeString
+			if i < len(columns) {
+				typ = columns[i].Type
+			}
+			if typ == protocol.TypeJSON {
+				row[i] = parseJSONCell(v)
+				continue
+			}
+			if typ == protocol.TypeTimestamp {
+				row[i] = coerceDuckCell(typ, v)
+				continue
+			}
 			switch t := v.(type) {
 			case []byte:
 				row[i] = string(t)
@@ -151,7 +170,13 @@ func scanDuckRows(rows *sql.Rows, spec QuerySpec) (*protocol.TabularResult, erro
 
 // coerceDuckCell implements runtime behavior for this package.
 func coerceDuckCell(t protocol.LogicalType, v any) any {
-	if v == nil || t != protocol.TypeTimestamp {
+	if v == nil {
+		return nil
+	}
+	if t == protocol.TypeJSON {
+		return encodeJSONCell(v)
+	}
+	if t != protocol.TypeTimestamp {
 		return v
 	}
 	switch x := v.(type) {

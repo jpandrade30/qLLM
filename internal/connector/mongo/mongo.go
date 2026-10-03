@@ -298,6 +298,26 @@ func normalize(v any) any {
 		return t.UTC().Format(time.RFC3339)
 	case primitive.DateTime:
 		return t.Time().UTC().Format(time.RFC3339)
+	case primitive.ObjectID:
+		return t.Hex()
+	case primitive.A:
+		out := make([]any, len(t))
+		for i, e := range t {
+			out[i] = normalize(e)
+		}
+		return out
+	case primitive.D:
+		m := make(map[string]any, len(t))
+		for _, e := range t {
+			m[e.Key] = normalize(e.Value)
+		}
+		return m
+	case bson.M:
+		m := make(map[string]any, len(t))
+		for k, e := range t {
+			m[k] = normalize(e)
+		}
+		return m
 	default:
 		return t
 	}

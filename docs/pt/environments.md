@@ -8,12 +8,12 @@ Rancher Desktop com **nerdctl compose**. Especificação: [`planning/05-dev-harn
 nerdctl compose up --build
 ```
 
-O stack do Compose embute a configuração a partir do [`Dockerfile.dev`](../../Dockerfile.dev) e de [`deploy/image/config`](../../deploy/image/config). Bearer HTTP do demo: `change-me`. Portas no host: HTTP 8088, MCP 8089 (veja o arquivo do Compose). Faça o seed com `.\scripts\dev-seed-fake.ps1` ou `./scripts/dev-seed-fake.sh`.
+O Compose monta [`deploy/image/config`](../../deploy/image/config) em `/config` e `fixtures/test-api/data.json` no `test-api`. Mudança de catálogo: `nerdctl compose up -d qllm` (sem rebuild). Bearer: `change-me`. Portas: HTTP 8088, MCP 8089. Seed: `.\scripts\dev\dev-seed-fake.ps1`.
 
 Seed da API fake:
 
 ```powershell
-.\scripts\dev-seed-fake.ps1
+.\scripts\dev\dev-seed-fake.ps1
 # --regenerate apenas reescreve o JSON congelado
 ```
 
@@ -44,22 +44,22 @@ Um mundo **separado** (D18), no namespace `qllm-prd`. **Não** rode junto com o 
 Guia: [`deploy/prd-tst/README.md`](../../deploy/prd-tst/README.md).
 
 ```powershell
-.\scripts\prd-tst-up.ps1
-.\scripts\prd-tst-port-forward.ps1
-.\scripts\prd-tst-down.ps1
+.\scripts\prd-tst\prd-tst-up.ps1
+.\scripts\prd-tst\prd-tst-port-forward.ps1
+.\scripts\prd-tst\prd-tst-down.ps1
 ```
 
 ```bash
-./scripts/prd-tst-up.sh
-./scripts/prd-tst-port-forward.sh
-./scripts/prd-tst-down.sh
+./scripts/prd-tst/prd-tst-up.sh
+./scripts/prd-tst/prd-tst-port-forward.sh
+./scripts/prd-tst/prd-tst-down.sh
 ```
 
 O `prd-tst-up` executa `compose down`, constrói `qllm:local` (namespace `k8s.io`) e aplica `kubectl apply -k deploy/prd-tst`. O port-forward roda em um único processo; Ctrl+C encerra todos os forwards:
 
 ```powershell
-.\scripts\prd-tst-port-forward.ps1
-# Unix: ./scripts/prd-tst-port-forward.sh
+.\scripts\prd-tst\prd-tst-port-forward.ps1
+# Unix: ./scripts/prd-tst/prd-tst-port-forward.sh
 ```
 
 | Porta no host | Serviço |
@@ -91,9 +91,11 @@ A imagem usa `imagePullPolicy: Never` com `qllm:local` no namespace `k8s.io`. `E
 
 | Script | Função |
 |--------|--------|
-| `dev-shell.ps1` / `dev-shell.cmd` / `dev-shell.sh` | Configuração de CGO e gcc (Windows vs Unix) |
-| `dev-seed-fake.ps1` / `.sh` | Seed de `fixtures/datasets/v1` |
-| `duckdb_smoke.go` | Smoke test do DuckDB com CGO |
+| `scripts/dev/dev-shell.ps1` / `.cmd` / `.sh` | Configuração de CGO e gcc (Windows vs Unix) |
+| `scripts/dev/dev-seed-fake.ps1` / `.sh` | Seed de `fixtures/datasets/v1` |
+| `scripts/dev/duckdb_smoke.go` | Smoke test do DuckDB com CGO |
+| `scripts/prd-tst/` | Simulação Kubernetes fleet-ops |
+| `scripts/standalone/` | Gerador de repo enxuto |
 
 ## Logs de consultas
 

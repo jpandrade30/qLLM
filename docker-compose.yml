@@ -50,6 +50,8 @@ services:
     build: ./fixtures/test-api
     ports:
       - "18080:8080"
+    volumes:
+      - ./fixtures/test-api/data.json:/app/data.json:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')"]
       interval: 5s
@@ -67,6 +69,8 @@ services:
     ports:
       - "8088:8088"
       - "8089:8089"
+    volumes:
+      - ./deploy/image/config:/config:ro
     depends_on:
       postgres:
         condition: service_healthy

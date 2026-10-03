@@ -205,6 +205,27 @@ def build_tables(n: int, seed: int) -> dict[str, list[dict]]:
         }
         for t in tickets
     ]
+    first_addr = {}
+    for a in addresses:
+        first_addr.setdefault(a["customer_id"], a)
+    tag_sets = (["vip"], ["trial"], ["vip", "trial"], ["support"])
+    api_profiles = []
+    for i, c in enumerate(customers):
+        a = first_addr.get(c["id"], {})
+        api_profiles.append(
+            {
+                "id": c["id"],
+                "email": c["email"],
+                "address": {
+                    "city": a.get("city"),
+                    "state": a.get("state"),
+                    "country": a.get("country") or c["country"],
+                    "postal_code": a.get("postal_code"),
+                },
+                "tags": list(tag_sets[i % len(tag_sets)]),
+                "prefs": {"locale": "en", "marketing": i % 2 == 0},
+            }
+        )
 
     return {
         "customers": customers,
@@ -222,6 +243,7 @@ def build_tables(n: int, seed: int) -> dict[str, list[dict]]:
         "legacy_users": legacy_users,
         "api_products": products,
         "api_tickets": api_tickets,
+        "api_profiles": api_profiles,
     }
 
 

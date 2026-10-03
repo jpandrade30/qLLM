@@ -2,7 +2,7 @@
 
 Shows three roles without mixing them: the **user** (login + question), the **customer backend** (mints the key, compiles LangGraph once), and **qLLM** (verifies the key and forces `user_id`).
 
-This stack is **not** the harness. Do not run it together with `docker-compose.yml` on the same ports (this file uses 18000 / 18088 / 18089 / 15432).
+This stack is **not** the harness. Compose project name is `qllm-enforced` so it does not recreate `qllm-postgres-1` / `qllm-qllm-1`. Ports are offset (18000 / 18088 / 18089 / 15432).
 
 ## What is enforced
 

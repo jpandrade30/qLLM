@@ -56,7 +56,7 @@ async def run_sql(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     return {"raw": raw}
 
 
-def answer(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
+def format_answer(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     raw = state.get("raw") or ""
     try:
         payload = json.loads(raw)
@@ -86,10 +86,10 @@ def compile_graph():
     g.add_node("load_context", load_context)
     g.add_node("plan_query", plan_query)
     g.add_node("run_sql", run_sql)
-    g.add_node("answer", answer)
+    g.add_node("format_answer", format_answer)
     g.set_entry_point("load_context")
     g.add_edge("load_context", "plan_query")
     g.add_edge("plan_query", "run_sql")
-    g.add_edge("run_sql", "answer")
-    g.add_edge("answer", END)
+    g.add_edge("run_sql", "format_answer")
+    g.add_edge("format_answer", END)
     return g.compile()

@@ -46,7 +46,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": ["string", "number", "boolean", "object", "null"]
+              "type": ["string", "number", "boolean", "object", "array", "null"],
+              "description": "A json column carries a parsed object or array, not a serialized string"
             }
           }
         },

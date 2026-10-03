@@ -237,10 +237,11 @@ sources:
 | 字段 | 取值 |
 |------|------|
 | `name` | 逻辑 id（`email`） |
-| `type` | `string` `number` `boolean` `timestamp` `json` |
-| `physical` | 列名或键；允许使用点号路径（`addr.city`） |
+| `type` | `string` `number` `boolean` `timestamp` `json`。`number` 在 DuckDB 中为 DOUBLE：大于 2^53 的 id 必须用 `string` |
+| `physical` | 列名或键；允许点号路径（`addr.city`），REST 除外（只读顶层键） |
 | `description` | 可选字符串 |
 | `fromFilter` | 可选布尔；仅 REST。API 不返回该字段；qLLM 从顶层 `eq` 过滤器复制值（D20） |
+| `shape` | 可选自由文本；仅 `type: json`。给 LLM 看的内部结构（`{street, city}`、`string[]`）。出现在 `describe_catalog`。运行时不校验（D22） |
 
 ### `relations[]`
 
