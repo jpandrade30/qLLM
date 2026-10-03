@@ -6,7 +6,7 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
+Release **0.3.0**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Why qLLM
 
