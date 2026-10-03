@@ -11,8 +11,12 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 ### Added
 
-- GitHub Actions CI (`go vet` / `go test`, optional `-tags duckdb` job, generate + build + validate the slim folder).
+- GitHub Actions CI (`go vet` / `go test`, `-tags duckdb` job, generate + build + validate the slim folder).
 - GitHub Release workflow on tags `v*`: builds `qllm-standalone-<ver>.zip` from `scripts/standalone/init-standalone.py` (LICENSE included) and attaches it using the matching `CHANGELOG.md` section as the release body.
+
+### Fixed
+
+- DuckDB dialect unit tests: parenthesize `UNION ALL` arms that use `LIMIT`, use a window in `QUALIFY`, and express boolean XOR as `<>` (DuckDB has no boolean `XOR` / `xor(bool,bool)`).
 
 ## [0.3.0] - 2026-10-03
 
