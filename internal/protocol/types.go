@@ -69,6 +69,7 @@ const (
 	SourceKSQL       SourceType = "ksql"
 	SourceRedis      SourceType = "redis"
 	SourceKafka      SourceType = "kafka"
+	SourceGraphQL    SourceType = "graphql"
 
 	SourceMariaDB     SourceType = "mariadb"
 	SourceTiDB        SourceType = "tidb"

@@ -48,7 +48,7 @@
 | 字段 | 类型 | 取值 |
 |------|------|------|
 | `id` | 字符串 | `crm_pg`、`legacy_api`、… |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka`，以及 MySQL 线协议别名（`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`）和 Postgres 线协议别名（`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`） |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` `graphql`，以及 MySQL 线协议别名（`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`）和 Postgres 线协议别名（`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`） |
 | `connection` | object | 结构取决于 `type`（见下）。多余的键会报错 |
 | `options` | object | 在 JSON schema 中是自由格式；运行时只读取它认识的键（见下） |
 
@@ -215,6 +215,7 @@ sources:
 | `table` | `schema`、`table` | postgres/mysql/mssql/sqlite（`schema: main`）/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest；`options.resources` 中的某个键 |
+| `graphql_operation` | `resource` | graphql；`options.operations` 中的某个键 |
 | `key` | `keyPattern`、`accessPath.partition` | redis（`user:{id}`） |
 | `topic` | `topic`、`accessPath`（partition / `key` / timestamp） | kafka |
 
