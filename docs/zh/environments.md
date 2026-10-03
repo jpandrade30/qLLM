@@ -8,12 +8,12 @@
 nerdctl compose up --build
 ```
 
-Compose 栈的配置由 [`Dockerfile.dev`](../../Dockerfile.dev) 和 [`deploy/image/config`](../../deploy/image/config) 内嵌。演示用 HTTP Bearer：`change-me`。主机端口：HTTP 8088、MCP 8089（见 Compose 文件）。使用 `.\scripts\dev-seed-fake.ps1` 或 `./scripts/dev-seed-fake.sh` 导入种子数据。
+Compose 将 [`deploy/image/config`](../../deploy/image/config) 挂到 `/config`，并把 `fixtures/test-api/data.json` 挂到 `test-api`。改目录后执行 `nerdctl compose up -d qllm`（不必重建镜像）。Bearer：`change-me`。端口：HTTP 8088、MCP 8089。种子：`.\scripts\dev\dev-seed-fake.ps1`。
 
 导入模拟 API 的种子数据：
 
 ```powershell
-.\scripts\dev-seed-fake.ps1
+.\scripts\dev\dev-seed-fake.ps1
 # --regenerate 仅会重写冻结的 JSON
 ```
 
@@ -44,22 +44,22 @@ Compose 使用 `Dockerfile.dev` 和 `deploy/image/config`。在 Kubernetes 模�
 指南：[`deploy/prd-tst/README.md`](../../deploy/prd-tst/README.md)。
 
 ```powershell
-.\scripts\prd-tst-up.ps1
-.\scripts\prd-tst-port-forward.ps1
-.\scripts\prd-tst-down.ps1
+.\scripts\prd-tst\prd-tst-up.ps1
+.\scripts\prd-tst\prd-tst-port-forward.ps1
+.\scripts\prd-tst\prd-tst-down.ps1
 ```
 
 ```bash
-./scripts/prd-tst-up.sh
-./scripts/prd-tst-port-forward.sh
-./scripts/prd-tst-down.sh
+./scripts/prd-tst/prd-tst-up.sh
+./scripts/prd-tst/prd-tst-port-forward.sh
+./scripts/prd-tst/prd-tst-down.sh
 ```
 
 `prd-tst-up` 会执行 `compose down`，构建 `qllm:local`（命名空间 `k8s.io`），并执行 `kubectl apply -k deploy/prd-tst`。端口转发以单个进程运行；按 Ctrl+C 会停止所有转发：
 
 ```powershell
-.\scripts\prd-tst-port-forward.ps1
-# Unix：./scripts/prd-tst-port-forward.sh
+.\scripts\prd-tst\prd-tst-port-forward.ps1
+# Unix：./scripts/prd-tst/prd-tst-port-forward.sh
 ```
 
 | 主机端口 | 服务 |
@@ -91,9 +91,11 @@ Argo CD 是**可选**的。脚本：
 
 | 脚本 | 用途 |
 |------|------|
-| `dev-shell.ps1` / `dev-shell.cmd` / `dev-shell.sh` | CGO 和 gcc 环境设置（Windows 与 Unix） |
-| `dev-seed-fake.ps1` / `.sh` | 导入 `fixtures/datasets/v1` 种子数据 |
-| `duckdb_smoke.go` | CGO DuckDB 冒烟测试 |
+| `scripts/dev/dev-shell.ps1` / `.cmd` / `.sh` | CGO 和 gcc 环境设置（Windows 与 Unix） |
+| `scripts/dev/dev-seed-fake.ps1` / `.sh` | 导入 `fixtures/datasets/v1` 种子数据 |
+| `scripts/dev/duckdb_smoke.go` | CGO DuckDB 冒烟测试 |
+| `scripts/prd-tst/` | Kubernetes fleet-ops 模拟 |
+| `scripts/standalone/` | 精简仓库生成器 |
 
 ## 查询日志
 

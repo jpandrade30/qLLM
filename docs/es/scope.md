@@ -42,6 +42,6 @@ Protocolo anunciado en las respuestas: **0.2.0**. Los archivos de preset, catál
 | Mundo | Dónde | Entidades típicas |
 |-------|-------|-------------------|
 | Demo / goldens | `nerdctl compose` más `deploy/image/config` | `customers`, `invoices`, … |
-| Simulación fleet-ops | `scripts/prd-tst-up` (`deploy/prd-tst`) | `vehicles`, `depots`, `gps_samples`, … |
+| Simulación fleet-ops | `scripts/prd-tst/prd-tst-up` (`deploy/prd-tst`) | `vehicles`, `depots`, `gps_samples`, … |
 
 No ejecutes ambos a la vez. El proceso **solo ve** el `--config-dir` (o el directorio actual / `--project`). Compose no "inyecta" un catálogo en el binario.

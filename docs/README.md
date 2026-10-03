@@ -9,4 +9,4 @@ Choose your language:
 | Español | [es/README.md](es/README.md) |
 | 中文 | [zh/README.md](zh/README.md) |
 
-Every language folder has the same 13 files. The normative contract lives in [`planning/`](../planning/); if this manual and `planning/` disagree, `planning/` wins.
+Every language folder has the same 15 files. The normative contract lives in [`planning/`](../planning/); if this manual and `planning/` disagree, `planning/` wins.

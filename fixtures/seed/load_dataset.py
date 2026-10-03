@@ -59,6 +59,7 @@ def write_api(tables: dict[str, list[dict]]) -> None:
             for p in tables["api_products"]
         ],
         "tickets": tables["api_tickets"],
+        "profiles": tables["api_profiles"],
     }
     API_FIXTURE.parent.mkdir(parents=True, exist_ok=True)
     API_FIXTURE.write_text(__import__("json").dumps(payload), encoding="utf-8")

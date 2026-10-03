@@ -2,24 +2,43 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://qllm.dev/schemas/access.schema.json",
   "title": "qLLM Access Config",
-  "description": "Optional per-app keys and table allowlists (qllm.access.yaml). key is a literal or exact ${ENV_NAME}.",
+  "description": "Optional per-app keys and table allowlists (qllm.access.yaml). One entry per app type, not per user (D21). key or keySecret is a literal or exact ${ENV_NAME}.",
   "type": "object",
   "additionalProperties": false,
   "required": ["apps"],
   "properties": {
+    "scopeMode": {
+      "type": "string",
+      "enum": ["reject", "inject"]
+    },
     "apps": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "key", "tables"],
+        "required": ["name", "tables"],
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "key": { "type": "string", "minLength": 1 },
+          "keySecret": { "type": "string", "minLength": 1 },
+          "scopeMode": {
+            "type": "string",
+            "enum": ["reject", "inject"]
+          },
+          "scope": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": { "type": "string", "minLength": 1 },
+            "description": "Template: { field: user_id }. Static exception: { user_id: \"42\" }."
+          },
           "tables": {
             "type": "array",
             "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "unscopedTables": {
+            "type": "array",
             "items": { "type": "string", "minLength": 1 }
           }
         }

@@ -58,7 +58,8 @@
         "relations": {
           "type": "array",
           "items": { "$ref": "#/$defs/relation" }
-        }
+        },
+        "scope": { "$ref": "#/$defs/entityScope" }
       }
     },
     "binding": {
@@ -67,7 +68,7 @@
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["table", "collection", "rest_resource"]
+          "enum": ["table", "collection", "rest_resource", "key", "topic"]
         },
         "schema": {
           "type": "string",
@@ -85,6 +86,8 @@
           "type": "string",
           "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
         },
+        "keyPattern": { "type": "string", "minLength": 1 },
+        "topic": { "type": "string", "minLength": 1 },
         "accessPath": { "$ref": "#/$defs/accessPath" }
       },
       "allOf": [
@@ -99,13 +102,21 @@
         {
           "if": { "properties": { "kind": { "const": "rest_resource" } } },
           "then": { "required": ["resource"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "key" } } },
+          "then": { "required": ["keyPattern"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "topic" } } },
+          "then": { "required": ["topic"] }
         }
       ]
     },
     "accessPath": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Required predicates for dynamodb/cassandra/ksql pull. Missing eq on these fields → UNSUPPORTED (no table scan).",
+      "description": "Required predicates for dynamodb/cassandra/ksql/redis/kafka. Missing eq on these fields → UNSUPPORTED (no table scan).",
       "properties": {
         "partition": {
           "type": "array",
@@ -117,7 +128,8 @@
         },
         "sort": { "type": "string", "minLength": 1 },
         "sk": { "type": "string", "minLength": 1 },
-        "ksqlKey": { "type": "string", "minLength": 1 }
+        "ksqlKey": { "type": "string", "minLength": 1 },
+        "key": { "type": "string", "minLength": 1 }
       }
     },
     "field": {
@@ -135,7 +147,15 @@
           "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$",
           "description": "Physical column/key; optional dotted path for nested docs"
         },
-        "description": { "type": "string" }
+        "description": { "type": "string" },
+        "fromFilter": {
+          "type": "boolean",
+          "description": "REST only: fill this field from a top-level AND of eq filters when the API omits it (D20)"
+        },
+        "shape": {
+          "type": "string",
+          "description": "Free-text hint of the inner structure of a type: json field (D22). Shown in describe_catalog."
+        }
       }
     },
     "relation": {
@@ -158,6 +178,23 @@
             "maxItems": 2,
             "items": { "type": "string" }
           }
+        }
+      }
+    },
+    "entityScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Scope key name (matches the value carried by the credential)"
+        },
+        "column": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Logical field to filter when it differs from field (D21)"
         }
       }
     }

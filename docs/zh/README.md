@@ -13,10 +13,13 @@
 | [project-files.md](project-files.md) | 文件发现与优先级 |
 | [cli.md](cli.md) | 所有命令和参数 |
 | [http-mcp.md](http-mcp.md) | HTTP `/v1`、MCP、认证、绑定与 CORS |
+| [responses.md](responses.md) | 输出信封、列类型、json 单元格、`shape` |
 | [queries.md](queries.md) | 目录 SQL 与 Query IR：接受什么、拒绝什么 |
 | [connectors.md](connectors.md) | 数据源类型、绑定与下推 |
 | [errors.md](errors.md) | 类型化错误码 |
+| [multi-user-safety.md](multi-user-safety.md) | 凭据上的行范围（D21） |
 | [environments.md](environments.md) | Compose、镜像、PRD 模拟环境与脚本 |
+| [install.md](install.md) | 全部安装方式：镜像、Go、DuckDB（Windows 的 `duckdblib`）、独立仓库 |
 | [build.md](build.md) | Go、`-tags duckdb` 与 Docker |
 
 请先阅读 [scope.md](scope.md) 和 [project-files.md](project-files.md)。如果没有有效的 preset 和 catalog，二进制文件会以 `CONFIG_ERROR` 失败；不会回退到 `fixtures/`。

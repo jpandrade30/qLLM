@@ -48,13 +48,13 @@
 | 字段 | 类型 | 取值 |
 |------|------|------|
 | `id` | 字符串 | `crm_pg`、`legacy_api`、… |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka`，以及 MySQL 线协议别名（`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`）和 Postgres 线协议别名（`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`） |
 | `connection` | object | 结构取决于 `type`（见下）。多余的键会报错 |
 | `options` | object | 在 JSON schema 中是自由格式；运行时只读取它认识的键（见下） |
 
 ### 按 `type` 划分的 `connection`
 
-**postgres** 和 **mysql**（`sqlConnection`）：必填 `hostEnv`、`port`、`database`、`userEnv`、`passwordEnv`。
+**postgres**、**mysql** 及其线协议别名（`sqlConnection`）：必填 `hostEnv`、`port`、`database`、`userEnv`、`passwordEnv`。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -79,6 +79,10 @@
 
 **cassandra**：schema 要求 `keyspace`。实际上代码使用 `hostsEnv`（列表）**或** `hostEnv`。可选：`port`、`userEnv`、`passwordEnv`。
 
+**redis**：`addrEnv` 或 `hostEnv`+`port`。可选：`db`、`userEnv`、`passwordEnv`、`tls`、`readReplica`。
+
+**kafka**：必填 `brokersEnv`。可选：`tls`、`sasl`（`none`/`plain`/`scram`）、`userEnv`、`passwordEnv`。options：`timeoutMs`、`maxRecords`、`maxScanRecords`。
+
 ### `connection.auth`（REST / ksql）
 
 必填：`type`。
@@ -94,7 +98,7 @@
 
 | 键 | 适用于 | 默认值 | 含义 |
 |----|--------|--------|------|
-| `statementTimeoutMs` | postgres、mysql、mssql、clickhouse、sqlite | `limits.maxSourceMs` | 语句超时。实际生效的是 `statementTimeoutMs`、`timeoutMs`、`maxSourceMs` 三者中**最小**的 |
+| `statementTimeoutMs` | postgres、mysql、其别名、mssql、clickhouse、sqlite | `limits.maxSourceMs` | 语句超时。实际生效的是 `statementTimeoutMs`、`timeoutMs`、`maxSourceMs` 三者中**最小**的 |
 | `timeoutMs` | SQL（同上规则）、REST、ksql | REST 10000，ksql 12000 | REST 和 ksql 的 HTTP 客户端超时。对 SQL 来说是第二个上限，与 `statementTimeoutMs` 相同 |
 | `resources` | REST，查询时**必填** | 无 | 资源名到 `list` / `getById` 操作的映射（见下文） |
 
@@ -124,33 +128,36 @@ options:
 
 | 操作 | 是否必填 | 用途 |
 |------|----------|------|
-| `list` | 是 | 运行时对该实体的**每次**查询所发送的请求 |
-| `getById` | 否 | 记录如何获取单条数据。`from-openapi` 会根据含 `{id}` 的路径生成它。**运行时目前不会调用它** |
+| `list` | 是* | 当 `getById` 无法运行（缺少路径参数）时使用。只要有非按 id 的查询就需要它 |
+| `getById` | 否 | 当 `path` 中每个 `{name}` 都有对应的 `eq` 过滤时使用。`from-openapi` 会根据含 `{id}` 的路径生成它 |
 
 每个操作（`list` 和 `getById`）的字段：
 
 | 字段 | 类型 | 默认值 | 含义 |
 |------|------|--------|------|
 | `method` | string | `GET` | HTTP 方法。`limits.readOnly: true` 时只允许 `GET` 和 `HEAD`；其他方法会在启动时以 `CONFIG_ERROR` 失败 |
-| `path` | string | 无 | 拼接到 `baseUrlEnv` 的基础 URL 之后（基础 URL 末尾的 `/` 会被去掉）。请以 `/` 开头 |
+| `path` | string | 无 | 拼接到 `baseUrlEnv` 的基础 URL 之后（基础 URL 末尾的 `/` 会被去掉）。请以 `/` 开头。`getById` 会用 `eq` 过滤替换 `{name}` |
 | `queryParams` | 字符串数组 | 无 | API 接受的查询参数。用来说明有哪些过滤条件；`from-openapi` 会填写。运行时**不会**校验它 |
+| `itemsKey` | string | list 为 `data`/`items`/`results`/`users`，getById 为 `data`/`item`/`result` | 存放数组或单个对象的 JSON 键。也可写在资源上 |
+| `maxPages` | int | 1 | 按 offset 翻页的页数（仅 `list`）。上限 20 |
+| `pageSize` | int | 查询的 `limit` | 当 `maxPages` > 1 时作为 limit 参数发送的页大小 |
+| `limitParam` | string | `limit` | 页大小查询参数名 |
+| `offsetParam` | string | `offset` | offset 查询参数名 |
 
-`getById` 看起来没被用到的原因：qLLM 没有"按 id 获取"的调用。要读取单条数据，请过滤列表：
+`getById` 示例：`WHERE id = '42'` 且 `path: /users/{id}` 会变成 `GET /users/42`。其余 `eq` 仍作为查询参数。若缺少某个占位符，运行时改用 `list`。
 
 ```sql
 SELECT id, email FROM users WHERE id = '42' LIMIT 1
 ```
 
-运行时会发送 `GET /users?id=42&limit=1`。只有当 API 的列表接口接受 `id` 作为查询参数时才有效，所以请把它加入 `list.queryParams`。`path` 中的 `{id}` **不会**被替换。
-
 一次查询如何变成 HTTP 请求：
 
-- **列：**每个被选中的字段按其 `physical` 名称从响应条目中读取。只读取顶层键；带点的 `physical`（如 `addr.city`）在 REST 上取不到值。
-- **`WHERE`：**只发送 `eq`（以及用 `and` 组合的 `eq`），形式为 `?<字段>=<值>`。参数名是查询中书写的**逻辑**字段名，所以对需要过滤的字段，请让逻辑名和物理名保持一致。其他运算符（`neq`、`gt`、`in`、`contains` 等）不会下推到 REST 连接器，在那里返回 `UNSUPPORTED`。
-- **`LIMIT` / `OFFSET`：**作为 `limit` 和 `offset` 查询参数发送。API 必须支持这两个名称。
-- **分页：**运行时只发一次请求，**不会**跟随下一页链接。
+- **列：**每个被选中的字段按其 `physical` 名称从响应条目中读取。只读取顶层键；带点的 `physical`（如 `addr.city`）在 REST 上取不到值。带 `fromFilter: true` 的字段在正文省略时从顶层 `eq`（或 `eq` 的 `and`）填充；没有该 `eq` 则返回 `INVALID_IR`；正文值不一致则返回 `SOURCE_ERROR`。
+- **`WHERE`：**只发送 `eq`（以及用 `and` 组合的 `eq`），形式为 `?<字段>=<值>`（或作为 `getById` 的路径参数）。参数名是查询中书写的**逻辑**字段名，所以对需要过滤的字段，请让逻辑名和物理名保持一致。其他运算符（`neq`、`gt`、`in`、`contains` 等）不会下推到 REST 连接器，在那里返回 `UNSUPPORTED`。
+- **`LIMIT` / `OFFSET`：**作为 `limitParam` / `offsetParam` 发送（默认 `limit` 和 `offset`）。
+- **分页：**`maxPages: 1`（默认）只发一次请求。更大的值会按 offset 翻页，直到短页、行数上限或 20 页。
 - **聚合：**从不下推，在 DuckDB 中执行。
-- **响应结构：**JSON 数组，或者 `data`、`items`、`results`、`users` 键中含有数组的对象。其他情况返回 `SOURCE_ERROR`。
+- **响应结构：**JSON 数组，或 `itemsKey`（或默认键）中含有数组的对象。`getById` 也接受裸对象。
 - **错误：**HTTP 状态码 400 及以上返回 `SOURCE_ERROR`；响应超过 `serve.maxRestResponseBytes` 会被拒绝；超时返回 `TIMEOUT`。
 
 包含两个操作的完整示例：
@@ -197,6 +204,7 @@ sources:
 | `primaryKey` | 字符串数组 | 逻辑字段名 |
 | `fields` | array | |
 | `relations` | array | 仅作提示；不会创建外键 |
+| `scope` | `{ field, column? }` | D21：用凭据在 `column`（或 `field`）上强制 `eq` |
 
 ### `binding`
 
@@ -207,6 +215,8 @@ sources:
 | `table` | `schema`、`table` | postgres/mysql/mssql/sqlite（`schema: main`）/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest；`options.resources` 中的某个键 |
+| `key` | `keyPattern`、`accessPath.partition` | redis（`user:{id}`） |
+| `topic` | `topic`、`accessPath`（partition / `key` / timestamp） | kafka |
 
 `schema` / `table` / `collection` / `resource`：`^[A-Za-z_][A-Za-z0-9_]*$`。
 
@@ -227,9 +237,11 @@ sources:
 | 字段 | 取值 |
 |------|------|
 | `name` | 逻辑 id（`email`） |
-| `type` | `string` `number` `boolean` `timestamp` `json` |
-| `physical` | 列名或键；允许使用点号路径（`addr.city`） |
+| `type` | `string` `number` `boolean` `timestamp` `json`。`number` 在 DuckDB 中为 DOUBLE：大于 2^53 的 id 必须用 `string` |
+| `physical` | 列名或键；允许点号路径（`addr.city`），REST 除外（只读顶层键） |
 | `description` | 可选字符串 |
+| `fromFilter` | 可选布尔；仅 REST。API 不返回该字段；qLLM 从顶层 `eq` 过滤器复制值（D20） |
+| `shape` | 可选自由文本；仅 `type: json`。给 LLM 看的内部结构（`{street, city}`、`string[]`）。出现在 `describe_catalog`。运行时不校验（D22） |
 
 ### `relations[]`
 
@@ -266,13 +278,17 @@ sources:
 
 ## `qllm.access.yaml`
 
-必填：`apps`（至少 1 项）。每个 app 需要 `name`、`key` 和 `tables`（至少 1 项）。
+必填：`apps`（至少 1 项）。每个 app 需要 `name`、`tables`，以及 `key` 或 `keySecret` 二者之一。按应用**类型**各一条，不是按用户。
 
 | 字段 | 说明 |
 |------|------|
-| `name` | 应用 id（`--app` / `QLLM_APP`） |
-| `key` | 字面值，**或**严格写成 `${ENV_NAME}` |
-| `tables` | 允许访问的 `entities[].name` |
+| `scopeMode` | 文件级 `reject`（默认）或 `inject` |
+| `name` | 应用 id（`--app` / `QLLM_APP`）。使用 `keySecret` 时须为 `[a-z][a-z0-9_-]*` |
+| `key` | 静态 Bearer；字面值 **或** 严格写成 `${ENV_NAME}` |
+| `keySecret` | 校验派生密钥 `app.scopeValue.expiry.hmac` |
+| `scope` | 模板 `{ field: user_id }` 或静态 `{ user_id: "acme" }` |
+| `tables` | 允许的 `entities[].name`，或 `*` |
+| `unscopedTables` | 应用带 `scope` 时必须列出的共享表 |
 
 ---
 

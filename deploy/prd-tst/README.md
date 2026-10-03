@@ -5,13 +5,13 @@ This is **not** the compose harness (`qllm-demo` / `customers` / `invoices`). It
 **Do not run at the same time as compose.** From the repo root (Rancher Desktop Kubernetes on):
 
 ```powershell
-.\scripts\prd-tst-up.ps1
-.\scripts\prd-tst-port-forward.ps1
+.\scripts\prd-tst\prd-tst-up.ps1
+.\scripts\prd-tst\prd-tst-port-forward.ps1
 ```
 
 ```bash
-./scripts/prd-tst-up.sh
-./scripts/prd-tst-port-forward.sh
+./scripts/prd-tst/prd-tst-up.sh
+./scripts/prd-tst/prd-tst-port-forward.sh
 ```
 
 `prd-tst-up` runs `nerdctl compose down -v`, builds `qllm:local` into the `k8s.io` namespace, applies this overlay, and waits for `deploy/qllm`. Skip those steps with `-SkipComposeDown` / `--skip-compose-down` and `-SkipBuild` / `--skip-build`.
@@ -44,7 +44,7 @@ kubectl -n qllm-prd port-forward svc/qllm 18088:8088 18089:8089
 All of this in **one** window (`Ctrl+C` stops every forward). Skips Argo if `argocd` is not installed:
 
 ```powershell
-.\scripts\prd-tst-port-forward.ps1
+.\scripts\prd-tst\prd-tst-port-forward.ps1
 ```
 
 | Host | What |
@@ -56,7 +56,7 @@ All of this in **one** window (`Ctrl+C` stops every forward). Skips Argo if `arg
 | `127.0.0.1:18123` | fleet-ch HTTP (`/ping`) |
 | `127.0.0.1:18000` | fleet-ddb |
 | `127.0.0.1:18080` | fleet-api |
-| `http://127.0.0.1:18081` | Argo CD UI **after** `.\scripts\prd-tst-argocd-up.ps1` (plain HTTP) |
+| `http://127.0.0.1:18081` | Argo CD UI **after** `.\scripts\prd-tst\prd-tst-argocd-up.ps1` (plain HTTP) |
 
 After adding ClickHouse HTTP on the Service, re-apply: `kubectl apply -k deploy/prd-tst`.
 
@@ -82,15 +82,15 @@ The Deployment **mounts** ConfigMap `qllm-config` at `/config`, so the catalog b
 `kubectl apply -k deploy/prd-tst` does **not** install Argo. Stock `argocd-server` speaks **TLS** on the pod even if you forward Service port 80, so `http://127.0.0.1:18081` looks “dead” until `--insecure`.
 
 ```powershell
-.\scripts\prd-tst-argocd-up.ps1
+.\scripts\prd-tst\prd-tst-argocd-up.ps1
 # Ctrl+C the old port-forward, then:
-.\scripts\prd-tst-port-forward.ps1
+.\scripts\prd-tst\prd-tst-port-forward.ps1
 ```
 
 Then register the app so it **appears in the UI** (this is a separate kubectl; kustomize does not create Applications):
 
 ```powershell
-.\scripts\prd-tst-argocd-register-app.ps1
+.\scripts\prd-tst\prd-tst-argocd-register-app.ps1
 ```
 
 Refresh the Argo browser tab. You should see **qllm-prd-sim**. Do not use Git `HEAD` as revision.
@@ -98,8 +98,8 @@ Refresh the Argo browser tab. You should see **qllm-prd-sim**. Do not use Git `H
 **SSH “no key found”:** the key in git-gui lives on **your PC**. Argo CD runs **inside the cluster** and does not use `ssh-agent`. Register the OpenSSH **private** key as a Secret:
 
 ```powershell
-.\scripts\prd-tst-argocd-add-ssh-repo.ps1
-# or: .\scripts\prd-tst-argocd-add-ssh-repo.ps1 -KeyPath $env:USERPROFILE\.ssh\id_ed25519
+.\scripts\prd-tst\prd-tst-argocd-add-ssh-repo.ps1
+# or: .\scripts\prd-tst\prd-tst-argocd-add-ssh-repo.ps1 -KeyPath $env:USERPROFILE\.ssh\id_ed25519
 ```
 
 Use the private key file, not `.pub`. PuTTY `.ppk` must be exported as OpenSSH in PuTTYgen. Then remove the broken repo entry in Argo **Settings → Repositories** (if you added SSH there without a key) and Refresh.
@@ -109,7 +109,7 @@ Alternatively connect **HTTPS + PAT** in Settings → Repositories (`https://git
 Password (`admin`):
 
 ```powershell
-.\scripts\prd-tst-argocd-password.ps1
+.\scripts\prd-tst\prd-tst-argocd-password.ps1
 ```
 
 (`prd-tst-argocd-up.ps1` also prints it once.) If that Secret is gone, Argo was already reconfigured — reset with `argocd account update-password`.
@@ -135,11 +135,11 @@ kubectl logs -n qllm-prd deploy/qllm -f | Select-String "execute_sql|mcp_tool"
 Stop port-forward first (Ctrl+C), then:
 
 ```powershell
-.\scripts\prd-tst-down.ps1
+.\scripts\prd-tst\prd-tst-down.ps1
 ```
 
 ```bash
-./scripts/prd-tst-down.sh
+./scripts/prd-tst/prd-tst-down.sh
 ```
 
 That deletes the overlay, Application `qllm-prd-sim` if present, and namespace `qllm-prd`. It does **not** uninstall Argo CD.

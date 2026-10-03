@@ -26,10 +26,10 @@ CGO_ENABLED=1 go build -tags duckdb -o qllm ./cmd/qllm
 Windows:
 
 ```powershell
-.\scripts\dev-shell.ps1
+.\scripts\dev\dev-shell.ps1
 go test -tags duckdb ./internal/duckdblocal/
 go build -tags duckdb -o qllm.exe ./cmd/qllm
-go run -tags duckdb .\scripts\duckdb_smoke.go
+go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 ```
 
 O [`Dockerfile`](../../Dockerfile) e o [`Dockerfile.dev`](../../Dockerfile.dev) executam `go build -tags duckdb`. A imagem de produto copia `deploy/prd`; o Compose usa `.dev` com `deploy/image/config`.

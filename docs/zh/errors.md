@@ -12,6 +12,7 @@
 | `AMBIGUOUS_ALIAS` | `as` 名称或别名冲突 |
 | `LIMIT_EXCEEDED` | `limit` 大于 `maxLimit` |
 | `FORBIDDEN` | ACL：该实体不在应用的 `tables` 中 |
+| `FORBIDDEN_SCOPE` | 凭据带行范围；过滤了其他主体，或范围内实体在密钥上没有值 |
 | `UNAUTHORIZED` | 缺少 Bearer 令牌或令牌错误 |
 | `UNSUPPORTED` | 数据源缺少所需能力（例如 KV 没有键的等值条件） |
 | `UNSUPPORTED_VERSION` | SQL `version` 未知 |

@@ -1,0 +1,20 @@
+apps:
+  - name: demo-agent
+    key: ${QLLM_AUTH_TOKEN}
+    tables:
+      - customers
+      - addresses
+      - support_tickets
+      - subscriptions
+      - products
+      - invoices
+      - invoice_items
+      - payments
+      - events
+      - sessions
+      - notifications
+      - audit_logs
+      - legacy_users
+      - api_products
+      - api_tickets
+      - api_profiles

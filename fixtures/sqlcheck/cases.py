@@ -25,6 +25,7 @@ REQUIRED_COVERS = [
     "numeric",
     "cast",
     "json",
+    "rest-json",
     "array",
     "datetime",
     "extra-agg",

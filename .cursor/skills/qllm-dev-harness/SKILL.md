@@ -35,7 +35,7 @@ No Kubernetes namespace required.
 ## Workflow
 
 1. `nerdctl compose up --build`
-2. Seed: `scripts/dev-seed-fake.ps1` or `scripts/dev-seed-fake.sh` loads frozen `fixtures/datasets/v1` (writes `fixtures/test-api/data.json`; rebuild test-api if JSON changed). `--regenerate` only when the generator changes.
+2. Seed: `scripts/dev/dev-seed-fake.ps1` or `scripts/dev/dev-seed-fake.sh` loads frozen `fixtures/datasets/v1` (writes `fixtures/test-api/data.json`; rebuild test-api if JSON changed). `--regenerate` only when the generator changes.
 3. Preset/catalog/access/env for compose: **only** `deploy/image/config/` (`Dockerfile.dev`). Product example: `deploy/prd/`. `fixtures/` = seed, test-api, golden IR — not schema.
 4. Golden IRs under `fixtures/queries/`; SQL MCP goldens under `fixtures/goldens/sql-v1` + `fixtures/sqlcheck`
 5. Host reaches DBs via published ports; container qllm uses compose DNS from `qllm.env.yaml`

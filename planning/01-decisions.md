@@ -97,7 +97,7 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 - **Decisão:** Arquivo opcional lista `apps[]` com `name`, `key` (literal ou `${ENV_NAME}`) e `tables` (nomes de entidade do catalog). Arquivo presente substitui o Bearer único (`authTokenEnv`). A key escolhe o app; a allowlist vale para IR e SQL. MCP stdio usa `--app` / `QLLM_APP`.
 - **Por quê:** Kubernetes injeta Secret em env; yaml aponta `${ENV}` sem copiar o valor para o git.
-- **Consequência:** Sem o arquivo, comportamento D14 (um token, catalog inteiro). Com o arquivo, catalog/`howtouseme` filtrados às tabelas da key.
+- **Consequência:** Sem o arquivo, comportamento D14 (um token, catalog inteiro). Com o arquivo, catalog/`howtouseme` filtrados às tabelas da key. Escopo por linha (D21) é opcional no mesmo arquivo.
 
 ### D17 — Superfície de agente = Query IR + catalog SQL; GraphQL fora
 
@@ -110,3 +110,27 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** Compose, seeds e `fixtures/` existem para **provar** o runtime. O processo qLLM **só vê** preset/catalog/config/access/env do `--config-dir` (ou `--preset`+`--catalog` / `--project` / CWD com esses arquivos). Sem YAML descrevendo fonte/entidade/host, isso **não existe** para `describe_catalog`, IR ou SQL.
 - **Por quê:** Se o binário ou defaults de produção incorporarem DNS `postgres`, entidades `invoices` do demo, token `change-me`, o próximo ambiente real quebra ou finge que o demo é o produto.
 - **Consequência:** Zero lista de hosts/entidades de demo em `internal/`. Sem YAML válido → `CONFIG_ERROR`, nunca fallback para `fixtures/`. A imagem **deste repo** bakeia `deploy/image/config` (o “projeto” desta instância de harness). `fixtures/` não descreve schema. Produção: outro diretório/ConfigMap, não reutilizar seed/compose. Introspect/from-openapi escrevem no config-dir alvo.
+
+### D19 — Fontes chave/stream são só leitura e não destrutivas
+
+- **Decisão:** `redis` e `kafka` (experimentais, sem harness) leem sem alterar dado, chave, offset, grupo ou TTL. Redis: allowlist `GET`/`HGET*`/`HGETALL`/`LRANGE`/`SSCAN`/`ZRANGE`/`XRANGE`/`TYPE`/`EXISTS`; nunca `DEL`/`SET`/`POP*`/`XACK`/`KEYS`. Kafka: fetch direto na partição **sem** consumer group, sem `CommitOffsets`, sem produce. Query sem igualdade no `accessPath` (Redis key; Kafka partition+offset, key, ou timestamp) → `UNSUPPORTED`.
+- **Por quê:** Consumer group commita offset no broker; `XACK`/`DEL`/`SET` mudam o store. O agente não pode “marcar como lido” nem apagar.
+- **Consequência:** ACL recomendada no Redis/Kafka (só Read/Describe) é a barreira real; o runtime é a segunda. Sem Avro/Protobuf no Kafka (fase 1: JSON/raw). Sem `SCAN`/`KEYS` no Redis. Sem compose.
+
+### D20 — Campo REST omitido pela API (`fromFilter`)
+
+- **Decisão:** `fields[].fromFilter: true` (só entidades cuja fonte é `rest`) diz que a API **não devolve** aquele campo; o runtime preenche a coluna com o valor de um `eq` no topo do WHERE (`eq` sozinho ou `and` de `eq`). Sem esse `eq` → `INVALID_IR`. Se o corpo **trouxer** o campo com valor diferente do filtro → `SOURCE_ERROR`. Valores sob `or` / `not` não alimentam o preenchimento. Não é coluna calculada: só ecoa um filtro que o caller já enviou.
+- **Por quê:** APIs de saldo/perfil recebem `user_id` na query/path e devolvem `{"saldo":5300}`. Sem o eco, `GROUP BY` / join na chave viram `null`.
+- **Consequência:** schema de catalog ganha `fromFilter` opcional (aditivo; `protocolVersion` 0.2.0). A API continua responsável por filtrar; o qLLM só reconstrói a chave para agregação/join.
+
+### D21 — Escopo na credencial, não na query
+
+- **Decisão:** `qllm.access.yaml` tem **uma entrada por tipo de app** (`mobile`, `admin`), nunca por usuário. O código do usuário vive na chave derivada `app.scopeValue.expiryUnix.hmac` (HMAC-SHA256 do `keySecret`, Base64URL). O catálogo marca entidades com `scope.field` (coluna opcional `scope.column`). O runtime força `eq` nessa coluna. `scopeMode` default `reject` (filtro conflitante → `FORBIDDEN_SCOPE`); `inject` faz AND. Tools de query **sem** campo novo. Variante estática `scope: { user_id: "acme" }` só para poucos principals fixos. MCP stdio: `QLLM_SCOPE` / `--scope`.
+- **Por quê:** Se o modelo pudesse passar o `user_id` na tool, trocaria 42 por 7.
+- **Consequência:** `key` e `keySecret` são mutuamente exclusivos. App com `scope` precisa que cada `tables[]` tenha `scope` no catalog ou esteja em `unscopedTables`. App sem `scope` (admin) não injeta. Sem denylist; revogação = expiração curta ou rotacionar o segredo. RLS/view no banco continua recomendado.
+
+### D22 — Célula `json` é JSON parseado; tipo de coluna vem da fonte/DuckDB
+
+- **Decisão:** Uma coluna `type: json` devolve o valor **já parseado** (objeto ou lista) em Query IR e em catalog SQL. `result.rows` aceita `array`. `fields[].shape` (texto livre, opcional) descreve a estrutura interna para o LLM; aparece no `describe_catalog`. O SQL path infere `columns[].type` a partir do tipo DuckDB (não força `string`). Inteiros acima de 2^53 devem ser `string` no catálogo: `number` materializa como `DOUBLE`.
+- **Por quê:** Sem isso, `execute_sql` mentia o tipo, `jsonb` virava texto, e uma lista de tags violava o schema de resposta. O LLM precisa saber o que tem dentro de um objeto.
+- **Consequência:** Aditivo; `protocolVersion` permanece **0.2.0**. REST continua lendo só chaves de topo. Sem filtro/agregação dentro do JSON. Sem caminho pontilhado no REST.

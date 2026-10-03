@@ -24,6 +24,7 @@ var (
 	accessSchema  *jsonschema.Schema
 	sqlReqSchema  *jsonschema.Schema
 	envFileSchema *jsonschema.Schema
+	queryRespSchema *jsonschema.Schema
 )
 
 // init registers package defaults.
@@ -45,6 +46,7 @@ func init() {
 	mustAdd("access.schema.json")
 	mustAdd("sql-request.schema.json")
 	mustAdd("env-file.schema.json")
+	mustAdd("query-response.schema.json")
 	var err error
 	presetSchema, err = c.Compile("https://qllm.dev/schemas/preset.schema.json")
 	if err != nil {
@@ -67,6 +69,10 @@ func init() {
 		panic(err)
 	}
 	envFileSchema, err = c.Compile("https://qllm.dev/schemas/env-file.schema.json")
+	if err != nil {
+		panic(err)
+	}
+	queryRespSchema, err = c.Compile("https://qllm.dev/schemas/query-response.schema.json")
 	if err != nil {
 		panic(err)
 	}
@@ -133,6 +139,11 @@ func EnvFile(e *protocol.EnvFile) *protocol.ProtocolError {
 	return validateSchema(envFileSchema, e, protocol.ErrConfigError)
 }
 
+// QueryResponse checks a serialized response against the public schema (tests and contract).
+func QueryResponse(r *protocol.QueryResponse) *protocol.ProtocolError {
+	return validateSchema(queryRespSchema, r, protocol.ErrInternal)
+}
+
 // EnforceACL implements runtime behavior for this package.
 func EnforceACL(idx *catalogidx.Index, q *protocol.QueryIR, allow map[string]struct{}) *protocol.ProtocolError {
 	if allow == nil {
@@ -167,7 +178,54 @@ func Bundle(preset *protocol.Preset, catalog *protocol.Catalog) (*catalogidx.Ind
 	if err := Catalog(catalog); err != nil {
 		return nil, err
 	}
-	return catalogidx.New(preset, catalog)
+	idx, err := catalogidx.New(preset, catalog)
+	if err != nil {
+		return nil, err
+	}
+	if err := checkFromFilter(idx); err != nil {
+		return nil, err
+	}
+	if err := checkEntityScope(idx); err != nil {
+		return nil, err
+	}
+	return idx, nil
+}
+
+func checkEntityScope(idx *catalogidx.Index) *protocol.ProtocolError {
+	for i := range idx.Catalog.Entities {
+		e := &idx.Catalog.Entities[i]
+		if e.Scope == nil || e.Scope.Field == "" {
+			continue
+		}
+		col := e.Scope.FilterField()
+		if _, ok := idx.Field(e, col); !ok {
+			return protocol.NewError(protocol.ErrConfigError,
+				"entity "+e.Name+" scope column is not a field: "+col,
+				map[string]any{"entity": e.Name, "field": col})
+		}
+	}
+	return nil
+}
+
+func checkFromFilter(idx *catalogidx.Index) *protocol.ProtocolError {
+	for i := range idx.Catalog.Entities {
+		e := &idx.Catalog.Entities[i]
+		src, ok := idx.Source(e.Source)
+		if !ok {
+			continue
+		}
+		for _, f := range e.Fields {
+			if !f.FromFilter {
+				continue
+			}
+			if protocol.WireFamily(src.Type) != protocol.SourceREST {
+				return protocol.NewError(protocol.ErrConfigError,
+					"fromFilter is only allowed on REST entities: "+e.Name+"."+f.Name,
+					map[string]any{"entity": e.Name, "field": f.Name})
+			}
+		}
+	}
+	return nil
 }
 
 type binding struct {

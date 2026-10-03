@@ -12,6 +12,7 @@ const (
 	ErrAmbiguousAlias     ErrorCode = "AMBIGUOUS_ALIAS"
 	ErrLimitExceeded      ErrorCode = "LIMIT_EXCEEDED"
 	ErrForbidden          ErrorCode = "FORBIDDEN"
+	ErrForbiddenScope     ErrorCode = "FORBIDDEN_SCOPE"
 	ErrUnauthorized       ErrorCode = "UNAUTHORIZED"
 	ErrUnsupported        ErrorCode = "UNSUPPORTED"
 	ErrUnsupportedVersion ErrorCode = "UNSUPPORTED_VERSION"
@@ -66,7 +67,37 @@ const (
 	SourceDynamoDB   SourceType = "dynamodb"
 	SourceCassandra  SourceType = "cassandra"
 	SourceKSQL       SourceType = "ksql"
+	SourceRedis      SourceType = "redis"
+	SourceKafka      SourceType = "kafka"
+
+	SourceMariaDB     SourceType = "mariadb"
+	SourceTiDB        SourceType = "tidb"
+	SourceVitess      SourceType = "vitess"
+	SourceAuroraMySQL SourceType = "aurora_mysql"
+	SourcePlanetScale SourceType = "planetscale"
+
+	SourceCockroach      SourceType = "cockroach"
+	SourceYugabyte       SourceType = "yugabyte"
+	SourceAlloyDB        SourceType = "alloydb"
+	SourceAuroraPostgres SourceType = "aurora_postgres"
+	SourceNeon           SourceType = "neon"
+	SourceSupabase       SourceType = "supabase"
+	SourceTimescale      SourceType = "timescale"
+	SourceRedshift       SourceType = "redshift"
 )
+
+// WireFamily maps a source type to the driver it reuses (itself if none).
+func WireFamily(t SourceType) SourceType {
+	switch t {
+	case SourceMariaDB, SourceTiDB, SourceVitess, SourceAuroraMySQL, SourcePlanetScale:
+		return SourceMySQL
+	case SourceCockroach, SourceYugabyte, SourceAlloyDB, SourceAuroraPostgres,
+		SourceNeon, SourceSupabase, SourceTimescale, SourceRedshift:
+		return SourcePostgres
+	default:
+		return t
+	}
+}
 
 type Source struct {
 	ID         string         `json:"id" yaml:"id"`
@@ -98,6 +129,7 @@ type AccessPath struct {
 	Sort      string   `json:"sort,omitempty" yaml:"sort,omitempty"`
 	SK        string   `json:"sk,omitempty" yaml:"sk,omitempty"`
 	KsqlKey   string   `json:"ksqlKey,omitempty" yaml:"ksqlKey,omitempty"`
+	Key       string   `json:"key,omitempty" yaml:"key,omitempty"`
 }
 
 // PartitionKeys implements runtime behavior for this package.
@@ -116,12 +148,22 @@ func (a AccessPath) SortKey() string {
 	return a.SK
 }
 
+// MessageKey is the Kafka record-key field (or ksqlKey fallback).
+func (a AccessPath) MessageKey() string {
+	if a.Key != "" {
+		return a.Key
+	}
+	return a.KsqlKey
+}
+
 type Binding struct {
 	Kind       string     `json:"kind" yaml:"kind"`
 	Schema     string     `json:"schema,omitempty" yaml:"schema,omitempty"`
 	Table      string     `json:"table,omitempty" yaml:"table,omitempty"`
 	Collection string     `json:"collection,omitempty" yaml:"collection,omitempty"`
 	Resource   string     `json:"resource,omitempty" yaml:"resource,omitempty"`
+	KeyPattern string     `json:"keyPattern,omitempty" yaml:"keyPattern,omitempty"`
+	Topic      string     `json:"topic,omitempty" yaml:"topic,omitempty"`
 	AccessPath AccessPath `json:"accessPath,omitempty" yaml:"accessPath,omitempty"`
 }
 
@@ -130,6 +172,8 @@ type Field struct {
 	Type        LogicalType `json:"type" yaml:"type"`
 	Physical    string      `json:"physical" yaml:"physical"`
 	Description string      `json:"description,omitempty" yaml:"description,omitempty"`
+	FromFilter  bool        `json:"fromFilter,omitempty" yaml:"fromFilter,omitempty"`
+	Shape       string      `json:"shape,omitempty" yaml:"shape,omitempty"`
 }
 
 type Relation struct {
@@ -139,15 +183,31 @@ type Relation struct {
 	On   [][]string `json:"on" yaml:"on"`
 }
 
+type EntityScope struct {
+	Field  string `json:"field" yaml:"field"`
+	Column string `json:"column,omitempty" yaml:"column,omitempty"`
+}
+
+func (s *EntityScope) FilterField() string {
+	if s == nil || s.Field == "" {
+		return ""
+	}
+	if s.Column != "" {
+		return s.Column
+	}
+	return s.Field
+}
+
 type Entity struct {
-	Name        string     `json:"name" yaml:"name"`
-	Aliases     []string   `json:"aliases,omitempty" yaml:"aliases,omitempty"`
-	Description string     `json:"description,omitempty" yaml:"description,omitempty"`
-	Source      string     `json:"source" yaml:"source"`
-	Binding     Binding    `json:"binding" yaml:"binding"`
-	PrimaryKey  []string   `json:"primaryKey,omitempty" yaml:"primaryKey,omitempty"`
-	Fields      []Field    `json:"fields" yaml:"fields"`
-	Relations   []Relation `json:"relations,omitempty" yaml:"relations,omitempty"`
+	Name        string       `json:"name" yaml:"name"`
+	Aliases     []string     `json:"aliases,omitempty" yaml:"aliases,omitempty"`
+	Description string       `json:"description,omitempty" yaml:"description,omitempty"`
+	Source      string       `json:"source" yaml:"source"`
+	Binding     Binding      `json:"binding" yaml:"binding"`
+	PrimaryKey  []string     `json:"primaryKey,omitempty" yaml:"primaryKey,omitempty"`
+	Fields      []Field      `json:"fields" yaml:"fields"`
+	Relations   []Relation   `json:"relations,omitempty" yaml:"relations,omitempty"`
+	Scope       *EntityScope `json:"scope,omitempty" yaml:"scope,omitempty"`
 }
 
 type Catalog struct {

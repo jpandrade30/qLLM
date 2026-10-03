@@ -26,4 +26,5 @@ LOGICAL_TABLES = (
     "legacy_users",
     "api_products",
     "api_tickets",
+    "api_profiles",
 )

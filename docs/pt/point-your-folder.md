@@ -71,8 +71,7 @@ Prova: `GET /v1/catalog` retorna o seu `project`. Se ainda aparecer o demo, o `-
 O [`Dockerfile`](../../Dockerfile) de produto faz:
 
 ```text
-COPY deploy/prd/qllm.preset.yaml …
-COPY deploy/prd/qllm.access.yaml …
+COPY deploy/prd/default/ /config/
 CMD serve --http --mcp-http --config-dir /config
 ```
 
@@ -111,7 +110,7 @@ O que fazer:
 
 1. Substitua `deploy/prd-tst/config/*.yaml` **ou** altere os caminhos no kustomize.
 2. Segredos: [`deploy/prd-tst/k8s/secret.yaml`](../../deploy/prd-tst/k8s/secret.yaml).
-3. Rode `.\scripts\prd-tst-up.ps1` (ou `./scripts/prd-tst-up.sh`). Para pular o compose down em um rebuild, use `-SkipComposeDown`.
+3. Rode `.\scripts\prd-tst\prd-tst-up.ps1` (ou `./scripts/prd-tst/prd-tst-up.sh`). Para pular o compose down em um rebuild, use `-SkipComposeDown`.
 4. Prova: `GET /v1/catalog` mostra o projeto `fleet-ops` e `vehicles`.
 
 Argumentos do pod: `serve --http --mcp-http --config-dir /config` ([`k8s/qllm.yaml`](../../deploy/prd-tst/k8s/qllm.yaml)).

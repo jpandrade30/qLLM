@@ -12,6 +12,7 @@ Response shape: `{ "protocolVersion", "error": { "code", "message", "details"? }
 | `AMBIGUOUS_ALIAS` | Conflicting `as` names or aliases |
 | `LIMIT_EXCEEDED` | `limit` is greater than `maxLimit` |
 | `FORBIDDEN` | ACL: entity is not in the app's `tables` |
+| `FORBIDDEN_SCOPE` | Credential is scoped; filter for another subject, or a scoped entity with no value on the key |
 | `UNAUTHORIZED` | Bearer token missing or wrong |
 | `UNSUPPORTED` | Source capability missing (for example KV without a key equality) |
 | `UNSUPPORTED_VERSION` | Unknown SQL `version` |

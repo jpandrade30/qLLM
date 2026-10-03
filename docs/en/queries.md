@@ -69,6 +69,6 @@ JSON with `additionalProperties: false`. Required: `from`, `select`.
 
 ## Response
 
-An envelope with `protocolVersion`, `queryId`, `status` (`succeeded` / `failed` / `accepted`), a tabular `result`, `meta` (`elapsedMs`, `app`, `plan.usedDuckDB`, steps), or a typed `error`.
+An envelope with `protocolVersion`, `queryId`, `status` (`succeeded` / `failed` / `accepted`), a tabular `result`, `meta` (`elapsedMs`, `app`, `plan.usedDuckDB`, steps), or a typed `error`. Full examples and the type table: [responses.md](responses.md).
 
 Do not treat HTTP 200 as success without checking `status` and `error`.

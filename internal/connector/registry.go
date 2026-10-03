@@ -8,8 +8,10 @@ import (
 	"qLLM/internal/connector/cassandra"
 	"qLLM/internal/connector/def"
 	"qLLM/internal/connector/dynamodb"
+	"qLLM/internal/connector/kafka"
 	"qLLM/internal/connector/ksql"
 	"qLLM/internal/connector/mongo"
+	"qLLM/internal/connector/redis"
 	"qLLM/internal/connector/rest"
 	"qLLM/internal/connector/sqldb"
 	"qLLM/internal/protocol"
@@ -31,6 +33,14 @@ type Registry struct {
 	byID map[string]def.Connector
 }
 
+// NewRegistry builds a registry from already-open connectors (tests).
+func NewRegistry(cs map[string]def.Connector) *Registry {
+	if cs == nil {
+		cs = map[string]def.Connector{}
+	}
+	return &Registry{byID: cs}
+}
+
 // OpenOpts carries runtime settings into connector open.
 type OpenOpts struct {
 	MaxRestResponseBytes int64
@@ -50,7 +60,7 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 	for _, s := range p.Sources {
 		var c def.Connector
 		var err error
-		switch s.Type {
+		switch protocol.WireFamily(s.Type) {
 		case protocol.SourcePostgres:
 			c, err = sqldb.OpenPostgres(s, maxSourceMs)
 		case protocol.SourceMySQL:
@@ -74,6 +84,10 @@ func OpenAll(p *protocol.Preset, opts OpenOpts) (*Registry, error) {
 			c, err = cassandra.Open(s)
 		case protocol.SourceKSQL:
 			c, err = ksql.Open(s)
+		case protocol.SourceRedis:
+			c, err = redis.Open(s)
+		case protocol.SourceKafka:
+			c, err = kafka.Open(s)
 		default:
 			err = protocol.NewError(protocol.ErrConfigError, "unknown source type: "+string(s.Type), nil)
 		}
@@ -98,19 +112,21 @@ func validateReadOnlyREST(p *protocol.Preset) error {
 		resources, _ := s.Options["resources"].(map[string]any)
 		for name, raw := range resources {
 			resDef, _ := raw.(map[string]any)
-			list, _ := resDef["list"].(map[string]any)
-			if list == nil {
-				continue
-			}
-			method, _ := list["method"].(string)
-			if method == "" {
-				method = http.MethodGet
-			}
-			m := strings.ToUpper(method)
-			if m != http.MethodGet && m != http.MethodHead {
-				return protocol.NewError(protocol.ErrConfigError,
-					fmt.Sprintf("readOnly preset forbids REST resource %q method %s on source %s", name, m, s.ID),
-					map[string]any{"source": s.ID, "resource": name, "method": m})
+			for _, opName := range []string{"list", "getById"} {
+				op, _ := resDef[opName].(map[string]any)
+				if op == nil {
+					continue
+				}
+				method, _ := op["method"].(string)
+				if method == "" {
+					method = http.MethodGet
+				}
+				m := strings.ToUpper(method)
+				if m != http.MethodGet && m != http.MethodHead {
+					return protocol.NewError(protocol.ErrConfigError,
+						fmt.Sprintf("readOnly preset forbids REST resource %q %s method %s on source %s", name, opName, m, s.ID),
+						map[string]any{"source": s.ID, "resource": name, "method": m})
+				}
 			}
 		}
 	}

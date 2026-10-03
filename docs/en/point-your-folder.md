@@ -4,7 +4,7 @@ The binary only sees YAML you give it.
 
 | Image | Baked into `/config` | Use |
 |-------|----------------------|-----|
-| [`Dockerfile`](../../Dockerfile) | [`deploy/prd/`](../../deploy/prd) | Product / example (`docker build`) |
+| [`Dockerfile`](../../Dockerfile) | [`deploy/prd/default/`](../../deploy/prd/default) | Product / example (`docker build`) |
 | [`Dockerfile.dev`](../../Dockerfile.dev) | [`deploy/image/config`](../../deploy/image/config) | Compose and the K8s simulation binary |
 
 ## On your PC (binary)
@@ -71,12 +71,11 @@ Proof: `GET /v1/catalog` returns your `project`. If it still shows the demo, the
 The product [`Dockerfile`](../../Dockerfile) does:
 
 ```text
-COPY deploy/prd/qllm.preset.yaml …
-COPY deploy/prd/qllm.access.yaml …
+COPY deploy/prd/default/ /config/
 CMD serve --http --mcp-http --config-dir /config
 ```
 
-Edit [`deploy/prd/`](../../deploy/prd) and run `docker build -t qllm .`. Guide: [`deploy/prd/README.md`](../../deploy/prd/README.md).
+Edit [`deploy/prd/default/`](../../deploy/prd/default) and run `docker build -t qllm .`. Guide: [`deploy/prd/README.md`](../../deploy/prd/README.md).
 
 Harness: edit `deploy/image/config/*` and run `nerdctl compose build` or `nerdctl build -f Dockerfile.dev`.
 
@@ -111,7 +110,7 @@ What to do:
 
 1. Replace `deploy/prd-tst/config/*.yaml`, **or** change the paths in kustomize.
 2. Secrets: [`deploy/prd-tst/k8s/secret.yaml`](../../deploy/prd-tst/k8s/secret.yaml).
-3. Run `.\scripts\prd-tst-up.ps1` (or `./scripts/prd-tst-up.sh`). To skip the compose teardown on a rebuild, use `-SkipComposeDown`.
+3. Run `.\scripts\prd-tst\prd-tst-up.ps1` (or `./scripts/prd-tst/prd-tst-up.sh`). To skip the compose teardown on a rebuild, use `-SkipComposeDown`.
 4. Proof: `GET /v1/catalog` shows project `fleet-ops` and `vehicles`.
 
 Pod args: `serve --http --mcp-http --config-dir /config` ([`k8s/qllm.yaml`](../../deploy/prd-tst/k8s/qllm.yaml)).

@@ -26,10 +26,10 @@ CGO_ENABLED=1 go build -tags duckdb -o qllm ./cmd/qllm
 Windows：
 
 ```powershell
-.\scripts\dev-shell.ps1
+.\scripts\dev\dev-shell.ps1
 go test -tags duckdb ./internal/duckdblocal/
 go build -tags duckdb -o qllm.exe ./cmd/qllm
-go run -tags duckdb .\scripts\duckdb_smoke.go
+go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 ```
 
 [`Dockerfile`](../../Dockerfile) 和 [`Dockerfile.dev`](../../Dockerfile.dev) 都会执行 `go build -tags duckdb`。产品镜像复制 `deploy/prd`；Compose 使用 `.dev` 以及 `deploy/image/config`。

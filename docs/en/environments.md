@@ -8,12 +8,12 @@ Rancher Desktop with **nerdctl compose**. Spec: [`planning/05-dev-harness.md`](.
 nerdctl compose up --build
 ```
 
-The Compose stack bakes its config from [`Dockerfile.dev`](../../Dockerfile.dev) and [`deploy/image/config`](../../deploy/image/config). Demo HTTP Bearer: `change-me`. Host ports: HTTP 8088, MCP 8089 (see the Compose file). Seed with `.\scripts\dev-seed-fake.ps1` or `./scripts/dev-seed-fake.sh`.
+The Compose stack builds the binary from [`Dockerfile.dev`](../../Dockerfile.dev) and **mounts** [`deploy/image/config`](../../deploy/image/config) at `/config` (catalog/preset changes apply after `nerdctl compose up -d qllm`, no image rebuild). It also mounts `fixtures/test-api/data.json`. Demo HTTP Bearer: `change-me`. Host ports: HTTP 8088, MCP 8089. Seed with `.\scripts\dev\dev-seed-fake.ps1` or `./scripts/dev/dev-seed-fake.sh`.
 
 Seed the fake API:
 
 ```powershell
-.\scripts\dev-seed-fake.ps1
+.\scripts\dev\dev-seed-fake.ps1
 # --regenerate only rewrites the frozen JSON
 ```
 
@@ -44,22 +44,22 @@ A **separate** world (D18), namespace `qllm-prd`. Do **not** run it together wit
 Guide: [`deploy/prd-tst/README.md`](../../deploy/prd-tst/README.md).
 
 ```powershell
-.\scripts\prd-tst-up.ps1
-.\scripts\prd-tst-port-forward.ps1
-.\scripts\prd-tst-down.ps1
+.\scripts\prd-tst\prd-tst-up.ps1
+.\scripts\prd-tst\prd-tst-port-forward.ps1
+.\scripts\prd-tst\prd-tst-down.ps1
 ```
 
 ```bash
-./scripts/prd-tst-up.sh
-./scripts/prd-tst-port-forward.sh
-./scripts/prd-tst-down.sh
+./scripts/prd-tst/prd-tst-up.sh
+./scripts/prd-tst/prd-tst-port-forward.sh
+./scripts/prd-tst/prd-tst-down.sh
 ```
 
 `prd-tst-up` runs `compose down`, builds `qllm:local` (namespace `k8s.io`), and applies `kubectl apply -k deploy/prd-tst`. Port-forward runs as one process; Ctrl+C stops every forward:
 
 ```powershell
-.\scripts\prd-tst-port-forward.ps1
-# Unix: ./scripts/prd-tst-port-forward.sh
+.\scripts\prd-tst\prd-tst-port-forward.ps1
+# Unix: ./scripts/prd-tst/prd-tst-port-forward.sh
 ```
 
 | Host port | Service |
@@ -91,9 +91,12 @@ The image uses `imagePullPolicy: Never` with `qllm:local` in the `k8s.io` namesp
 
 | Script | Purpose |
 |--------|---------|
-| `dev-shell.ps1` / `dev-shell.cmd` / `dev-shell.sh` | CGO and gcc setup (Windows vs Unix) |
-| `dev-seed-fake.ps1` / `.sh` | Seed `fixtures/datasets/v1` |
-| `duckdb_smoke.go` | CGO DuckDB smoke test |
+| `scripts/dev/dev-shell.ps1` / `.cmd` / `.sh` | CGO and gcc setup (Windows vs Unix) |
+| `scripts/dev/dev-seed-fake.ps1` / `.sh` | Seed `fixtures/datasets/v1` |
+| `scripts/dev/check-live.ps1` / `.sh` | SQL goldens vs live MCP (`-Filter rest_json` for nested JSON) |
+| `scripts/dev/duckdb_smoke.go` | CGO DuckDB smoke test |
+| `scripts/prd-tst/` | Kubernetes fleet-ops sim (up, down, port-forward, Argo) |
+| `scripts/standalone/` | Slim repo generator |
 
 ## Query logs
 

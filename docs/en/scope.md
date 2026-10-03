@@ -9,7 +9,7 @@ Protocol advertised in responses: **0.2.0**. **0.1.0** preset, catalog, and IR f
 - Expose **HTTP** `/v1` and/or **MCP** (stdio or Streamable HTTP `/mcp` plus SSE `/sse`).
 - Validate config (`qllm validate`) with no I/O to the sources.
 - Run one IR (`qllm query`) or one SQL file (`qllm sql`) against the preset's sources.
-- Generate a catalog **draft**: `introspect` (postgres/mysql) and `from-openapi` (REST). You must review relations and aliases before serving.
+- Generate a catalog **draft**: `introspect` (postgres/mysql and wire aliases) and `from-openapi` (REST). You must review relations and aliases before serving.
 - Isolate apps with `qllm.access.yaml` (a Bearer key per app plus an entity allowlist).
 - Fail fast: a typical sync budget of **~15 s** (`limits.maxSyncMs`), a per-source timeout, then `TIMEOUT` and cancellation.
 
@@ -42,6 +42,6 @@ Protocol advertised in responses: **0.2.0**. **0.1.0** preset, catalog, and IR f
 | World | Where | Typical entities |
 |-------|-------|------------------|
 | Demo / goldens | `nerdctl compose` plus `deploy/image/config` | `customers`, `invoices`, … |
-| fleet-ops simulation | `scripts/prd-tst-up` (`deploy/prd-tst`) | `vehicles`, `depots`, `gps_samples`, … |
+| fleet-ops simulation | `scripts/prd-tst/prd-tst-up` (`deploy/prd-tst`) | `vehicles`, `depots`, `gps_samples`, … |
 
 Do not run both at the same time. The process **only sees** the `--config-dir` (or CWD / `--project`). Compose does not "inject" a catalog into the binary.

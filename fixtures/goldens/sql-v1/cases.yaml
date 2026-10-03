@@ -19,6 +19,7 @@ required_covers:
   - numeric
   - cast
   - json
+  - rest-json
   - array
   - datetime
   - extra-agg
@@ -381,6 +382,59 @@ cases:
     covers: [reject]
     sql: |
       SELECT id FROM customers LIMIT 1; SELECT id FROM invoices LIMIT 1
+
+  - id: rest_json_profiles_select
+    version: "2"
+    expect: ok
+    covers: [rest, rest-json, json]
+    sql: |
+      SELECT id, address, tags FROM api_profiles ORDER BY id LIMIT 5
+
+  - id: rest_json_extract_city
+    version: "2"
+    expect: ok
+    covers: [rest-json, json]
+    sql: |
+      SELECT id, json_extract_string(address, '$.city') AS city
+      FROM api_profiles ORDER BY id LIMIT 10
+
+  - id: rest_json_group_city
+    version: "2"
+    expect: ok
+    covers: [rest-json, agg]
+    sql: |
+      SELECT json_extract_string(address, '$.city') AS city, COUNT(*) AS n
+      FROM api_profiles
+      GROUP BY 1
+      ORDER BY n DESC, city
+      LIMIT 20
+
+  - id: rest_json_array_len
+    version: "2"
+    expect: ok
+    covers: [rest-json, array]
+    sql: |
+      SELECT id, json_array_length(tags) AS n_tags
+      FROM api_profiles ORDER BY id LIMIT 10
+
+  - id: rest_json_filter_prefs
+    version: "2"
+    expect: ok
+    covers: [rest-json, filter]
+    sql: |
+      SELECT id FROM api_profiles
+      WHERE CAST(json_extract(prefs, '$.marketing') AS BOOLEAN)
+      ORDER BY id LIMIT 10
+
+  - id: rest_json_join_customers
+    version: "2"
+    expect: ok
+    covers: [rest-json, join]
+    sql: |
+      SELECT p.id, json_extract_string(p.address, '$.city') AS city, c.full_name
+      FROM api_profiles p
+      INNER JOIN customers c ON p.id = c.id
+      ORDER BY p.id LIMIT 10
 
   - id: reject_union_dialect1
     version: "1"

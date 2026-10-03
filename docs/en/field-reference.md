@@ -48,13 +48,13 @@ Required: `id`, `type`, `connection`.
 | Field | Type | Values |
 |-------|------|--------|
 | `id` | string | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` plus MySQL-wire aliases (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) and Postgres-wire aliases (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | Shape depends on `type` (below). Extra keys are an error |
 | `options` | object | Free-form in the JSON schema; the runtime reads only what it knows (below) |
 
 ### `connection` by `type`
 
-**postgres** and **mysql** (`sqlConnection`): required `hostEnv`, `port`, `database`, `userEnv`, `passwordEnv`.
+**postgres**, **mysql**, and their wire aliases (`sqlConnection`): required `hostEnv`, `port`, `database`, `userEnv`, `passwordEnv`.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -79,6 +79,10 @@ Required: `id`, `type`, `connection`.
 
 **cassandra**: the schema requires `keyspace`. In practice the code uses `hostsEnv` (a list) **or** `hostEnv`. Optional: `port`, `userEnv`, `passwordEnv`.
 
+**redis**: `addrEnv` or `hostEnv`+`port`. Optional: `db`, `userEnv`, `passwordEnv`, `tls`, `readReplica` (documented hint; the driver does not send writes).
+
+**kafka**: required `brokersEnv`. Optional: `tls`, `sasl` (`none`/`plain`/`scram`), `userEnv`, `passwordEnv`. Options: `timeoutMs`, `maxRecords`, `maxScanRecords`.
+
 ### `connection.auth` (REST / ksql)
 
 Required: `type`.
@@ -94,8 +98,8 @@ Required: `type`.
 
 | Key | Applies to | Default | Meaning |
 |-----|------------|---------|---------|
-| `statementTimeoutMs` | postgres, mysql, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Statement timeout. The effective value is the **smallest** of `statementTimeoutMs`, `timeoutMs`, and `maxSourceMs` |
-| `timeoutMs` | SQL sources (same rule as above), REST, ksql | REST 10000, ksql 12000 | HTTP client timeout for REST and ksql. For SQL it is a second cap, like `statementTimeoutMs` |
+| `statementTimeoutMs` | postgres, mysql, their aliases, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Statement timeout. The effective value is the **smallest** of `statementTimeoutMs`, `timeoutMs`, and `maxSourceMs` |
+| `timeoutMs` | SQL sources (same rule as above), REST, ksql, redis, kafka | REST 10000, ksql/kafka 12000, redis 10000 | Client timeout |
 | `resources` | REST, **required** to query | none | Map of resource name to `list` / `getById` operations (see below) |
 
 Every other source type (mongodb, dynamodb, cassandra) reads no `options` keys today. Unknown keys are accepted by the schema and ignored by the runtime, so a typo fails silently.
@@ -124,33 +128,36 @@ Each key under `resources` is a resource name. A catalog entity points at it wit
 
 | Operation | Required | Purpose |
 |-----------|----------|---------|
-| `list` | yes | The request the runtime sends for **every** query on the entity |
-| `getById` | no | Documents how to fetch a single item. `from-openapi` generates it from paths that contain `{id}`. **The runtime does not call it today** |
+| `list` | yes* | Used when `getById` cannot run (no matching path params). Required unless every query hits `getById` |
+| `getById` | no | Used when every `{name}` in `path` has a matching `eq` filter. `from-openapi` generates it from paths that contain `{id}` |
 
 Operation fields (`list` and `getById`):
 
 | Field | Type | Default | Meaning |
 |-------|------|---------|---------|
 | `method` | string | `GET` | HTTP method. With `limits.readOnly: true` only `GET` and `HEAD` are allowed; any other method fails at startup with `CONFIG_ERROR` |
-| `path` | string | none | Appended to the base URL from `baseUrlEnv` (a trailing `/` on the base is trimmed). Start it with `/` |
+| `path` | string | none | Appended to the base URL from `baseUrlEnv` (a trailing `/` on the base is trimmed). Start it with `/`. `{name}` is replaced from `eq` filters when this is `getById` |
 | `queryParams` | array of strings | none | The query parameters the API accepts. It documents which filters exist; `from-openapi` fills it. The runtime does **not** enforce it |
+| `itemsKey` | string | `data`/`items`/`results`/`users` (list) or `data`/`item`/`result` (getById) | JSON key that holds the array or the single object. Also allowed on the resource itself |
+| `maxPages` | int | 1 | Offset pages to fetch (`list` only). Capped at 20 |
+| `pageSize` | int | the query `limit` | Page size sent as the limit parameter when `maxPages` > 1 |
+| `limitParam` | string | `limit` | Query parameter name for the page size |
+| `offsetParam` | string | `offset` | Query parameter name for the offset |
 
-Why `getById` looks unused: qLLM has no "fetch by id" call. To read one item, filter the list instead:
+`getById` example: `WHERE id = '42'` plus `path: /users/{id}` becomes `GET /users/42`. Remaining `eq` filters stay as query parameters. If a path placeholder has no matching filter, the runtime uses `list`.
 
 ```sql
 SELECT id, email FROM users WHERE id = '42' LIMIT 1
 ```
 
-The runtime sends `GET /users?id=42&limit=1`. This only works if the API's list endpoint accepts `id` as a query parameter, so add it to `list.queryParams`. A `{id}` placeholder in `path` is **not** substituted.
-
 How a query becomes an HTTP request:
 
-- **Columns:** each selected field is read from the response item using its `physical` name. Only top-level keys are read; a dotted `physical` such as `addr.city` returns nothing on REST.
-- **`WHERE`:** only `eq` (and `and`-combined `eq`) is sent, as `?<field>=<value>`. The parameter name is the **logical** field name as written in the query, so keep the logical and physical names equal for fields you filter on. Any other operator (`neq`, `gt`, `in`, `contains`, …) is not pushed down to the REST connector and returns `UNSUPPORTED` there.
-- **`LIMIT` / `OFFSET`:** sent as the `limit` and `offset` query parameters. The API must support those names.
-- **Pagination:** the runtime makes one request and does **not** follow next-page links.
+- **Columns:** each selected field is read from the response item using its `physical` name. Only top-level keys are read; a dotted `physical` such as `addr.city` returns nothing on REST. A field with `fromFilter: true` is filled from a top-level `eq` (or `and` of `eq`) when the body omits it; without that `eq` the query returns `INVALID_IR`; a different value in the body returns `SOURCE_ERROR`.
+- **`WHERE`:** only `eq` (and `and`-combined `eq`) is sent, as `?<field>=<value>` (or as a path param on `getById`). The parameter name is the **logical** field name as written in the query, so keep the logical and physical names equal for fields you filter on. Any other operator (`neq`, `gt`, `in`, `contains`, …) is not pushed down to the REST connector and returns `UNSUPPORTED` there.
+- **`LIMIT` / `OFFSET`:** sent as `limitParam` / `offsetParam` (defaults `limit` and `offset`).
+- **Pagination:** `maxPages: 1` (default) is one request. Higher values walk offset until a short page, the row limit, or 20 pages.
 - **Aggregations:** never pushed down; they run in DuckDB.
-- **Response shape:** either a JSON array, or an object whose `data`, `items`, `results`, or `users` key holds the array. Anything else returns `SOURCE_ERROR`.
+- **Response shape:** a JSON array, or an object whose `itemsKey` (or the default keys) holds the array. `getById` also accepts a bare object.
 - **Errors:** HTTP status 400 or above returns `SOURCE_ERROR`; a response larger than `serve.maxRestResponseBytes` is refused; exceeding the timeout returns `TIMEOUT`.
 
 Full example with both operations:
@@ -197,6 +204,7 @@ Required: `name`, `source`, `binding`, `fields` (at least 1 field).
 | `primaryKey` | array of strings | Logical field names |
 | `fields` | array | |
 | `relations` | array | Hints only; they do not create foreign keys |
+| `scope` | `{ field, column? }` | D21: force `eq` on `column` (or `field`) from the credential |
 
 ### `binding`
 
@@ -207,6 +215,8 @@ Required: `kind`.
 | `table` | `schema`, `table` | postgres/mysql/mssql/sqlite (`schema: main`)/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest; a key of `options.resources` |
+| `key` | `keyPattern`, `accessPath.partition` | redis (`user:{id}`) |
+| `topic` | `topic`, `accessPath` (partition / `key` / timestamp) | kafka |
 
 `schema` / `table` / `collection` / `resource`: `^[A-Za-z_][A-Za-z0-9_]*$`.
 
@@ -227,9 +237,11 @@ Required: `name`, `type`, `physical`.
 | Field | Values |
 |-------|--------|
 | `name` | logical id (`email`) |
-| `type` | `string` `number` `boolean` `timestamp` `json` |
-| `physical` | column or key; dotted paths allowed (`addr.city`) |
+| `type` | `string` `number` `boolean` `timestamp` `json`. `number` is DOUBLE in DuckDB: ids above 2^53 must be `string` |
+| `physical` | column or key; dotted paths allowed (`addr.city`) except on REST (top-level keys only) |
 | `description` | optional string |
+| `fromFilter` | optional bool; REST only. The API does not return this field; qLLM copies the value from a top-level `eq` filter (D20) |
+| `shape` | optional free text; only for `type: json`. Inner structure for the LLM (`{street, city}`, `string[]`). Shown in `describe_catalog`. Not validated (D22) |
 
 ### `relations[]`
 
@@ -266,13 +278,17 @@ CLI flags that **override** the file: `--addr`, `--mcp-addr`, `--auth-token-env`
 
 ## `qllm.access.yaml`
 
-Required: `apps` (at least 1). Each app needs `name`, `key`, and `tables` (at least 1).
+Required: `apps` (at least 1). Each app needs `name`, `tables`, and exactly one of `key` or `keySecret`. One entry per app **type**, not per user.
 
 | Field | Notes |
 |-------|-------|
-| `name` | App id (`--app` / `QLLM_APP`) |
-| `key` | Literal **or** exactly `${ENV_NAME}` |
-| `tables` | Allowed `entities[].name` values |
+| `scopeMode` | File-level `reject` (default) or `inject` |
+| `name` | App id (`--app` / `QLLM_APP`). For `keySecret`, `[a-z][a-z0-9_-]*` |
+| `key` | Static Bearer; literal **or** exactly `${ENV_NAME}` |
+| `keySecret` | Verifies derived keys `app.scopeValue.expiry.hmac` |
+| `scope` | Template `{ field: user_id }` or static `{ user_id: "acme" }` |
+| `tables` | Allowed `entities[].name` values, or `*` |
+| `unscopedTables` | Shared tables required when the app has `scope` |
 
 ---
 

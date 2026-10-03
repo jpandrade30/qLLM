@@ -3,6 +3,7 @@ package sqldb
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
@@ -100,7 +101,7 @@ func OpenPostgres(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	db.SetMaxOpenConns(5)
 	db.SetConnMaxLifetime(30 * time.Minute)
 	return &SQLConnector{
-		id: src.ID, srcType: protocol.SourcePostgres, db: db,
+		id: src.ID, srcType: src.Type, db: db,
 		dialect: sqlbuild.Postgres,
 		caps: def.Caps{
 			Filter: true, Project: true, Agg: true, GroupBy: true,
@@ -151,7 +152,7 @@ func OpenMySQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	db := sql.OpenDB(connector)
 	db.SetMaxOpenConns(5)
 	return &SQLConnector{
-		id: src.ID, srcType: protocol.SourceMySQL, db: db,
+		id: src.ID, srcType: src.Type, db: db,
 		dialect: sqlbuild.MySQL,
 		caps: def.Caps{
 			Filter: true, Project: true, Agg: true, GroupBy: true,
@@ -217,7 +218,11 @@ func (c *SQLConnector) Query(ctx context.Context, step def.PushdownStep) (*proto
 		}
 		row := make([]any, len(raw))
 		for i, v := range raw {
-			row[i] = normalizeSQLValue(v)
+			typ := protocol.TypeString
+			if i < len(columns) {
+				typ = columns[i].Type
+			}
+			row[i] = normalizeSQLValue(typ, v)
 		}
 		out = append(out, row)
 	}
@@ -247,15 +252,34 @@ func inferOutType(step def.PushdownStep, name string) protocol.LogicalType {
 }
 
 // normalizeSQLValue implements runtime behavior for this package.
-func normalizeSQLValue(v any) any {
+func normalizeSQLValue(typ protocol.LogicalType, v any) any {
 	switch t := v.(type) {
 	case nil:
 		return nil
 	case []byte:
+		if typ == protocol.TypeJSON {
+			return parseJSONBytes(t)
+		}
 		return string(t)
+	case string:
+		if typ == protocol.TypeJSON {
+			return parseJSONBytes([]byte(t))
+		}
+		return t
 	case time.Time:
 		return t.UTC().Format(time.RFC3339)
 	default:
 		return t
 	}
+}
+
+func parseJSONBytes(b []byte) any {
+	if len(b) == 0 {
+		return nil
+	}
+	var out any
+	if err := json.Unmarshal(b, &out); err != nil {
+		return string(b)
+	}
+	return out
 }

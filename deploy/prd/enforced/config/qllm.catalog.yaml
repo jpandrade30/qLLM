@@ -1,0 +1,24 @@
+protocolVersion: "0.2.0"
+project: qllm-enforced
+entities:
+  - name: orders
+    description: Customer orders (scoped by user_id)
+    source: shop_pg
+    scope: { field: user_id }
+    binding: { kind: table, schema: public, table: orders }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: user_id, type: string, physical: user_id }
+      - { name: item, type: string, physical: item }
+      - { name: total_cents, type: number, physical: total_cents }
+
+  - name: products
+    description: Shared product list (no row scope)
+    source: shop_pg
+    binding: { kind: table, schema: public, table: products }
+    primaryKey: [id]
+    fields:
+      - { name: id, type: string, physical: id }
+      - { name: name, type: string, physical: name }
+      - { name: price_cents, type: number, physical: price_cents }

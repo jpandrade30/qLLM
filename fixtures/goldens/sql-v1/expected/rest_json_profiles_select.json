@@ -1,0 +1,15 @@
+{
+  "columns": [
+    {"name": "id", "type": "string"},
+    {"name": "address", "type": "json"},
+    {"name": "tags", "type": "json"}
+  ],
+  "rows": [
+    ["c1", {"city": "Martinezbury", "state": "UT", "country": "VC", "postal_code": "93533"}, ["vip"]],
+    ["c10", {"city": "Port Kimberly", "state": "MS", "country": "NA", "postal_code": "06221"}, ["trial"]],
+    ["c11", {"city": "Thorntonfurt", "state": "MD", "country": "RU", "postal_code": "51105"}, ["vip", "trial"]],
+    ["c12", {"city": "South Tammie", "state": "TN", "country": "BG", "postal_code": "17048"}, ["support"]],
+    ["c13", {"city": "Mollymouth", "state": "NY", "country": "NL", "postal_code": "13570"}, ["vip"]]
+  ],
+  "rowCount": 5
+}

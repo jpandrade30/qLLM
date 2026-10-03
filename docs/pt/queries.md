@@ -69,6 +69,6 @@ O `GET /v1/howtouseme` descreve `never`, os formatos e `invalidExamples`. O agen
 
 ## Resposta
 
-Um envelope com `protocolVersion`, `queryId`, `status` (`succeeded` / `failed` / `accepted`), um `result` tabular, `meta` (`elapsedMs`, `app`, `plan.usedDuckDB`, steps) ou um `error` tipado.
+Um envelope com `protocolVersion`, `queryId`, `status` (`succeeded` / `failed` / `accepted`), um `result` tabular, `meta` (`elapsedMs`, `app`, `plan.usedDuckDB`, steps) ou um `error` tipado. Exemplos e tabela de tipos: [responses.md](responses.md).
 
 Não trate HTTP 200 como sucesso sem verificar `status` e `error`.

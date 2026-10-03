@@ -31,11 +31,17 @@ def cmd_coverage(_: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_check_oracle(_: argparse.Namespace) -> int:
+def _selected(cases: list, filt: str | None) -> list:
+    if not filt:
+        return cases
+    return [c for c in cases if filt in str(c.get("id")) or filt in (c.get("covers") or [])]
+
+
+def cmd_check_oracle(args: argparse.Namespace) -> int:
     suite = load_suite()
     con = open_oracle()
     failed = 0
-    for case in suite["cases"]:
+    for case in _selected(suite["cases"], getattr(args, "filter", None)):
         print_case_banner(case)
         if case.get("expect") == "reject":
             print("  skip exec (reject)")
@@ -61,7 +67,7 @@ def cmd_check_oracle(_: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_mcp(_: argparse.Namespace) -> int:
+def cmd_mcp(args: argparse.Namespace) -> int:
     from sqlcheck.mcp_client import MCPClient, MCPError
 
     suite = load_suite()
@@ -77,7 +83,7 @@ def cmd_mcp(_: argparse.Namespace) -> int:
             return 1
         failed = 0
         print("tools/list:", names)
-        for case in suite["cases"]:
+        for case in _selected(suite["cases"], getattr(args, "filter", None)):
             print_case_banner(case)
             sql = case["sql"]
             ver = str(case.get("version") or "2")
@@ -131,8 +137,10 @@ def main() -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("oracle", help="regenerate fixtures/goldens/sql-v1/expected")
     sub.add_parser("coverage")
-    sub.add_parser("check-oracle")
-    sub.add_parser("mcp")
+    p_chk = sub.add_parser("check-oracle")
+    p_chk.add_argument("--filter", default="", help="case id or cover tag substring (e.g. rest_json)")
+    p_mcp = sub.add_parser("mcp")
+    p_mcp.add_argument("--filter", default="", help="case id or cover tag substring (e.g. rest_json)")
     args = p.parse_args()
     fn = {"oracle": cmd_oracle, "coverage": cmd_coverage, "check-oracle": cmd_check_oracle, "mcp": cmd_mcp}[args.cmd]
     raise SystemExit(fn(args))

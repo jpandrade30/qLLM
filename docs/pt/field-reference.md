@@ -48,13 +48,13 @@ Obrigatórios: `id`, `type`, `connection`.
 | Campo | Tipo | Valores |
 |-------|------|---------|
 | `id` | string | `crm_pg`, `legacy_api`, … |
-| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` |
+| `type` | enum | `postgres` `mysql` `mongodb` `rest` `mssql` `sqlite` `clickhouse` `dynamodb` `cassandra` `ksql` `redis` `kafka` e aliases de fio MySQL (`mariadb` `tidb` `vitess` `aurora_mysql` `planetscale`) e Postgres (`cockroach` `yugabyte` `alloydb` `aurora_postgres` `neon` `supabase` `timescale` `redshift`) |
 | `connection` | object | O formato depende do `type` (abaixo). Chaves extras são erro |
 | `options` | object | Livre no JSON schema; o runtime lê apenas o que conhece (abaixo) |
 
 ### `connection` por `type`
 
-**postgres** e **mysql** (`sqlConnection`): obrigatórios `hostEnv`, `port`, `database`, `userEnv`, `passwordEnv`.
+**postgres**, **mysql** e os aliases de fio (`sqlConnection`): obrigatórios `hostEnv`, `port`, `database`, `userEnv`, `passwordEnv`.
 
 | Campo | Tipo | Observações |
 |-------|------|-------------|
@@ -79,6 +79,10 @@ Obrigatórios: `id`, `type`, `connection`.
 
 **cassandra**: o schema exige `keyspace`. Na prática, o código usa `hostsEnv` (uma lista) **ou** `hostEnv`. Opcionais: `port`, `userEnv`, `passwordEnv`.
 
+**redis**: `addrEnv` ou `hostEnv`+`port`. Opcionais: `db`, `userEnv`, `passwordEnv`, `tls`, `readReplica`.
+
+**kafka**: obrigatório `brokersEnv`. Opcionais: `tls`, `sasl` (`none`/`plain`/`scram`), `userEnv`, `passwordEnv`. Options: `timeoutMs`, `maxRecords`, `maxScanRecords`.
+
 ### `connection.auth` (REST / ksql)
 
 Obrigatório: `type`.
@@ -94,7 +98,7 @@ Obrigatório: `type`.
 
 | Chave | Aplica-se a | Padrão | Significado |
 |-------|-------------|--------|-------------|
-| `statementTimeoutMs` | postgres, mysql, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Timeout do statement. Vale o **menor** entre `statementTimeoutMs`, `timeoutMs` e `maxSourceMs` |
+| `statementTimeoutMs` | postgres, mysql, aliases, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Timeout do statement. Vale o **menor** entre `statementTimeoutMs`, `timeoutMs` e `maxSourceMs` |
 | `timeoutMs` | SQL (mesma regra), REST, ksql | REST 10000, ksql 12000 | Timeout do cliente HTTP em REST e ksql. Em SQL é um segundo teto, como `statementTimeoutMs` |
 | `resources` | REST, **obrigatório** para consultar | nenhum | Mapa de nome do recurso para operações `list` / `getById` (veja abaixo) |
 
@@ -124,33 +128,36 @@ Cada chave de `resources` é o nome de um recurso. Uma entidade do catálogo apo
 
 | Operação | Obrigatória | Para que serve |
 |----------|-------------|----------------|
-| `list` | sim | A requisição que o runtime envia em **toda** consulta da entidade |
-| `getById` | não | Documenta como buscar um item. O `from-openapi` gera a partir de caminhos com `{id}`. **O runtime não a chama hoje** |
+| `list` | sim* | Usada quando o `getById` não pode rodar (faltam path params). Obrigatória se alguma consulta não for por id |
+| `getById` | não | Usada quando todo `{nome}` do `path` tem um filtro `eq`. O `from-openapi` gera a partir de caminhos com `{id}` |
 
 Campos de cada operação (`list` e `getById`):
 
 | Campo | Tipo | Padrão | Significado |
 |-------|------|--------|-------------|
 | `method` | string | `GET` | Método HTTP. Com `limits.readOnly: true` só `GET` e `HEAD` são aceitos; outro método falha na inicialização com `CONFIG_ERROR` |
-| `path` | string | nenhum | Concatenado à URL base de `baseUrlEnv` (a `/` final da base é removida). Comece com `/` |
+| `path` | string | nenhum | Concatenado à URL base de `baseUrlEnv` (a `/` final da base é removida). Comece com `/`. `{nome}` é substituído pelos filtros `eq` no `getById` |
 | `queryParams` | lista de strings | nenhum | Parâmetros de query que a API aceita. Documenta quais filtros existem; o `from-openapi` preenche. O runtime **não** valida |
+| `itemsKey` | string | `data`/`items`/`results`/`users` (list) ou `data`/`item`/`result` (getById) | Chave JSON do array ou do objeto. Também vale no recurso |
+| `maxPages` | int | 1 | Páginas por offset (`list`). Teto 20 |
+| `pageSize` | int | o `limit` da consulta | Tamanho da página enviado no parâmetro de limit quando `maxPages` > 1 |
+| `limitParam` | string | `limit` | Nome do parâmetro de tamanho de página |
+| `offsetParam` | string | `offset` | Nome do parâmetro de offset |
 
-Por que o `getById` parece sem uso: o qLLM não tem chamada "buscar por id". Para ler um item, filtre a listagem:
+Exemplo de `getById`: `WHERE id = '42'` com `path: /users/{id}` vira `GET /users/42`. Os outros `eq` ficam como query params. Se faltar um placeholder, o runtime usa `list`.
 
 ```sql
 SELECT id, email FROM users WHERE id = '42' LIMIT 1
 ```
 
-O runtime envia `GET /users?id=42&limit=1`. Isso só funciona se o endpoint de listagem da API aceitar `id` como parâmetro de query; por isso inclua-o em `list.queryParams`. Um `{id}` no `path` **não** é substituído.
-
 Como uma consulta vira requisição HTTP:
 
-- **Colunas:** cada campo selecionado é lido do item da resposta pelo nome `physical`. Só chaves de primeiro nível são lidas; um `physical` com ponto, como `addr.city`, não retorna nada em REST.
-- **`WHERE`:** só `eq` (e `eq` combinados com `and`) é enviado, como `?<campo>=<valor>`. O nome do parâmetro é o nome **lógico** do campo, como escrito na consulta; mantenha nome lógico e físico iguais nos campos que você filtra. Outro operador (`neq`, `gt`, `in`, `contains`, …) não é empurrado ao conector REST e retorna `UNSUPPORTED` ali.
-- **`LIMIT` / `OFFSET`:** enviados como parâmetros `limit` e `offset`. A API precisa aceitar esses nomes.
-- **Paginação:** o runtime faz uma única requisição e **não** segue links de próxima página.
+- **Colunas:** cada campo selecionado é lido do item da resposta pelo nome `physical`. Só chaves de primeiro nível são lidas; um `physical` com ponto, como `addr.city`, não retorna nada em REST. Campo com `fromFilter: true` é preenchido a partir de um `eq` de topo (ou `and` de `eq`) quando o corpo omite a chave; sem esse `eq` a consulta retorna `INVALID_IR`; valor diferente no corpo retorna `SOURCE_ERROR`.
+- **`WHERE`:** só `eq` (e `eq` combinados com `and`) é enviado, como `?<campo>=<valor>` (ou path param no `getById`). O nome do parâmetro é o nome **lógico** do campo; mantenha nome lógico e físico iguais nos campos que você filtra. Outro operador (`neq`, `gt`, `in`, `contains`, …) não é empurrado ao conector REST e retorna `UNSUPPORTED` ali.
+- **`LIMIT` / `OFFSET`:** enviados como `limitParam` / `offsetParam` (padrões `limit` e `offset`).
+- **Paginação:** `maxPages: 1` (padrão) é uma requisição. Valores maiores andam o offset até página curta, limite de linhas ou 20 páginas.
 - **Agregações:** nunca empurradas; rodam no DuckDB.
-- **Formato da resposta:** um array JSON, ou um objeto em que a chave `data`, `items`, `results` ou `users` contém o array. Qualquer outra coisa retorna `SOURCE_ERROR`.
+- **Formato da resposta:** array JSON ou objeto cuja `itemsKey` (ou as chaves padrão) contém o array. `getById` também aceita um objeto puro.
 - **Erros:** status HTTP 400 ou maior retorna `SOURCE_ERROR`; resposta maior que `serve.maxRestResponseBytes` é recusada; estourar o timeout retorna `TIMEOUT`.
 
 Exemplo completo com as duas operações:
@@ -197,6 +204,7 @@ Obrigatórios: `name`, `source`, `binding`, `fields` (mínimo 1 field).
 | `primaryKey` | array de strings | Nomes lógicos de field |
 | `fields` | array | |
 | `relations` | array | Apenas dicas; não criam chaves estrangeiras |
+| `scope` | `{ field, column? }` | D21: força `eq` em `column` (ou `field`) a partir da credencial |
 
 ### `binding`
 
@@ -207,6 +215,8 @@ Obrigatório: `kind`.
 | `table` | `schema`, `table` | postgres/mysql/mssql/sqlite (`schema: main`)/clickhouse/dynamodb/cassandra/ksql |
 | `collection` | `collection` | mongodb |
 | `rest_resource` | `resource` | rest; uma chave de `options.resources` |
+| `key` | `keyPattern`, `accessPath.partition` | redis (`user:{id}`) |
+| `topic` | `topic`, `accessPath` (partition / `key` / timestamp) | kafka |
 
 `schema` / `table` / `collection` / `resource`: `^[A-Za-z_][A-Za-z0-9_]*$`.
 
@@ -227,9 +237,11 @@ Obrigatórios: `name`, `type`, `physical`.
 | Campo | Valores |
 |-------|---------|
 | `name` | id lógico (`email`) |
-| `type` | `string` `number` `boolean` `timestamp` `json` |
-| `physical` | coluna ou chave; caminhos com ponto são permitidos (`addr.city`) |
+| `type` | `string` `number` `boolean` `timestamp` `json`. `number` vira DOUBLE no DuckDB: ids acima de 2^53 devem ser `string` |
+| `physical` | coluna ou chave; caminhos com ponto são permitidos (`addr.city`), exceto no REST (só chaves de topo) |
 | `description` | string opcional |
+| `fromFilter` | bool opcional; só REST. A API não devolve o campo; o qLLM copia o valor de um `eq` de topo (D20) |
+| `shape` | texto livre opcional; só para `type: json`. Estrutura interna para o LLM (`{street, city}`, `string[]`). Aparece no `describe_catalog`. Não é validado (D22) |
 
 ### `relations[]`
 
@@ -266,13 +278,17 @@ Flags da CLI que **sobrescrevem** o arquivo: `--addr`, `--mcp-addr`, `--auth-tok
 
 ## `qllm.access.yaml`
 
-Obrigatório: `apps` (mínimo 1). Cada app precisa de `name`, `key` e `tables` (mínimo 1).
+Obrigatório: `apps` (mínimo 1). Cada app precisa de `name`, `tables` e exatamente um de `key` ou `keySecret`. Uma entrada por **tipo** de app, não por usuário.
 
 | Campo | Observações |
 |-------|-------------|
-| `name` | ID do app (`--app` / `QLLM_APP`) |
-| `key` | Literal **ou** exatamente `${ENV_NAME}` |
-| `tables` | Valores permitidos de `entities[].name` |
+| `scopeMode` | No arquivo: `reject` (padrão) ou `inject` |
+| `name` | ID do app (`--app` / `QLLM_APP`). Com `keySecret`, `[a-z][a-z0-9_-]*` |
+| `key` | Bearer estático; literal **ou** exatamente `${ENV_NAME}` |
+| `keySecret` | Valida chaves derivadas `app.scopeValue.expiry.hmac` |
+| `scope` | Template `{ field: user_id }` ou estático `{ user_id: "acme" }` |
+| `tables` | `entities[].name` permitidos, ou `*` |
+| `unscopedTables` | Tabelas compartilhadas obrigatórias quando o app tem `scope` |
 
 ---
 

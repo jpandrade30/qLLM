@@ -220,6 +220,14 @@ func TestPresetExperimentalSourceTypes(t *testing.T) {
 			{ID: "local_sqlite", Type: protocol.SourceSQLite, Connection: map[string]any{"pathEnv": "QLLM_SQLITE_PATH"}},
 			{ID: "items_ddb", Type: protocol.SourceDynamoDB, Connection: map[string]any{"region": "us-east-1"}},
 			{ID: "ks", Type: protocol.SourceKSQL, Connection: map[string]any{"baseUrlEnv": "QLLM_KSQL_URL"}},
+			{ID: "crdb", Type: protocol.SourceCockroach, Connection: map[string]any{
+				"hostEnv": "H", "port": 26257, "database": "app", "userEnv": "U", "passwordEnv": "P",
+			}},
+			{ID: "maria", Type: protocol.SourceMariaDB, Connection: map[string]any{
+				"hostEnv": "H", "port": 3306, "database": "app", "userEnv": "U", "passwordEnv": "P",
+			}},
+			{ID: "cache", Type: protocol.SourceRedis, Connection: map[string]any{"addrEnv": "QLLM_REDIS_ADDR"}},
+			{ID: "bus", Type: protocol.SourceKafka, Connection: map[string]any{"brokersEnv": "QLLM_KAFKA_BROKERS"}},
 		},
 	}
 	if err := validate.Preset(p); err != nil {
@@ -242,5 +250,56 @@ func TestCatalogAccessPath(t *testing.T) {
 	}
 	if err := validate.Catalog(c); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestFromFilterOnlyREST(t *testing.T) {
+	p, c := sampleBundle(t)
+	c.Entities[0].Fields[0].FromFilter = true
+	_, err := validate.Bundle(p, c)
+	if err == nil || err.Code != protocol.ErrConfigError {
+		t.Fatalf("expected CONFIG_ERROR got %#v", err)
+	}
+	if !strings.Contains(err.Message, "fromFilter") {
+		t.Fatalf("message %s", err.Message)
+	}
+}
+
+func TestFromFilterRESTOK(t *testing.T) {
+	p := &protocol.Preset{
+		ProtocolVersion: "0.2.0",
+		Project:         "test",
+		Limits: protocol.Limits{
+			MaxSyncMs: 15000, MaxSourceMs: 12000, DefaultLimit: 100, MaxLimit: 1000, ReadOnly: true,
+		},
+		Sources: []protocol.Source{{
+			ID: "bank_api", Type: protocol.SourceREST,
+			Connection: map[string]any{"baseUrlEnv": "QLLM_REST_URL"},
+			Options:    map[string]any{"resources": map[string]any{"balance": map[string]any{"list": map[string]any{"path": "/balance"}}}},
+		}},
+	}
+	c := &protocol.Catalog{
+		ProtocolVersion: "0.2.0",
+		Project:         "test",
+		Entities: []protocol.Entity{{
+			Name: "balance", Source: "bank_api",
+			Binding: protocol.Binding{Kind: "rest_resource", Resource: "balance"},
+			Fields: []protocol.Field{
+				{Name: "user_id", Type: protocol.TypeString, Physical: "user_id", FromFilter: true},
+				{Name: "saldo", Type: protocol.TypeNumber, Physical: "saldo"},
+			},
+		}},
+	}
+	if _, err := validate.Bundle(p, c); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestEntityScopeColumnMustExist(t *testing.T) {
+	p, c := sampleBundle(t)
+	c.Entities[0].Scope = &protocol.EntityScope{Field: "missing"}
+	_, err := validate.Bundle(p, c)
+	if err == nil || err.Code != protocol.ErrConfigError {
+		t.Fatalf("expected CONFIG_ERROR got %#v", err)
 	}
 }

@@ -1,0 +1,7 @@
+{
+  "protocolVersion": "0.2.0",
+  "from": "api_profiles",
+  "select": ["id", "email", "address", "tags", "prefs"],
+  "orderBy": [{ "field": "id", "dir": "asc" }],
+  "limit": 5
+}

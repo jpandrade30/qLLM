@@ -42,6 +42,6 @@
 | 世界 | 位置 | 典型实体 |
 |------|------|----------|
 | 演示 / goldens | `nerdctl compose` 加 `deploy/image/config` | `customers`、`invoices`、… |
-| fleet-ops 模拟环境 | `scripts/prd-tst-up`（`deploy/prd-tst`） | `vehicles`、`depots`、`gps_samples`、… |
+| fleet-ops 模拟环境 | `scripts/prd-tst/prd-tst-up`（`deploy/prd-tst`） | `vehicles`、`depots`、`gps_samples`、… |
 
 不要同时运行两者。进程**只能看到** `--config-dir`（或当前目录 / `--project`）。Compose 不会把 catalog “注入”到二进制文件中。

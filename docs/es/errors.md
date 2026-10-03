@@ -12,6 +12,7 @@ Formato de la respuesta: `{ "protocolVersion", "error": { "code", "message", "de
 | `AMBIGUOUS_ALIAS` | Nombres `as` o alias en conflicto |
 | `LIMIT_EXCEEDED` | `limit` mayor que `maxLimit` |
 | `FORBIDDEN` | ACL: la entidad no está en las `tables` de la app |
+| `FORBIDDEN_SCOPE` | Credencial con alcance; filtro de otro sujeto, o entidad acotada sin valor en la clave |
 | `UNAUTHORIZED` | Token Bearer ausente o incorrecto |
 | `UNSUPPORTED` | Falta una capacidad de la fuente (por ejemplo, KV sin igualdad en la clave) |
 | `UNSUPPORTED_VERSION` | `version` de SQL desconocida |

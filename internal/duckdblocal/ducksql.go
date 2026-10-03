@@ -8,6 +8,26 @@ import (
 )
 
 // duckType implements runtime behavior for this package.
+// logicalFromDuckName maps a DuckDB DatabaseTypeName to a qLLM logical type (D22).
+func logicalFromDuckName(name string) protocol.LogicalType {
+	u := strings.ToUpper(name)
+	switch {
+	case strings.Contains(u, "BOOL"):
+		return protocol.TypeBoolean
+	case strings.Contains(u, "TIMESTAMP"), strings.Contains(u, "DATE"), strings.Contains(u, "TIME"):
+		return protocol.TypeTimestamp
+	case strings.Contains(u, "JSON"), strings.Contains(u, "STRUCT"), strings.Contains(u, "LIST"),
+		strings.Contains(u, "MAP"), strings.HasPrefix(u, "["):
+		return protocol.TypeJSON
+	case strings.Contains(u, "INT"), strings.Contains(u, "DECIMAL"), strings.Contains(u, "NUMERIC"),
+		strings.Contains(u, "DOUBLE"), strings.Contains(u, "FLOAT"), strings.Contains(u, "REAL"),
+		strings.Contains(u, "HUGEINT"):
+		return protocol.TypeNumber
+	default:
+		return protocol.TypeString
+	}
+}
+
 func duckType(t protocol.LogicalType) string {
 	switch t {
 	case protocol.TypeNumber:

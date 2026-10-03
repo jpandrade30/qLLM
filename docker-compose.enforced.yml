@@ -1,0 +1,45 @@
+# Standalone scoped-key demo (not the harness). Own compose project name so
+# `qllm-postgres-1` / `qllm-qllm-1` from docker-compose.yml are not recreated.
+# nerdctl compose -f docker-compose.enforced.yml up --build
+name: qllm-enforced
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: qllm
+      POSTGRES_PASSWORD: qllm
+      POSTGRES_DB: shop
+    ports:
+      - "15432:5432"
+    volumes:
+      - ./deploy/prd/enforced/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qllm -d shop"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  qllm:
+    build:
+      context: .
+      dockerfile: Dockerfile.enforced
+    environment:
+      QLLM_MOBILE_SECRET: change-me-mobile
+      QLLM_ADMIN_KEY: change-me-admin
+      QLLM_SHOP_PG_PASSWORD: qllm
+    ports:
+      - "18088:8088"
+      - "18089:8089"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  agent:
+    build: ./deploy/prd/enforced/agent
+    environment:
+      QLLM_MCP_URL: http://qllm:8089/mcp
+      QLLM_MOBILE_SECRET: change-me-mobile
+    ports:
+      - "18000:8000"
+    depends_on:
+      - qllm
