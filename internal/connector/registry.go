@@ -33,6 +33,14 @@ type Registry struct {
 	byID map[string]def.Connector
 }
 
+// NewRegistry builds a registry from already-open connectors (tests).
+func NewRegistry(cs map[string]def.Connector) *Registry {
+	if cs == nil {
+		cs = map[string]def.Connector{}
+	}
+	return &Registry{byID: cs}
+}
+
 // OpenOpts carries runtime settings into connector open.
 type OpenOpts struct {
 	MaxRestResponseBytes int64

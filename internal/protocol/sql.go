@@ -28,11 +28,16 @@ func ResolveSQLVersion(version string) (string, *ProtocolError) {
 }
 
 type AccessFile struct {
-	Apps []AccessApp `json:"apps" yaml:"apps"`
+	ScopeMode string      `json:"scopeMode,omitempty" yaml:"scopeMode,omitempty"`
+	Apps      []AccessApp `json:"apps" yaml:"apps"`
 }
 
 type AccessApp struct {
-	Name   string   `json:"name" yaml:"name"`
-	Key    string   `json:"key" yaml:"key"`
-	Tables []string `json:"tables" yaml:"tables"`
+	Name           string            `json:"name" yaml:"name"`
+	Key            string            `json:"key,omitempty" yaml:"key,omitempty"`
+	KeySecret      string            `json:"keySecret,omitempty" yaml:"keySecret,omitempty"`
+	Tables         []string          `json:"tables" yaml:"tables"`
+	UnscopedTables []string          `json:"unscopedTables,omitempty" yaml:"unscopedTables,omitempty"`
+	Scope          map[string]string `json:"scope,omitempty" yaml:"scope,omitempty"`
+	ScopeMode      string            `json:"scopeMode,omitempty" yaml:"scopeMode,omitempty"`
 }

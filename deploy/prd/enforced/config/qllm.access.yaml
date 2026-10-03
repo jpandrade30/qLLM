@@ -1,0 +1,10 @@
+apps:
+  - name: mobile
+    keySecret: ${QLLM_MOBILE_SECRET}
+    tables: [orders, products]
+    unscopedTables: [products]
+    scope:
+      field: user_id
+  - name: admin
+    key: ${QLLM_ADMIN_KEY}
+    tables: ["*"]

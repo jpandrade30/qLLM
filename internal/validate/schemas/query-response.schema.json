@@ -95,6 +95,7 @@
             "AMBIGUOUS_ALIAS",
             "LIMIT_EXCEEDED",
             "FORBIDDEN",
+            "FORBIDDEN_SCOPE",
             "UNAUTHORIZED",
             "UNSUPPORTED",
             "UNSUPPORTED_VERSION",

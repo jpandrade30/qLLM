@@ -16,6 +16,7 @@ El contrato normativo (JSON Schema, Query IR, errores) sigue en [`planning/`](..
 | [queries.md](queries.md) | SQL de catálogo vs Query IR: qué se acepta y qué se rechaza |
 | [connectors.md](connectors.md) | Tipos de fuente, bindings y pushdown |
 | [errors.md](errors.md) | Códigos de error tipados |
+| [multi-user-safety.md](multi-user-safety.md) | Alcance por fila en la credencial (D21) |
 | [environments.md](environments.md) | Compose, imágenes, simulación PRD y scripts |
 | [build.md](build.md) | Go, `-tags duckdb` y Docker |
 

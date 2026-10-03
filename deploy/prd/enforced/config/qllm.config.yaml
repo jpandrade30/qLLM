@@ -1,0 +1,8 @@
+serve:
+  addr: "0.0.0.0:8088"
+  mcpAddr: "0.0.0.0:8089"
+  insecureBind: false
+  maxBodyBytes: 1048576
+  maxRestResponseBytes: 10485760
+  cors:
+    origins: []

@@ -58,7 +58,8 @@
         "relations": {
           "type": "array",
           "items": { "$ref": "#/$defs/relation" }
-        }
+        },
+        "scope": { "$ref": "#/$defs/entityScope" }
       }
     },
     "binding": {
@@ -173,6 +174,23 @@
             "maxItems": 2,
             "items": { "type": "string" }
           }
+        }
+      }
+    },
+    "entityScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Scope key name (matches the value carried by the credential)"
+        },
+        "column": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Logical field to filter when it differs from field (D21)"
         }
       }
     }

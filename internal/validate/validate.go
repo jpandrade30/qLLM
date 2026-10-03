@@ -174,7 +174,26 @@ func Bundle(preset *protocol.Preset, catalog *protocol.Catalog) (*catalogidx.Ind
 	if err := checkFromFilter(idx); err != nil {
 		return nil, err
 	}
+	if err := checkEntityScope(idx); err != nil {
+		return nil, err
+	}
 	return idx, nil
+}
+
+func checkEntityScope(idx *catalogidx.Index) *protocol.ProtocolError {
+	for i := range idx.Catalog.Entities {
+		e := &idx.Catalog.Entities[i]
+		if e.Scope == nil || e.Scope.Field == "" {
+			continue
+		}
+		col := e.Scope.FilterField()
+		if _, ok := idx.Field(e, col); !ok {
+			return protocol.NewError(protocol.ErrConfigError,
+				"entity "+e.Name+" scope column is not a field: "+col,
+				map[string]any{"entity": e.Name, "field": col})
+		}
+	}
+	return nil
 }
 
 func checkFromFilter(idx *catalogidx.Index) *protocol.ProtocolError {

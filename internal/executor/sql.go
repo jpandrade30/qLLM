@@ -110,6 +110,12 @@ func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (re
 		return fail(queryID, mode, start, protocol.NewError(protocol.ErrInvalidSQL, "LIMIT must be >= 1", nil), app)
 	}
 
+	for _, sc := range scans {
+		if _, serr := sqlScopeWhere(sc.entity, app); serr != nil {
+			return fail(queryID, mode, start, serr, app)
+		}
+	}
+
 	budget := time.Duration(limits.MaxSyncMs) * time.Millisecond
 	ctx, cancel := context.WithTimeout(ctx, budget)
 	defer cancel()
@@ -128,11 +134,16 @@ func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (re
 		if err != nil {
 			return fail(queryID, mode, start, asProto(err), app)
 		}
+		where, serr := sqlScopeWhere(sc.entity, app)
+		if serr != nil {
+			return fail(queryID, mode, start, serr, app)
+		}
 		step := def.PushdownStep{
 			SourceID: sc.entity.Source,
 			Entity:   sc.entity,
 			Binding:  sc.entity.Name,
 			Select:   sc.selects,
+			Where:    where,
 			Limit:    limits.MaxLimit,
 		}
 		stepCtx, cancel := context.WithTimeout(ctx, srcBudget)
@@ -182,6 +193,20 @@ func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (re
 			},
 		},
 	}
+}
+
+func sqlScopeWhere(ent *protocol.Entity, app *access.App) (map[string]any, *protocol.ProtocolError) {
+	if app == nil || !app.HasScope() || ent == nil || ent.Scope == nil || ent.Scope.Field == "" {
+		return nil, nil
+	}
+	col := ent.Scope.FilterField()
+	val, ok := app.ScopeValue(ent.Scope.Field)
+	if !ok {
+		return nil, protocol.NewError(protocol.ErrForbiddenScope,
+			"this key has no scope value for "+ent.Scope.Field,
+			map[string]any{"field": ent.Scope.Field, "entity": ent.Name})
+	}
+	return map[string]any{"op": "eq", "field": col, "value": val}, nil
 }
 
 type sqlScan struct {

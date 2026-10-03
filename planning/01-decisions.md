@@ -97,7 +97,7 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 - **Decisão:** Arquivo opcional lista `apps[]` com `name`, `key` (literal ou `${ENV_NAME}`) e `tables` (nomes de entidade do catalog). Arquivo presente substitui o Bearer único (`authTokenEnv`). A key escolhe o app; a allowlist vale para IR e SQL. MCP stdio usa `--app` / `QLLM_APP`.
 - **Por quê:** Kubernetes injeta Secret em env; yaml aponta `${ENV}` sem copiar o valor para o git.
-- **Consequência:** Sem o arquivo, comportamento D14 (um token, catalog inteiro). Com o arquivo, catalog/`howtouseme` filtrados às tabelas da key.
+- **Consequência:** Sem o arquivo, comportamento D14 (um token, catalog inteiro). Com o arquivo, catalog/`howtouseme` filtrados às tabelas da key. Escopo por linha (D21) é opcional no mesmo arquivo.
 
 ### D17 — Superfície de agente = Query IR + catalog SQL; GraphQL fora
 
@@ -122,3 +122,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** `fields[].fromFilter: true` (só entidades cuja fonte é `rest`) diz que a API **não devolve** aquele campo; o runtime preenche a coluna com o valor de um `eq` no topo do WHERE (`eq` sozinho ou `and` de `eq`). Sem esse `eq` → `INVALID_IR`. Se o corpo **trouxer** o campo com valor diferente do filtro → `SOURCE_ERROR`. Valores sob `or` / `not` não alimentam o preenchimento. Não é coluna calculada: só ecoa um filtro que o caller já enviou.
 - **Por quê:** APIs de saldo/perfil recebem `user_id` na query/path e devolvem `{"saldo":5300}`. Sem o eco, `GROUP BY` / join na chave viram `null`.
 - **Consequência:** schema de catalog ganha `fromFilter` opcional (aditivo; `protocolVersion` 0.2.0). A API continua responsável por filtrar; o qLLM só reconstrói a chave para agregação/join.
+
+### D21 — Escopo na credencial, não na query
+
+- **Decisão:** `qllm.access.yaml` tem **uma entrada por tipo de app** (`mobile`, `admin`), nunca por usuário. O código do usuário vive na chave derivada `app.scopeValue.expiryUnix.hmac` (HMAC-SHA256 do `keySecret`, Base64URL). O catálogo marca entidades com `scope.field` (coluna opcional `scope.column`). O runtime força `eq` nessa coluna. `scopeMode` default `reject` (filtro conflitante → `FORBIDDEN_SCOPE`); `inject` faz AND. Tools de query **sem** campo novo. Variante estática `scope: { user_id: "acme" }` só para poucos principals fixos. MCP stdio: `QLLM_SCOPE` / `--scope`.
+- **Por quê:** Se o modelo pudesse passar o `user_id` na tool, trocaria 42 por 7.
+- **Consequência:** `key` e `keySecret` são mutuamente exclusivos. App com `scope` precisa que cada `tables[]` tenha `scope` no catalog ou esteja em `unscopedTables`. App sem `scope` (admin) não injeta. Sem denylist; revogação = expiração curta ou rotacionar o segredo. RLS/view no banco continua recomendado.

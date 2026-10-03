@@ -14,10 +14,16 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 - `scripts/init-standalone.py` (`.ps1` / `.sh` wrappers) writes a slim folder (`qllm-<user>`) with the Go runtime, blank SQLite YAML, and a Dockerfile so the project can be hosted without harness or docs.
 - Experimental read-only `redis` and `kafka` sources (D19): Redis allowlists GET/HGETALL/LRANGE/SSCAN/ZRANGE/XRANGE; Kafka fetches without a consumer group or offset commit. Missing key/offset predicates return `UNSUPPORTED`. No harness.
 - REST catalog field `fromFilter` (D20): when the API omits a key it already received as `eq` (for example `{"saldo":5300}`), qLLM fills that column so `GROUP BY` and joins work. Missing `eq` is `INVALID_IR`; a mismatched body value is `SOURCE_ERROR`.
+- Scoped keys (D21): one `qllm.access.yaml` entry per app type; derived Bearer `app.user.expiry.hmac` (or a static `scope` map) forces `eq` on catalog `entities[].scope`. Conflicting filters return `FORBIDDEN_SCOPE` (`scopeMode: reject`, default). Query tools gain no extra field.
+- Example stack `Dockerfile.enforced` + `docker-compose.enforced.yml` + `deploy/prd/enforced/` (Postgres seed, LangGraph agent that mints keys and opens an MCP session per `execute_sql` call).
 
 ### Changed
 
 - Root README is reorganized (why, how it works, connector table, quick start, configuration, serving, containers, behavior, development).
+
+### Fixed
+
+- Catalog SQL (`execute_sql` / `POST /v1/sql`) now applies entity `scope` on each source fetch (inject). Without this, a scoped key only constrained Query IR.
 
 ## [0.2.0] - 2026-09-30
 

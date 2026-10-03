@@ -1,0 +1,20 @@
+protocolVersion: "0.2.0"
+project: qllm-enforced
+limits:
+  maxSyncMs: 15000
+  maxSourceMs: 12000
+  defaultLimit: 100
+  maxLimit: 1000
+  readOnly: true
+sources:
+  - id: shop_pg
+    type: postgres
+    connection:
+      hostEnv: QLLM_SHOP_PG_HOST
+      port: 5432
+      database: shop
+      userEnv: QLLM_SHOP_PG_USER
+      passwordEnv: QLLM_SHOP_PG_PASSWORD
+      sslMode: disable
+    options:
+      statementTimeoutMs: 12000

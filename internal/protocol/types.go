@@ -12,6 +12,7 @@ const (
 	ErrAmbiguousAlias     ErrorCode = "AMBIGUOUS_ALIAS"
 	ErrLimitExceeded      ErrorCode = "LIMIT_EXCEEDED"
 	ErrForbidden          ErrorCode = "FORBIDDEN"
+	ErrForbiddenScope     ErrorCode = "FORBIDDEN_SCOPE"
 	ErrUnauthorized       ErrorCode = "UNAUTHORIZED"
 	ErrUnsupported        ErrorCode = "UNSUPPORTED"
 	ErrUnsupportedVersion ErrorCode = "UNSUPPORTED_VERSION"
@@ -181,15 +182,31 @@ type Relation struct {
 	On   [][]string `json:"on" yaml:"on"`
 }
 
+type EntityScope struct {
+	Field  string `json:"field" yaml:"field"`
+	Column string `json:"column,omitempty" yaml:"column,omitempty"`
+}
+
+func (s *EntityScope) FilterField() string {
+	if s == nil || s.Field == "" {
+		return ""
+	}
+	if s.Column != "" {
+		return s.Column
+	}
+	return s.Field
+}
+
 type Entity struct {
-	Name        string     `json:"name" yaml:"name"`
-	Aliases     []string   `json:"aliases,omitempty" yaml:"aliases,omitempty"`
-	Description string     `json:"description,omitempty" yaml:"description,omitempty"`
-	Source      string     `json:"source" yaml:"source"`
-	Binding     Binding    `json:"binding" yaml:"binding"`
-	PrimaryKey  []string   `json:"primaryKey,omitempty" yaml:"primaryKey,omitempty"`
-	Fields      []Field    `json:"fields" yaml:"fields"`
-	Relations   []Relation `json:"relations,omitempty" yaml:"relations,omitempty"`
+	Name        string       `json:"name" yaml:"name"`
+	Aliases     []string     `json:"aliases,omitempty" yaml:"aliases,omitempty"`
+	Description string       `json:"description,omitempty" yaml:"description,omitempty"`
+	Source      string       `json:"source" yaml:"source"`
+	Binding     Binding      `json:"binding" yaml:"binding"`
+	PrimaryKey  []string     `json:"primaryKey,omitempty" yaml:"primaryKey,omitempty"`
+	Fields      []Field      `json:"fields" yaml:"fields"`
+	Relations   []Relation   `json:"relations,omitempty" yaml:"relations,omitempty"`
+	Scope       *EntityScope `json:"scope,omitempty" yaml:"scope,omitempty"`
 }
 
 type Catalog struct {

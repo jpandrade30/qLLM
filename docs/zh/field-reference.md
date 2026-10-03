@@ -204,6 +204,7 @@ sources:
 | `primaryKey` | 字符串数组 | 逻辑字段名 |
 | `fields` | array | |
 | `relations` | array | 仅作提示；不会创建外键 |
+| `scope` | `{ field, column? }` | D21：用凭据在 `column`（或 `field`）上强制 `eq` |
 
 ### `binding`
 
@@ -276,13 +277,17 @@ sources:
 
 ## `qllm.access.yaml`
 
-必填：`apps`（至少 1 项）。每个 app 需要 `name`、`key` 和 `tables`（至少 1 项）。
+必填：`apps`（至少 1 项）。每个 app 需要 `name`、`tables`，以及 `key` 或 `keySecret` 二者之一。按应用**类型**各一条，不是按用户。
 
 | 字段 | 说明 |
 |------|------|
-| `name` | 应用 id（`--app` / `QLLM_APP`） |
-| `key` | 字面值，**或**严格写成 `${ENV_NAME}` |
-| `tables` | 允许访问的 `entities[].name` |
+| `scopeMode` | 文件级 `reject`（默认）或 `inject` |
+| `name` | 应用 id（`--app` / `QLLM_APP`）。使用 `keySecret` 时须为 `[a-z][a-z0-9_-]*` |
+| `key` | 静态 Bearer；字面值 **或** 严格写成 `${ENV_NAME}` |
+| `keySecret` | 校验派生密钥 `app.scopeValue.expiry.hmac` |
+| `scope` | 模板 `{ field: user_id }` 或静态 `{ user_id: "acme" }` |
+| `tables` | 允许的 `entities[].name`，或 `*` |
+| `unscopedTables` | 应用带 `scope` 时必须列出的共享表 |
 
 ---
 

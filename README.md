@@ -158,7 +158,7 @@ curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/cat
 
 `GET /v1/health` stays unauthenticated for probes.
 
-Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` (literal or `${ENV_NAME}`) and `tables` from the catalog. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP`.
+Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`) and `tables` from the catalog. One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. See [multi-user safety](docs/en/multi-user-safety.md).
 
 ```yaml
 apps:
@@ -219,7 +219,7 @@ nerdctl compose up --build
 
 HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Rebuild `test-api` if `fixtures/test-api/data.json` changed. SQL MCP goldens: `pytest fixtures/sqlcheck`.
 
-Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md).
+Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md). Scoped-key + LangGraph demo (own compose, not the harness): [`deploy/prd/enforced/README.md`](deploy/prd/enforced/README.md) and [`docker-compose.enforced.yml`](docker-compose.enforced.yml).
 
 Standalone image (same compose network / `--network`):
 

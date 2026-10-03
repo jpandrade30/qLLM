@@ -104,11 +104,7 @@ func main() {
 				}
 				exec.ACL = acl
 			}
-			appName, _ := cmd.Flags().GetString("app")
-			if appName == "" {
-				appName = os.Getenv("QLLM_APP")
-			}
-			exec.StdioApp = appName
+			exec.StdioApp, exec.StdioScope = resolveAppScopeFlags(cmd)
 			q, err := config.LoadQueryIR(irPath)
 			if err != nil {
 				return printErr(err)
@@ -122,6 +118,7 @@ func main() {
 	addConfigFlags(queryCmd)
 	queryCmd.Flags().StringP("file", "f", "", "query IR JSON/YAML file")
 	queryCmd.Flags().String("app", "", "app name when qllm.access.yaml is present")
+	queryCmd.Flags().String("scope", "", "row scope for a template app (or QLLM_SCOPE)")
 
 	sqlCmd := &cobra.Command{
 		Use:   "sql",
@@ -162,11 +159,7 @@ func main() {
 				}
 				exec.ACL = acl
 			}
-			appName, _ := cmd.Flags().GetString("app")
-			if appName == "" {
-				appName = os.Getenv("QLLM_APP")
-			}
-			exec.StdioApp = appName
+			exec.StdioApp, exec.StdioScope = resolveAppScopeFlags(cmd)
 			ver, _ := cmd.Flags().GetString("version")
 			resp := exec.ExecuteSQL(context.Background(), &protocol.SQLRequest{SQL: string(raw), Version: ver})
 			enc := json.NewEncoder(os.Stdout)
@@ -178,6 +171,7 @@ func main() {
 	sqlCmd.Flags().StringP("file", "f", "", "SQL file")
 	sqlCmd.Flags().String("version", "", "SQL dialect version (omit = latest)")
 	sqlCmd.Flags().String("app", "", "app name when qllm.access.yaml is present")
+	sqlCmd.Flags().String("scope", "", "row scope for a template app (or QLLM_SCOPE)")
 
 	serveCmd := &cobra.Command{
 		Use:   "serve",
@@ -257,12 +251,10 @@ func main() {
 					return printErr(perr)
 				}
 			}
-			stdioApp, _ := cmd.Flags().GetString("app")
-			if stdioApp == "" {
-				stdioApp = os.Getenv("QLLM_APP")
-			}
+			stdioApp, stdioScope := resolveAppScopeFlags(cmd)
 			exec.ACL = acl
 			exec.StdioApp = stdioApp
+			exec.StdioScope = stdioScope
 			mcpSrv := mcpserver.New(idx, exec, store)
 
 			if mcpMode {
@@ -329,11 +321,24 @@ func main() {
 	serveCmd.Flags().Bool("insecure-bind", false, "allow non-loopback bind without auth")
 	serveCmd.Flags().StringSlice("cors-origin", nil, "allowed CORS origin (repeatable; empty disables CORS)")
 	serveCmd.Flags().String("app", "", "app name for MCP stdio when qllm.access.yaml is present (or QLLM_APP)")
+	serveCmd.Flags().String("scope", "", "row scope for a template app on MCP stdio (or QLLM_SCOPE)")
 
 	root.AddCommand(validateCmd, queryCmd, sqlCmd, serveCmd, newCatalogCmd(opts, addConfigFlags))
 	if err := root.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func resolveAppScopeFlags(cmd *cobra.Command) (app, scope string) {
+	app, _ = cmd.Flags().GetString("app")
+	if app == "" {
+		app = os.Getenv("QLLM_APP")
+	}
+	scope, _ = cmd.Flags().GetString("scope")
+	if scope == "" {
+		scope = os.Getenv("QLLM_SCOPE")
+	}
+	return app, scope
 }
 
 // printErr implements runtime behavior for this package.

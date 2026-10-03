@@ -12,7 +12,7 @@ Cópia inicial de [`deploy/image/config`](../image/config) (projecto `qllm-demo`
 | `qllm.env.yaml` | Preenche env **vazias** (`${VAR}` ou literais). Processo ganha. |
 | `qllm.access.yaml` | App `demo-agent`; `key` = `${QLLM_AUTH_TOKEN}`; `tables` = entidades deste catalog |
 
-Harnees compose: [`Dockerfile.dev`](../../Dockerfile.dev) + `deploy/image/config`. Sim K8s fleet-ops: [`deploy/prd-tst`](../prd-tst).
+Harness compose: [`Dockerfile.dev`](../../Dockerfile.dev) + `deploy/image/config`. Sim K8s fleet-ops: [`deploy/prd-tst`](../prd-tst). Scoped-key + LangGraph demo: [`enforced/`](enforced/README.md) + [`Dockerfile.enforced`](../../Dockerfile.enforced).
 
 ## Build e run
 

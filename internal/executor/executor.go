@@ -19,11 +19,12 @@ import (
 )
 
 type Executor struct {
-	Idx      *catalogidx.Index
-	Reg      *connector.Registry
-	Store    *querystore.Store
-	ACL      *access.Registry
-	StdioApp string
+	Idx        *catalogidx.Index
+	Reg        *connector.Registry
+	Store      *querystore.Store
+	ACL        *access.Registry
+	StdioApp   string
+	StdioScope string
 }
 
 // New constructs a value.
@@ -61,6 +62,9 @@ func (e *Executor) Execute(ctx context.Context, q *protocol.QueryIR) *protocol.Q
 	plan, err := planner.Build(e.Idx, q)
 	if err != nil {
 		return fail(queryID, mode, start, err, app)
+	}
+	if serr := applyScope(plan, q, app); serr != nil {
+		return fail(queryID, mode, start, serr, app)
 	}
 
 	if mode == "async" && e.Store != nil {
@@ -326,7 +330,7 @@ func (e *Executor) resolveApp(ctx context.Context) (*access.App, *protocol.Proto
 		if app == nil {
 			return nil, protocol.NewError(protocol.ErrForbidden, "unknown app: "+e.StdioApp, map[string]any{"app": e.StdioApp})
 		}
-		return app, nil
+		return app.WithStdioScope(e.StdioScope)
 	}
 	return nil, protocol.NewError(protocol.ErrUnauthorized, "app required: Authorization Bearer key or --app / QLLM_APP", nil)
 }

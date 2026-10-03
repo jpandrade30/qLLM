@@ -16,6 +16,7 @@ The normative contract (JSON Schema, Query IR, errors) stays in [`planning/`](..
 | [queries.md](queries.md) | Catalog SQL vs Query IR: what is accepted and refused |
 | [connectors.md](connectors.md) | Source types, bindings, pushdown |
 | [errors.md](errors.md) | Typed error codes |
+| [multi-user-safety.md](multi-user-safety.md) | Row scope on the credential (D21) |
 | [environments.md](environments.md) | Compose, images, PRD simulation, scripts |
 | [build.md](build.md) | Go, `-tags duckdb`, Docker |
 

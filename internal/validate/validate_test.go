@@ -294,3 +294,12 @@ func TestFromFilterRESTOK(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestEntityScopeColumnMustExist(t *testing.T) {
+	p, c := sampleBundle(t)
+	c.Entities[0].Scope = &protocol.EntityScope{Field: "missing"}
+	_, err := validate.Bundle(p, c)
+	if err == nil || err.Code != protocol.ErrConfigError {
+		t.Fatalf("expected CONFIG_ERROR got %#v", err)
+	}
+}

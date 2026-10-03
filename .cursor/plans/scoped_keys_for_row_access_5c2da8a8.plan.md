@@ -4,16 +4,16 @@ overview: "Stop one user from reading another user's rows: the credential carrie
 todos:
   - id: spec-scope
     content: "Spec first: D20, entity scope + app template (scope.field, keySecret), FORBIDDEN_SCOPE, schemas, derived key format"
-    status: pending
+    status: completed
   - id: access-scope-parse
     content: Parse and validate scope in access/catalog; derived key verify (HMAC + expiry); validate rule for unscoped tables
-    status: pending
+    status: completed
   - id: executor-scope-inject
     content: Inject or reject scope predicate on every scoped entity step in IR and SQL paths
-    status: pending
+    status: completed
   - id: scope-tests-docs
     content: Tests for spoofed filters, joins, missing scope, bad/expired key; README, CHANGELOG, docs in 4 languages
-    status: pending
+    status: completed
 isProject: false
 ---
 

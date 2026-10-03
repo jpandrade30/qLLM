@@ -16,6 +16,7 @@
 | [queries.md](queries.md) | 目录 SQL 与 Query IR：接受什么、拒绝什么 |
 | [connectors.md](connectors.md) | 数据源类型、绑定与下推 |
 | [errors.md](errors.md) | 类型化错误码 |
+| [multi-user-safety.md](multi-user-safety.md) | 凭据上的行范围（D21） |
 | [environments.md](environments.md) | Compose、镜像、PRD 模拟环境与脚本 |
 | [build.md](build.md) | Go、`-tags duckdb` 与 Docker |
 

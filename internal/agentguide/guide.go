@@ -108,6 +108,7 @@ func Build(preset *protocol.Preset, catalog *protocol.Catalog) protocol.HowToUse
 			{Code: "UNKNOWN_FIELD", When: "column not on that catalog entity"},
 			{Code: "LIMIT_EXCEEDED", When: "limit > maxLimit"},
 			{Code: "FORBIDDEN", When: "entity not in app ACL tables"},
+			{Code: "FORBIDDEN_SCOPE", When: "key is scoped; filter another user or missing scope value"},
 			{Code: "TIMEOUT", When: "budget/source exceeded"},
 			{Code: "SOURCE_ERROR", When: "backend error (message may include cause)"},
 		},

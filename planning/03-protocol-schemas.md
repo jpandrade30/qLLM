@@ -87,19 +87,30 @@ Defaults seguros: loopback, CORS off. Se `authTokenEnv` estiver definido, o env 
 JSON Schema: [`schemas/access.schema.json`](schemas/access.schema.json). Arquivo presente **substitui** o Bearer único.
 
 ```yaml
+scopeMode: reject   # reject | inject (default reject)
 apps:
+  - name: mobile
+    keySecret: ${QLLM_MOBILE_SECRET}
+    tables: [orders, profile, products]
+    unscopedTables: [products]
+    scope:
+      field: user_id
+  - name: partner-acme
+    key: ${QLLM_ACME_KEY}
+    tables: [orders]
+    scope:
+      user_id: "acme"
   - name: crm-agent
     key: ${QLLM_CRM_AGENT_KEY}
     tables: [customers, addresses, invoices]
-  - name: billing-dev
-    key: dev-only-literal
-    tables: [invoices, products]
 ```
 
-- `key`: literal **ou** placeholder exato `${ENV_NAME}` (um token; sem texto em volta). Env vazio = `CONFIG_ERROR` no startup.
-- Cada entrada de `tables` deve existir no catalog no startup.
-- HTTP e MCP HTTP: `Authorization: Bearer` casa com uma `key`; o app filtra catalog, IR e SQL. `GET /v1/health` continua aberto.
-- MCP stdio: `--app NAME` ou env `QLLM_APP`. Sem app, recusa `execute_sql`.
+- Uma entrada por **tipo de app**, não por usuário (D21). `key` **ou** `keySecret` (não os dois). `key` / `keySecret`: literal ou `${ENV_NAME}`.
+- Chave derivada (template com `keySecret`): `app.scopeValue.expiryUnix.hmac` onde `hmac` é Base64URL(HMAC-SHA256(keySecret, `app.scopeValue.expiryUnix`)). `scopeValue` ∈ `[A-Za-z0-9_-]`, ≤128. O backend mint; o qLLM verifica HMAC e expiração.
+- `scope.field` no app = nome do valor na chave. `entities[].scope.field` (e `column` se o nome físico/lógico diferir) marca a coluna filtrada.
+- `tables: ["*"]` = todas as entidades do catalog. `unscopedTables` = tabelas compartilhadas exigidas quando o app tem `scope`.
+- HTTP/MCP HTTP: `Authorization: Bearer` (key estática ou derivada). MCP stdio / CLI: `--app` / `QLLM_APP` e, se o app for template, `--scope` / `QLLM_SCOPE` (`42` ou `user_id=42`).
+- `execute_sql` e o IR **não** ganham campo de constraint.
 
 ### `qllm.env.yaml` (opcional — seed de env)
 
@@ -427,6 +438,7 @@ entities:
 - `source` deve existir no preset (`sources[].id`).
 - `fields[].name` = nome lógico na entidade; `physical` = coluna/path na fonte (pode repetir entre entidades).
 - `fields[].fromFilter` (bool, opcional, D20): só em entidades cuja fonte é `rest`. A API não devolve o campo; o runtime preenche com o `eq` de topo do WHERE. Sem `eq` → `INVALID_IR`. Corpo com valor diferente → `SOURCE_ERROR`. `or`/`not` não alimentam o valor.
+- `entities[].scope` (D21): `{ field, column? }`. O runtime força `eq` na coluna (`column` ou `field`) com o valor da credencial. Sem `scope` a entidade não é protegida.
 - Tipos lógicos v0.1: `string` | `number` | `boolean` | `timestamp` | `json`
 - `relations` são **hints** para o agente e para joins no IR; não criam FK automática no banco.
 
@@ -754,6 +766,7 @@ Todo erro de API:
 | `AMBIGUOUS_ALIAS` | 400 | `as`/binding repetido na query |
 | `LIMIT_EXCEEDED` | 400 | limit > maxLimit |
 | `FORBIDDEN` | 403 | `readOnly` / método REST mutável / tabela fora da allowlist do app |
+| `FORBIDDEN_SCOPE` | 403 | credencial escopada; filtro de outro sujeito, ou entidade escopada sem valor na chave |
 | `UNAUTHORIZED` | 401 | Bearer token ausente ou inválido (HTTP/MCP HTTP) |
 | `UNSUPPORTED` | 400 | op não suportada e não degradável |
 | `UNSUPPORTED_VERSION` | 400 | `version` SQL desconhecida |

@@ -182,7 +182,7 @@ func httpStatus(code protocol.ErrorCode) int {
 		protocol.ErrAmbiguousField, protocol.ErrAmbiguousAlias, protocol.ErrLimitExceeded,
 		protocol.ErrUnsupported, protocol.ErrUnsupportedVersion, protocol.ErrInvalidSQL:
 		return http.StatusBadRequest
-	case protocol.ErrForbidden:
+	case protocol.ErrForbidden, protocol.ErrForbiddenScope:
 		return http.StatusForbidden
 	case protocol.ErrUnauthorized:
 		return http.StatusUnauthorized

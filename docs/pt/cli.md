@@ -25,7 +25,7 @@ Em caso de sucesso, o stderr mostra `ok preset=… catalog=… entities=N`. Os e
 
 Executa um arquivo de Query IR. `--file` / `-f` é obrigatório. Abre as fontes.
 
-Use `--app` ou `QLLM_APP` quando existir `qllm.access.yaml`.
+Use `--app` ou `QLLM_APP` quando existir `qllm.access.yaml`. App template também precisa de `--scope` / `QLLM_SCOPE`.
 
 Aplica o `qllm.env.yaml` do diretório de configuração antes de conectar.
 
@@ -39,7 +39,7 @@ Executa um arquivo de texto com SQL de catálogo. `--file` / `-f` é obrigatóri
 
 Sem `--version`, usa o dialeto mais recente (`"2"`). O `"1"` é o dialeto congelado (sem operações de conjunto e sem `QUALIFY`).
 
-`--app` / `QLLM_APP` aplica as ACLs.
+`--app` / `QLLM_APP` aplica as ACLs. `--scope` / `QLLM_SCOPE` envia o valor de escopo de um app template.
 
 Exige um build com DuckDB embutido para o `ExecSQL`.
 
@@ -70,7 +70,7 @@ Se nenhum de `--http`, `--mcp` ou `--mcp-http` for informado, o **HTTP fica ativ
 ./qllm serve --mcp --config-dir ./meu-projeto --app crm-agent
 ```
 
-Stdio com `qllm.access.yaml` e sem `--app` / `QLLM_APP` retorna `CONFIG_ERROR`.
+Stdio com `qllm.access.yaml` e sem `--app` / `QLLM_APP` retorna `CONFIG_ERROR`. Apps template também precisam de `--scope` / `QLLM_SCOPE`.
 
 ## `qllm catalog introspect`
 

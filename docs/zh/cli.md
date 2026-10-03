@@ -25,7 +25,7 @@
 
 执行一个 Query IR 文件。`--file` / `-f` 为必填。会打开数据源。
 
-存在 `qllm.access.yaml` 时，请使用 `--app` 或 `QLLM_APP`。
+存在 `qllm.access.yaml` 时，请使用 `--app` 或 `QLLM_APP`。模板应用还需要 `--scope` / `QLLM_SCOPE`。
 
 连接之前会先应用配置目录中的 `qllm.env.yaml`。
 
@@ -39,7 +39,7 @@
 
 省略 `--version` 时使用最新方言（`"2"`）。`"1"` 是冻结的方言（不支持集合运算，也不支持 `QUALIFY`）。
 
-`--app` / `QLLM_APP` 用于应用 ACL。
+`--app` / `QLLM_APP` 用于应用 ACL。`--scope` / `QLLM_SCOPE` 为模板应用提供行范围值。
 
 `ExecSQL` 需要内嵌 DuckDB 的构建版本。
 
@@ -70,7 +70,7 @@
 ./qllm serve --mcp --config-dir ./my-project --app crm-agent
 ```
 
-使用 stdio、存在 `qllm.access.yaml` 且未提供 `--app` / `QLLM_APP` 时，返回 `CONFIG_ERROR`。
+使用 stdio、存在 `qllm.access.yaml` 且未提供 `--app` / `QLLM_APP` 时，返回 `CONFIG_ERROR`。模板应用还需要 `--scope` / `QLLM_SCOPE`。
 
 ## `qllm catalog introspect`
 

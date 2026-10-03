@@ -204,6 +204,7 @@ Obrigatórios: `name`, `source`, `binding`, `fields` (mínimo 1 field).
 | `primaryKey` | array de strings | Nomes lógicos de field |
 | `fields` | array | |
 | `relations` | array | Apenas dicas; não criam chaves estrangeiras |
+| `scope` | `{ field, column? }` | D21: força `eq` em `column` (ou `field`) a partir da credencial |
 
 ### `binding`
 
@@ -276,13 +277,17 @@ Flags da CLI que **sobrescrevem** o arquivo: `--addr`, `--mcp-addr`, `--auth-tok
 
 ## `qllm.access.yaml`
 
-Obrigatório: `apps` (mínimo 1). Cada app precisa de `name`, `key` e `tables` (mínimo 1).
+Obrigatório: `apps` (mínimo 1). Cada app precisa de `name`, `tables` e exatamente um de `key` ou `keySecret`. Uma entrada por **tipo** de app, não por usuário.
 
 | Campo | Observações |
 |-------|-------------|
-| `name` | ID do app (`--app` / `QLLM_APP`) |
-| `key` | Literal **ou** exatamente `${ENV_NAME}` |
-| `tables` | Valores permitidos de `entities[].name` |
+| `scopeMode` | No arquivo: `reject` (padrão) ou `inject` |
+| `name` | ID do app (`--app` / `QLLM_APP`). Com `keySecret`, `[a-z][a-z0-9_-]*` |
+| `key` | Bearer estático; literal **ou** exatamente `${ENV_NAME}` |
+| `keySecret` | Valida chaves derivadas `app.scopeValue.expiry.hmac` |
+| `scope` | Template `{ field: user_id }` ou estático `{ user_id: "acme" }` |
+| `tables` | `entities[].name` permitidos, ou `*` |
+| `unscopedTables` | Tabelas compartilhadas obrigatórias quando o app tem `scope` |
 
 ---
 
