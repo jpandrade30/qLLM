@@ -65,7 +65,7 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ### D11 — Versionamento do protocolo
 
-- **Decisão:** Campo `protocolVersion` (semver string, começar em `0.1.0`).
+- **Decisão:** Campo `protocolVersion` (No version string, começar em `0.1.0`).
 - **Por quê:** Clients e presets precisam detectar incompatibilidade.
 - **Consequência:** Bump minor = additive; major = breaking em IR/API. **0.2.0** = novos `sources[].type` + `accessPath`. Arquivos **0.1.0** continuam válidos. Runtime responde `protocolVersion: 0.2.0`.
 

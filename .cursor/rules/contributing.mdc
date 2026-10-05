@@ -1,0 +1,19 @@
+---
+description: How to contribute to qLLM (fork/PR, contracts, CoC, changelog)
+alwaysApply: false
+---
+
+# Contributing (agent)
+
+Canonical human docs: [`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Product site: `site/contribute.html`.
+
+When helping someone contribute or open a PR:
+
+- Fork → feature branch → PR into `main`/`master`; small focused diffs.
+- Contract / API changes: update `planning/` (+ schemas) before or with code; never invent HTTP/MCP shapes.
+- User-visible or contract changes: [`CHANGELOG.md`](CHANGELOG.md) `[Unreleased]`; operator-facing surfaces also [`README.md`](README.md).
+- Agent API stays Query IR + catalog SQL (not GraphQL). Read-only default; limits required/capped.
+- Harness: Rancher Desktop + nerdctl compose. Prefer Release zip guidance for end users.
+- Docs: keep `docs/en` as source of truth for meaning; note language lag if pt/es/zh not updated.
+- Decision ids: explain or link (`decisions.html` / `planning/01-decisions.md`); always state units (`ms`, `rows`, `bytes`).
+- No secrets in commits or issue text. Security via GitHub Advisories, not public issues.

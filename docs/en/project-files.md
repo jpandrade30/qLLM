@@ -36,7 +36,7 @@ Secure defaults (loopback, CORS off), then `qllm.config.yaml`, then CLI flags.
 
 Required: `protocolVersion`, `project`, `limits`, `sources[]` (`id`, `type`, `connection`).
 
-`limits` (spec defaults): `maxSyncMs` 15000, `maxSourceMs` 12000, `defaultLimit` 100, `maxLimit` 1000, `readOnly` true.
+`limits` (spec defaults): `maxSyncMs` 15000 **ms**, `maxSourceMs` 12000 **ms**, `defaultLimit` 100 **rows**, `maxLimit` 1000 **rows**, `readOnly` true.
 
 `sources[].id`: `[a-z][a-z0-9_]*`. `type`: see [connectors.md](connectors.md).
 
@@ -78,8 +78,8 @@ Fields are defined in [`runtime-config.schema.json`](../../planning/schemas/runt
 | `serve.mcpAddr` | `127.0.0.1:8089` |
 | `serve.authTokenEnv` | Name of the Bearer env var; if the name is set, that env var **must** be non-empty |
 | `serve.insecureBind` | `false`; a non-loopback bind without auth requires `true` or `--insecure-bind` |
-| `serve.maxBodyBytes` | POST body cap (schema minimum 1024) |
-| `serve.maxRestResponseBytes` | Cap for the REST connector |
+| `serve.maxBodyBytes` | POST body cap in **bytes** (schema minimum 1024 bytes; default 1048576 bytes = 1 MiB) |
+| `serve.maxRestResponseBytes` | REST response cap in **bytes** (default 10485760 bytes = 10 MiB) |
 | `serve.cors.origins` | Empty means CORS off; `*` is rejected |
 
 ## Minimal layout to implement

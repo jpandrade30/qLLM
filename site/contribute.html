@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Contribute — qLLM</title>
+    <meta
+      name="description"
+      content="How to contribute to qLLM: Code of Conduct, fork and pull request workflow, contract changes, tests, and changelog rules."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html" aria-current="page">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Community</span>
+        <h1>Contribute</h1>
+        <p class="lead">
+          qLLM is open for focused improvements — connectors, docs, harness, and the product site —
+          as long as they stay inside the product rules. Full text lives in the repo; this page is
+          the short path.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <h2>Code of Conduct</h2>
+        <p>
+          Participation requires the
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/CODE_OF_CONDUCT.md"
+            >Contributor Covenant</a
+          >
+          (v2.1). Be respectful; no harassment. Report violations privately via
+          <a href="https://github.com/jpandrade30/qLLM/security/advisories/new"
+            >GitHub Security Advisories</a
+          >
+          or the maintainer contact on GitHub — not in public issues.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>Product rules (do not break these)</h2>
+        <ul class="ban">
+          <li>
+            <strong>Surface</strong>
+            <span
+              >Agents use Query IR and catalog SQL. No GraphQL agent API
+              (<a href="decisions.html#d17">D17</a>).</span
+            >
+          </li>
+          <li>
+            <strong>Contracts</strong>
+            <span
+              >JSON schemas in <code>planning/</code> win. Update specs before or with code — never
+              invent ad-hoc request shapes.</span
+            >
+          </li>
+          <li>
+            <strong>Safety</strong>
+            <span>Read-only by default; row limits required and capped; secrets only via <code>*Env</code>.</span>
+          </li>
+          <li>
+            <strong>Scope</strong>
+            <span
+              >Query runtime, not a warehouse. Fail-fast budgets (typical
+              <code>maxSyncMs</code> 15000&nbsp;ms).</span
+            >
+          </li>
+        </ul>
+        <p>
+          Plain-language decision list: <a href="decisions.html">Decisions</a>. Canonical guide:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>Fork → branch → pull request</h2>
+        <ol class="ban" style="list-style: decimal; padding-left: 1.25rem">
+          <li style="display: list-item; border: none; padding: 0.35rem 0; grid-template-columns: none">
+            Fork
+            <a href="https://github.com/jpandrade30/qLLM">jpandrade30/qLLM</a> on GitHub.
+          </li>
+          <li style="display: list-item; border: none; padding: 0.35rem 0; grid-template-columns: none">
+            Clone your fork, add <code>upstream</code>, create
+            <code>topic/short-description</code>.
+          </li>
+          <li style="display: list-item; border: none; padding: 0.35rem 0; grid-template-columns: none">
+            Keep the change focused. Rebase or merge from <code>upstream/main</code> before opening
+            the PR.
+          </li>
+          <li style="display: list-item; border: none; padding: 0.35rem 0; grid-template-columns: none">
+            Open a PR against <code>main</code> with why / what / how tested.
+          </li>
+        </ol>
+        <pre><code>git remote add upstream https://github.com/jpandrade30/qLLM.git
+git fetch upstream
+git checkout -b topic/short-description
+go vet ./...
+go test ./...</code></pre>
+      </section>
+
+      <section class="reveal">
+        <h2>PR checklist</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Check</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>CHANGELOG.md</code> <code>[Unreleased]</code></td>
+                <td>User-visible or contract changes</td>
+              </tr>
+              <tr>
+                <td>Root <code>README.md</code></td>
+                <td>Operators/agents would notice (flags, auth, connectors, Pages)</td>
+              </tr>
+              <tr>
+                <td><code>planning/</code> + schemas</td>
+                <td>Any protocol / IR / connector capability change</td>
+              </tr>
+              <tr>
+                <td><code>docs/en/</code> (+ other languages)</td>
+                <td>Meaning changes for implementers</td>
+              </tr>
+              <tr>
+                <td>Units on numbers</td>
+                <td>Always: <strong>ms</strong>, <strong>rows</strong>, <strong>bytes</strong></td>
+              </tr>
+              <tr>
+                <td>Decision labels</td>
+                <td>Link <a href="decisions.html">Decisions</a> — no bare <code>D##</code> alone</td>
+              </tr>
+              <tr>
+                <td>No secrets</td>
+                <td>Never commit tokens, passwords, or private keys</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Contract changes</h2>
+        <p>
+          Changing Query IR, envelopes, preset/catalog shapes, or connector capabilities is a
+          <strong>spec change</strong>: problem statement → additive vs breaking → update
+          <code>planning/01-decisions.md</code> if needed → schemas and
+          <code>03</code>/<code>04</code> docs → then code and tests. Record any
+          <code>protocolVersion</code> bump.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>Where to work</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Contribution</th>
+                <th>Path</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Runtime / connectors</td>
+                <td><code>internal/</code>, tests, goldens</td>
+              </tr>
+              <tr>
+                <td>Protocol</td>
+                <td><code>planning/</code> first</td>
+              </tr>
+              <tr>
+                <td>Implementer manuals</td>
+                <td><code>docs/{en,pt,es,zh}/</code></td>
+              </tr>
+              <tr>
+                <td>This site</td>
+                <td><code>site/</code> (English only)</td>
+              </tr>
+              <tr>
+                <td>Harness</td>
+                <td>Compose + <code>fixtures/</code> + <code>scripts/dev/</code> (nerdctl)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Bugs and security</h2>
+        <p>
+          Bugs and ideas:
+          <a href="https://github.com/jpandrade30/qLLM/issues">GitHub Issues</a> (include version,
+          OS, redacted YAML, typed error codes). Vulnerabilities:
+          <a href="https://github.com/jpandrade30/qLLM/security/advisories/new">Security Advisories</a>
+          only — not public issues.
+        </p>
+      </section>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Ready to open a PR?</h2>
+          <p style="margin: 0.5rem 0 0">
+            Read the full guide in the repo, then fork and ship a focused change.
+          </p>
+        </div>
+        <a
+          class="btn"
+          href="https://github.com/jpandrade30/qLLM/blob/main/CONTRIBUTING.md"
+          >CONTRIBUTING.md →</a
+        >
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/blob/main/LICENSE.md">License</a>
+      </span>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

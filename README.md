@@ -6,7 +6,9 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Release **0.3.2**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
+Release **0.3.4**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
+
+Product site: https://jpandrade30.github.io/qLLM/
 
 ## Why qLLM
 
@@ -34,6 +36,8 @@ preset.yaml  +  catalog.yaml  →  validate  →  HTTP /v1  or  MCP
 You write two project files: which sources exist (`qllm.preset.yaml`) and which logical tables the agent may see (`qllm.catalog.yaml`). The runtime never exposes raw source SQL as the agent API.
 
 ## Documentation
+
+Product overview (English): [jpandrade30.github.io/qLLM](https://jpandrade30.github.io/qLLM/) (`site/`). Deep manuals index: [Docs](https://jpandrade30.github.io/qLLM/docs.html). Protocol **0.1.0 → 0.2.0**: [Protocol](https://jpandrade30.github.io/qLLM/protocol.html). Release history: [Changelog](https://jpandrade30.github.io/qLLM/changelog.html). Product rules `D17`–`D22`: [Decisions](https://jpandrade30.github.io/qLLM/decisions.html).
 
 Pick the folder for your language. Each one has the same 15 guides, including the response format (`responses.md`), installation options (`install.md`), writing your YAML from zero (`from-scratch.md`) and the full field list (`field-reference.md`).
 
@@ -75,7 +79,7 @@ Wire-compatible aliases (same driver and connection shape as the parent; experim
 
 Redshift and Cockroach may need extra dialect work for introspection; `qllm catalog introspect` still only talks the parent wire protocol (postgres or mysql).
 
-Not a source type: Oracle, BigQuery, Snowflake, Elasticsearch, S3-as-table. GraphQL is a **source** (`type: graphql`) only — never the agent API (use Query IR / catalog SQL). Many HTTP JSON APIs are already reachable as `rest` plus `from-openapi`.
+Not a source type: Oracle, BigQuery, Snowflake, Elasticsearch, S3-as-table. Optional experimental `type: graphql` connects to an upstream GraphQL HTTP endpoint as a data source (query documents only). Many HTTP JSON APIs are already reachable as `rest` plus `from-openapi`.
 
 ## Quick start (5 minutes)
 
@@ -92,7 +96,7 @@ curl -s http://127.0.0.1:8088/v1/health
 curl -s -H "Authorization: Bearer change-me" http://127.0.0.1:8088/v1/catalog
 ```
 
-Edit `config/` in that folder for your sources. Clone this repo only for development, the compose harness, or docs.
+The zip’s `config/` (and this repo’s `deploy/`) are **examples** — replace hosts, env names, and entities with your sources. See [Configure](https://jpandrade30.github.io/qLLM/configure.html). The zip also includes `planning/` (schemas + protocol) so you or an LLM can author YAML against the contract. Clone this repo only for development, the compose harness, or docs.
 
 ### Develop from a full clone
 
@@ -281,6 +285,8 @@ Without `-tags duckdb`, `go test ./...` stays CGO-free.
 ## Development
 
 Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.6-bookworm`). `mcp-go` is pinned at **v0.48.0**.
+
+Contributions: [CONTRIBUTING.md](CONTRIBUTING.md) (fork → PR, contract checklist, changelog). Community standards: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Short version on the product site: [Contribute](https://jpandrade30.github.io/qLLM/contribute.html).
 
 ### Start a standalone repo
 
