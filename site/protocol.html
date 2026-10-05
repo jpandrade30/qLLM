@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Protocol 0.1.0 → 0.2.0 — qLLM</title>
+    <meta
+      name="description"
+      content="What changed between qLLM protocolVersion 0.1.0 and 0.2.0: additive source types, accessPath, unchanged Query IR shape, and compatibility rules."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html" aria-current="page">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">protocolVersion</span>
+        <h1>0.1.0 → 0.2.0</h1>
+        <p class="lead">
+          Protocol <strong>0.2.0</strong> is additive. Preset, catalog, and Query IR files marked
+          <code>0.1.0</code> stay valid. The runtime advertises <code>protocolVersion: 0.2.0</code>
+          in responses. Normative detail:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/planning/03-protocol-schemas.md"
+            >planning/03-protocol-schemas.md</a
+          >
+          and
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/planning/01-decisions.md"
+            >D11</a
+          >.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <p class="note">
+          Product releases (<code>0.3.x</code> and later) can add connectors and operators without
+          bumping the protocol when the wire contracts stay compatible. Full history:
+          <a href="changelog.html">Changelog</a>.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>Compatibility at a glance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>0.1.0</th>
+                <th>0.2.0</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Preset / catalog / IR files</td>
+                <td>Baseline contract</td>
+                <td>Still accepted unchanged</td>
+              </tr>
+              <tr>
+                <td>Runtime response <code>protocolVersion</code></td>
+                <td>Advertised 0.1.0 at ship</td>
+                <td>Advertises <strong>0.2.0</strong></td>
+              </tr>
+              <tr>
+                <td>Query IR shape</td>
+                <td>JSON IR as shipped</td>
+                <td><strong>Unchanged</strong> (richer work stays on catalog SQL)</td>
+              </tr>
+              <tr>
+                <td>Harness connectors</td>
+                <td>postgres, mysql, mongodb, rest</td>
+                <td>Same four in Compose / goldens</td>
+              </tr>
+              <tr>
+                <td>Experimental <code>sources[].type</code></td>
+                <td>—</td>
+                <td>
+                  mssql, sqlite, clickhouse, dynamodb, cassandra, ksql (pull) — no Compose goldens
+                </td>
+              </tr>
+              <tr>
+                <td>Key-path binding</td>
+                <td>—</td>
+                <td>
+                  <code>binding.accessPath</code> (<code>pk</code>/<code>partition</code>,
+                  <code>sk</code>/<code>sort</code>, <code>ksqlKey</code>); missing key eq →
+                  <code>UNSUPPORTED</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>qllm.env.yaml</code></td>
+                <td>Literal values</td>
+                <td>
+                  Values may be exactly <code>${ENV_NAME}</code>; empty names are not written as the
+                  placeholder
+                </td>
+              </tr>
+              <tr>
+                <td>Agent surface</td>
+                <td>
+                  MCP <code>how_to_use_me</code>, <code>describe_catalog</code>,
+                  <code>execute_sql</code> + HTTP <code>/v1</code>
+                </td>
+                <td>Same three tools / HTTP paths (D17 unchanged)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>What 0.2.0 added (protocol)</h2>
+        <ul class="ban">
+          <li>
+            <strong>Sources</strong>
+            <span
+              >Experimental types for Microsoft SQL Server, SQLite, ClickHouse, DynamoDB, Cassandra,
+              and ksqlDB pull — present in the binary, not in the harness Compose stack.</span
+            >
+          </li>
+          <li>
+            <strong>accessPath</strong>
+            <span
+              >Catalog binding tells the runtime which equality predicates are required so Dynamo /
+              Cassandra / ksql never fall back to full scan / <code>ALLOW FILTERING</code> /
+              push queries.</span
+            >
+          </li>
+          <li>
+            <strong>Env placeholders</strong>
+            <span
+              ><code>qllm.env.yaml</code> can point at process env with <code>${NAME}</code>; Compose
+              injects harness secrets via <code>environment:</code>.</span
+            >
+          </li>
+          <li>
+            <strong>Docs &amp; SQL path</strong>
+            <span
+              >Per-language manuals under <code>docs/</code>, richer dialect <code>"2"</code> goldens,
+              CTE aliases on the catalog SQL path — without changing the IR document shape.</span
+            >
+          </li>
+        </ul>
+      </section>
+
+      <section class="reveal">
+        <h2>What stayed the same</h2>
+        <ul>
+          <li>Read-only default, required/capped <code>limit</code>, fail-fast budgets.</li>
+          <li>No GraphQL as the qLLM agent API (D17).</li>
+          <li>Harness isolation from the binary (D18).</li>
+          <li>
+            Catalog SQL dialect versions <code>"1"</code> / <code>"2"</code> on
+            <code>POST /v1/sql</code> / <code>execute_sql</code> (omit = newest).
+          </li>
+        </ul>
+        <p>
+          Later product releases (for example <code>0.3.0</code>) added redis/kafka, REST
+          <code>fromFilter</code>, scoped keys, and <code>graphql</code> source type under the same
+          protocol <strong>0.2.0</strong> line when contracts stayed additive — see
+          <a href="changelog.html">Changelog</a>.
+        </p>
+      </section>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Need every field?</h2>
+          <p style="margin: 0.5rem 0 0">
+            Field reference and schemas stay in the manuals and <code>planning/schemas/</code>.
+          </p>
+        </div>
+        <a class="btn" href="docs.html">Docs index →</a>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="changelog.html">Changelog</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

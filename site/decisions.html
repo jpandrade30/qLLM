@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Decisions — qLLM</title>
+    <meta
+      name="description"
+      content="Plain-language product decisions behind qLLM labels D17–D22: agent surface, harness isolation, read-only streams, fromFilter, credential scope, and json cells."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html" aria-current="page">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Product rules</span>
+        <h1>Decisions</h1>
+        <p class="lead">
+          Spec labels like <code>D21</code> are shorthand for locked product rules. This page states
+          what each one means in plain language. Full rationale:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/planning/01-decisions.md"
+            >planning/01-decisions.md</a
+          >.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>In one sentence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="#d17"><code>D17</code></a></td>
+                <td>Agents use Query IR and catalog SQL — not GraphQL as the qLLM API.</td>
+              </tr>
+              <tr>
+                <td><a href="#d18"><code>D18</code></a></td>
+                <td>Demo Compose/fixtures never become silent defaults for a real deploy.</td>
+              </tr>
+              <tr>
+                <td><a href="#d19"><code>D19</code></a></td>
+                <td>Redis/Kafka (and similar) are read-only and non-destructive.</td>
+              </tr>
+              <tr>
+                <td><a href="#d20"><code>D20</code></a></td>
+                <td><code>fromFilter</code> rebuilds a REST key the API omitted from the body.</td>
+              </tr>
+              <tr>
+                <td><a href="#d21"><code>D21</code></a></td>
+                <td>Row scope comes from the credential, not from a field the model can rewrite.</td>
+              </tr>
+              <tr>
+                <td><a href="#d22"><code>D22</code></a></td>
+                <td><code>json</code> cells are parsed objects/arrays; <code>shape</code> is a hint only.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="d17">
+        <div class="stage__num">D17</div>
+        <div class="stage__body">
+          <h2>Agent surface is Query IR + catalog SQL</h2>
+          <p>
+            HTTP exposes Query IR and catalog SQL. MCP tools run catalog SQL. There is no GraphQL
+            agent API, tool, or IR↔GraphQL translation. An optional experimental
+            <code>type: graphql</code> source talks to an upstream GraphQL HTTP endpoint as data —
+            that is unrelated to how agents call qLLM.
+          </p>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="d18">
+        <div class="stage__num">D18</div>
+        <div class="stage__body">
+          <h2>Harness world stays separate</h2>
+          <p>
+            Compose, seeds, and <code>fixtures/</code> prove the runtime. The binary only sees the
+            YAML you point at with <code>--config-dir</code> (or preset/catalog/project/CWD). No
+            valid project files → <code>CONFIG_ERROR</code>, never a silent fallback to demo hosts or
+            entities.
+          </p>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="d19">
+        <div class="stage__num">D19</div>
+        <div class="stage__body">
+          <h2>Key/stream sources are read-only</h2>
+          <p>
+            Experimental <code>redis</code> and <code>kafka</code> only use non-mutating reads (no
+            delete/set/pop, no consumer-group commit, no produce). Queries without the required
+            key/partition access path return <code>UNSUPPORTED</code>. Brokers/ACLs remain the real
+            safety boundary; the runtime is a second line.
+          </p>
+          <p class="note">
+            Separately: Oracle, BigQuery, Snowflake, Elasticsearch, and S3-as-table are simply
+            <strong>not</strong> source types today — that is a connector matrix gap, not D19.
+          </p>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="d20">
+        <div class="stage__num">D20</div>
+        <div class="stage__body">
+          <h2>REST omitted field → <code>fromFilter</code></h2>
+          <p>
+            When a REST API accepts a filter (for example <code>warehouse_id</code>) but does not
+            echo it in the JSON body, mark the catalog field <code>fromFilter: true</code>. qLLM
+            copies the value from a top-level <code>eq</code> so joins and <code>GROUP BY</code>
+            still see the column. No matching <code>eq</code> → <code>INVALID_IR</code>. Body value
+            disagrees with the filter → <code>SOURCE_ERROR</code>.
+          </p>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="d21">
+        <div class="stage__num">D21</div>
+        <div class="stage__body">
+          <h2>Scope on the credential</h2>
+          <p>
+            <code>qllm.access.yaml</code> lists <strong>app types</strong>, not end users. Row
+            identity lives in a derived Bearer key (or static scope), and the catalog
+            <code>entities[].scope</code> forces an equality filter on that column. The model cannot
+            swap <code>user_id</code> in the query to see another tenant’s rows.
+          </p>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="d22">
+        <div class="stage__num">D22</div>
+        <div class="stage__body">
+          <h2>Parsed <code>json</code> cells + typed columns</h2>
+          <p>
+            A catalog field with <code>type: json</code> returns a parsed object or array in the
+            response envelope (not a JSON string). Optional <code>shape</code> is free text for the
+            LLM (<code>{aisle, bin}</code>, <code>string[]</code>); the runtime does not validate it.
+            Column types in SQL results follow the source/DuckDB type. Integers above 2<sup>53</sup>
+            should be catalogued as <code>string</code> because <code>number</code> is DOUBLE.
+          </p>
+          <p class="note">
+            Key-conditioned sources (DynamoDB, Cassandra, ksql, Redis, Kafka) still need the
+            documented <code>accessPath</code> equalities or they return <code>UNSUPPORTED</code> —
+            see <a href="connectors.html">Connectors</a>. That requirement is separate from the json
+            cell rule, even though both show up when you design catalogs carefully.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/blob/main/planning/01-decisions.md"
+          >01-decisions.md</a
+        >
+      </span>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

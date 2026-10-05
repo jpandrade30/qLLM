@@ -14,7 +14,7 @@ Obrigatórios: `protocolVersion`, `preset`, `catalog`.
 
 | Campo | Tipo | Observações |
 |-------|------|-------------|
-| `protocolVersion` | string semver | `0.1.0` / `0.2.0` |
+| `protocolVersion` | No version | `0.1.0` / `0.2.0` |
 | `preset` | string | Caminho relativo a **este** arquivo |
 | `catalog` | string | Idem |
 
@@ -26,7 +26,7 @@ Obrigatórios na raiz: `protocolVersion`, `project`, `limits`, `sources` (mínim
 
 | Campo | Tipo | Observações |
 |-------|------|-------------|
-| `protocolVersion` | semver | |
+| `protocolVersion` | No version | |
 | `project` | string não vazia | Nome lógico do projeto; deve ser igual ao do catálogo |
 | `limits` | object | **Todos** os 5 campos são obrigatórios |
 | `sources` | array | |

@@ -52,6 +52,18 @@ def copy_runtime(dest: Path) -> None:
         shutil.copy2(p, out)
 
 
+def copy_planning(dest: Path) -> None:
+    """Ship planning/ so humans and LLMs can author config against the contract."""
+    src = REPO / "planning"
+    if not src.is_dir():
+        raise FileNotFoundError(f"missing {src}")
+    shutil.copytree(
+        src,
+        dest / "planning",
+        ignore=shutil.ignore_patterns(".DS_Store", "Thumbs.db"),
+    )
+
+
 def write_sqlite(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
@@ -124,8 +136,9 @@ entities:
     )
     write_text(
         cfg / "qllm.env.yaml",
-        """QLLM_SQLITE_PATH: /data/app.db
-QLLM_AUTH_TOKEN: ${QLLM_AUTH_TOKEN}
+        """env:
+  QLLM_SQLITE_PATH: /data/app.db
+  QLLM_AUTH_TOKEN: ${QLLM_AUTH_TOKEN}
 """,
     )
     write_text(
@@ -213,13 +226,19 @@ On the host, set `QLLM_SQLITE_PATH` to `data/app.db` (relative to where you run 
 
 ## Add your own sources
 
+The files under `config/` are a **starter example** (local SQLite `items` table). Replace host names, credentials env names, entities, and fields with your real sources — do not treat them as production defaults.
+
 Edit `config/qllm.preset.yaml` and `config/qllm.catalog.yaml`. Secrets stay in env vars (`*Env` keys), not in YAML.
 
-Guides in the upstream repo:
+This folder includes **`planning/`** (schemas + protocol prose). Point an LLM at `planning/` (especially `schemas/` and `03-protocol-schemas.md`) when generating or reviewing config. If anything disagrees, **`planning/` wins**.
 
+Also useful:
+
+- Product configure walkthrough: https://jpandrade30.github.io/qLLM/configure.html
 - [{UPSTREAM}/blob/main/docs/en/from-scratch.md]({UPSTREAM}/blob/main/docs/en/from-scratch.md)
 - [{UPSTREAM}/blob/main/docs/en/field-reference.md]({UPSTREAM}/blob/main/docs/en/field-reference.md)
-- [{UPSTREAM}/tree/main/planning]({UPSTREAM}/tree/main/planning)
+
+In the full monorepo, `deploy/` is likewise **example** layout only — copy the shape, replace every value.
 
 Rebuild the image after YAML changes, or mount `./config` over `/config`.
 """,
@@ -269,6 +288,7 @@ def main(argv: list[str] | None = None) -> int:
         shutil.rmtree(dest)
     dest.mkdir(parents=True)
     copy_runtime(dest)
+    copy_planning(dest)
     license_src = REPO / "LICENSE.md"
     if license_src.is_file():
         shutil.copy2(license_src, dest / "LICENSE.md")

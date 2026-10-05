@@ -3,9 +3,34 @@
 All notable changes to qLLM are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.2**.
+Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.4**.
 
 ## [Unreleased]
+
+## [0.3.4] - 2026-10-04
+
+### Changed
+
+- Product site primary nav follows a reader journey: Get started → Configure → Connectors → Query → Security → Docs → Protocol → Decisions → Changelog → Contribute.
+
+## [0.3.3] - 2026-10-04
+
+### Added
+
+- GitHub Pages product site (`site/`, English): overview, get started, connectors, configure (side menu for preset/catalog/config/env), query, security, Docs index, Decisions (plain-language D17–D22), and Contribute — deployed via Actions to https://jpandrade30.github.io/qLLM/
+- Site pages for protocol **0.1.0 → 0.2.0** (`protocol.html`) and a generated **Changelog** (`changelog.html` from root `CHANGELOG.md` via `scripts/dev/render_site_md.py`, also in the Pages workflow).
+- Docs clarify units on time/size/row limits (`ms`, `bytes`, `rows`) in `docs/en/field-reference.md` and `project-files.md`; decision ids point at `planning/01-decisions.md` instead of bare `D##` shorthand.
+- `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1): fork/PR workflow, contract-change checklist, changelog/README expectations.
+- Standalone generator (`scripts/standalone/init-standalone.py`) copies `planning/` into the slim folder so LLMs/humans can author config against the contract; Get started / install docs stress that `config/` and monorepo `deploy/` are examples to replace.
+
+### Changed
+
+- Home-page flow sketch sits inside **01 — What** as the example diagram (no longer a separate band above that stage).
+- Documentation type labels for `protocolVersion` say **No version** instead of “semver” (field-reference / from-scratch in en/pt/es/zh, plus planning D11 / protocol field table).
+
+### Fixed
+
+- Standalone `config/qllm.env.yaml` template now uses the required root `env:` map.
 
 ## [0.3.2] - 2026-10-04
 

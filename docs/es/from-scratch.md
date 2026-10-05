@@ -17,7 +17,7 @@ C:\datos\mi-qllm\           (ejemplo)
 
 Extensiones admitidas: `.yaml`, `.yml`, `.json`. No puedes usar `preset.yaml` sin el prefijo `qllm.`.
 
-`protocolVersion` en los YAML: `"0.1.0"` o `"0.2.0"` (semver `N.N.N`). El runtime **responde** con `0.2.0`.
+`protocolVersion` en los YAML: `"0.1.0"` o `"0.2.0"` (No version `N.N.N`). El runtime **responde** con `0.2.0`.
 
 Todos los campos: [field-reference.md](field-reference.md). Carpeta de ejemplo (copia del demo, embebida por el `Dockerfile`): [`deploy/prd/`](../../deploy/prd). Docker y Kubernetes: [point-your-folder.md](point-your-folder.md).
 

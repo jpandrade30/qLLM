@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Get started — qLLM</title>
+    <meta
+      name="description"
+      content="Install qLLM from the Release standalone zip, run with Docker, and hit health/catalog. When to clone vs zip."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html" aria-current="page">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Install</span>
+        <h1>Get started</h1>
+        <p class="lead">
+          Prefer <code>qllm-standalone-&lt;ver&gt;.zip</code> from
+          <a href="https://github.com/jpandrade30/qLLM/releases">Releases</a>. Do not grab “Source
+          code” unless you intend to build the monorepo.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <h2>1. Download and unzip</h2>
+        <p>
+          The standalone zip is a small runnable project: Dockerfile, starter
+          <code>config/</code>, SQLite demo data, and a copy of <code>planning/</code> (schemas +
+          protocol docs so you or an LLM can author real YAML). Unzip anywhere; you do not need the
+          full Git history.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>2. Configure for your sources</h2>
+        <p>
+          Before you treat the stack as “yours”, read
+          <a href="configure.html">Configure</a> — preset, catalog, REST
+          <code>itemsKey</code> / <code>fromFilter</code>, runtime config, and env.
+        </p>
+        <p class="note">
+          Everything under <code>config/</code> in the zip (and <code>deploy/</code> in the full
+          monorepo) is an <strong>example</strong> of file shape only. Replace hosts, env var names,
+          entities, and fields with your real sources. The included SQLite
+          <code>items</code> table is a smoke demo, not a template to keep in production.
+        </p>
+        <p>
+          When asking an LLM to write config, point it at the local <code>planning/</code> folder
+          in the zip (especially <code>planning/schemas/</code>). <code>planning/</code> wins over
+          any guessed API shape.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>3. Docker</h2>
+        <pre><code>cp .env.example .env   # set QLLM_AUTH_TOKEN
+docker build -t qllm-standalone .
+docker run --rm -p 8088:8088 -p 8089:8089 --env-file .env qllm-standalone</code></pre>
+        <p>
+          Defaults: HTTP on <code>8088</code>, MCP HTTP on <code>8089</code>. After you replace the
+          example YAML, rebuild or mount <code>./config</code> over <code>/config</code>.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>4. Health and catalog</h2>
+        <pre><code>curl -s http://127.0.0.1:8088/v1/health
+curl -s -H "Authorization: Bearer change-me" http://127.0.0.1:8088/v1/catalog</code></pre>
+        <p class="note">
+          Replace <code>change-me</code> with the token from your <code>.env</code>. Health stays
+          unauthenticated for probes; catalog and queries require Bearer when auth is configured.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>When to clone vs zip</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Goal</th>
+                <th>Use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Run qLLM against your sources</td>
+                <td><span class="chip chip--ok">Release zip</span></td>
+              </tr>
+              <tr>
+                <td>Contribute, change Go code, or read full docs tree</td>
+                <td><span class="chip">Clone</span></td>
+              </tr>
+              <tr>
+                <td>Compose harness + golden Query IR</td>
+                <td><span class="chip">Clone</span> + Rancher Desktop / nerdctl</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Develop from a full clone</h2>
+        <pre><code>go build -o qllm ./cmd/qllm
+./qllm validate --config-dir ./my-project
+./qllm serve --http --config-dir ./my-project</code></pre>
+        <p>
+          Without YAML in <code>--config-dir</code> (or CWD), serve fails with
+          <code>CONFIG_ERROR</code>. Field-by-field install notes:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/install.md">docs/en/install.md</a>.
+        </p>
+      </section>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Next: replace the example config</h2>
+          <p style="margin: 0.5rem 0 0">
+            Use Configure for field-by-field guidance. Keep <code>planning/</code> next to your YAML
+            when an LLM helps.
+          </p>
+        </div>
+        <a class="btn" href="configure.html">Open Configure →</a>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>
