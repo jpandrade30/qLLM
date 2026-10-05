@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Configure — qLLM</title>
+    <meta
+      name="description"
+      content="Configure qLLM: quick example plus field maps for preset, catalog, config, and env YAML."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html" aria-current="page">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Project files</span>
+        <h1>Configure</h1>
+        <p class="lead">
+          Use the side menu to jump: a short worked example, then every common YAML field for
+          preset/catalog, runtime config, and env.
+        </p>
+      </header>
+
+      <div class="doc-layout" data-doc-layout>
+        <aside class="doc-side" aria-label="Configure sections">
+          <p class="doc-side__label">Jump to</p>
+          <nav>
+            <button type="button" data-doc-target="overview" aria-current="true">
+              Overview &amp; example
+            </button>
+            <button type="button" data-doc-target="preset-catalog">Preset &amp; catalog</button>
+            <button type="button" data-doc-target="config">Config</button>
+            <button type="button" data-doc-target="env">Env</button>
+          </nav>
+          <p class="doc-side__hint">
+            Field tables:
+            <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/field-reference.md"
+              >field-reference.md</a
+            >.
+            Rules behind <code>D##</code>:
+            <a href="decisions.html">Decisions</a>
+          <a href="contribute.html">Contribute</a>.
+          </p>
+        </aside>
+
+        <div class="doc-main">
+          <!-- OVERVIEW -->
+          <section class="doc-panel" data-doc-panel="overview" id="overview">
+            <h2>Overview &amp; example</h2>
+            <p>
+              Required: <code>qllm.preset.yaml</code> + <code>qllm.catalog.yaml</code>. Optional:
+              <code>qllm.config.yaml</code>, <code>qllm.env.yaml</code>,
+              <code>qllm.access.yaml</code>. Secrets are names of env vars (<code>*Env</code>), never
+              the secret text in YAML.
+            </p>
+            <pre><code>my-project/
+  qllm.preset.yaml
+  qllm.catalog.yaml
+  qllm.config.yaml    # optional
+  qllm.env.yaml       # optional (local)
+  qllm.access.yaml    # optional (per-app keys)</code></pre>
+            <pre><code>./qllm validate --config-dir ./my-project
+./qllm serve --http --config-dir ./my-project</code></pre>
+
+            <h3>Worked example: warehouse DB + stock API</h3>
+            <p>
+              Postgres holds product master data; a REST inventory service exposes
+              <code>GET /v1/stock</code>. You only publish the fields the agent may see.
+            </p>
+            <pre><code># qllm.preset.yaml (excerpt)
+protocolVersion: "0.2.0"
+project: warehouse
+limits:
+  maxSyncMs: 15000      # ms  (~15 s total)
+  maxSourceMs: 12000    # ms  (~12 s per source)
+  defaultLimit: 100     # rows
+  maxLimit: 1000        # rows
+  readOnly: true
+sources:
+  - id: warehouse_pg
+    type: postgres
+    connection:
+      hostEnv: QLLM_PG_HOST
+      port: 5432
+      database: warehouse
+      userEnv: QLLM_PG_USER
+      passwordEnv: QLLM_PG_PASSWORD
+      sslMode: require
+
+  - id: stock_api
+    type: rest
+    connection:
+      baseUrlEnv: QLLM_STOCK_API_BASE
+      auth:
+        type: bearer
+        tokenEnv: QLLM_STOCK_API_TOKEN
+    options:
+      timeoutMs: 10000   # ms
+      resources:
+        stock:
+          list:
+            method: GET
+            path: /v1/stock
+            queryParams: [sku, warehouse_id, limit, offset]
+            itemsKey: data
+          getById:
+            method: GET
+            path: /v1/stock/{sku}
+            itemsKey: data</code></pre>
+            <pre><code># qllm.catalog.yaml (excerpt)
+protocolVersion: "0.2.0"
+project: warehouse
+entities:
+  - name: products
+    source: warehouse_pg
+    binding: { kind: table, schema: warehouse, table: products }
+    fields:
+      - { name: sku, physical: sku, type: string }
+      - { name: title, physical: title, type: string }
+      - { name: weight_kg, physical: weight_kg, type: number }
+
+  - name: stock_levels
+    source: stock_api
+    binding: { kind: rest_resource, resource: stock }
+    fields:
+      - { name: sku, physical: sku, type: string }
+      - { name: qty, physical: qty, type: number }
+      - name: location
+        physical: location
+        type: json
+        shape: "{aisle, bin}"
+      - name: tags
+        physical: tags
+        type: json
+        shape: "string[]"
+      - name: warehouse_id
+        physical: warehouse_id
+        type: string
+        fromFilter: true</code></pre>
+            <ul class="ban">
+              <li>
+                <strong>json</strong>
+                <span
+                  >Nested objects/arrays: one top-level field with <code>type: json</code> + optional
+                  <code>shape</code> (<a href="decisions.html#d22">decision D22</a>). REST does not
+                  resolve dotted paths like <code>location.aisle</code>.</span
+                >
+              </li>
+              <li>
+                <strong>fromFilter</strong>
+                <span
+                  >API takes a filter key but omits it in the body → set
+                  <code>fromFilter: true</code> (<a href="decisions.html#d20">decision D20</a>).
+                  Needs a top-level <code>eq</code> or the query is <code>INVALID_IR</code>.</span
+                >
+              </li>
+              <li>
+                <strong>itemsKey</strong>
+                <span
+                  >When the body is <code>{ "data": [ … ] }</code>, set
+                  <code>itemsKey: data</code> on the REST operation.</span
+                >
+              </li>
+            </ul>
+            <p class="note">
+              Draft helpers:
+              <code>catalog introspect</code> (SQL) and <code>catalog from-openapi</code> (REST).
+              Always review before serve.
+            </p>
+          </section>
+
+          <!-- PRESET + CATALOG -->
+          <section class="doc-panel" data-doc-panel="preset-catalog" id="preset-catalog" hidden>
+            <h2>Preset &amp; catalog fields</h2>
+            <p>
+              Logical ids (<code>sources[].id</code>, entity/field names):
+              <code>^[a-z][a-z0-9_]*$</code>. Extra keys on closed objects → reject.
+            </p>
+            <nav class="doc-subnav" aria-label="Within this panel">
+              <a href="#pc-preset">Preset root</a>
+              <a href="#pc-limits">limits</a>
+              <a href="#pc-sources">sources</a>
+              <a href="#pc-conn">connection</a>
+              <a href="#pc-rest">REST resources</a>
+              <a href="#pc-catalog">Catalog</a>
+              <a href="#pc-binding">binding</a>
+              <a href="#pc-fields">fields</a>
+              <a href="#pc-relations">relations</a>
+            </nav>
+
+            <div class="field-block" id="pc-preset">
+              <h3>qllm.preset.yaml — root</h3>
+              <p>Required: <code>protocolVersion</code>, <code>project</code>, <code>limits</code>, <code>sources</code> (≥1).</p>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>protocolVersion</code></td>
+                      <td><code>0.1.0</code> / <code>0.2.0</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>project</code></td>
+                      <td>Must match the catalog <code>project</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>limits</code></td>
+                      <td>All five fields required</td>
+                    </tr>
+                    <tr>
+                      <td><code>sources[]</code></td>
+                      <td>Each needs <code>id</code>, <code>type</code>, <code>connection</code></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="field-block" id="pc-limits">
+              <h3>limits (all required)</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Range / rule</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>maxSyncMs</code></td>
+                      <td>100–60000 <strong>ms</strong> · total query budget (typical 15000&nbsp;ms ≈ 15&nbsp;s)</td>
+                    </tr>
+                    <tr>
+                      <td><code>maxSourceMs</code></td>
+                      <td>100–60000 <strong>ms</strong> · per-source round trip (typical 12000&nbsp;ms ≈ 12&nbsp;s)</td>
+                    </tr>
+                    <tr>
+                      <td><code>defaultLimit</code></td>
+                      <td>≥ 1 <strong>row</strong> · when IR/SQL omits LIMIT (typical 100 rows)</td>
+                    </tr>
+                    <tr>
+                      <td><code>maxLimit</code></td>
+                      <td>≥ 1 <strong>row</strong> · hard ceiling (typical 1000 rows)</td>
+                    </tr>
+                    <tr>
+                      <td><code>readOnly</code></td>
+                      <td>must be <code>true</code></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="field-block" id="pc-sources">
+              <h3>sources[]</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>id</code></td>
+                      <td>Referenced by catalog <code>entities[].source</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>type</code></td>
+                      <td>
+                        Stable: <code>postgres</code> <code>mysql</code> <code>mongodb</code>
+                        <code>rest</code>. Also experimental types + wire aliases — see
+                        <a href="connectors.html">Connectors</a>.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>connection</code></td>
+                      <td>Shape depends on <code>type</code>; extra keys error</td>
+                    </tr>
+                    <tr>
+                      <td><code>options</code></td>
+                      <td>
+                        Runtime reads known keys only (<code>timeoutMs</code> in
+                        <strong>ms</strong>, <code>statementTimeoutMs</code> in <strong>ms</strong>,
+                        REST <code>resources</code>, …). Typos fail silently.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="field-block" id="pc-conn">
+              <h3>connection by type (cheat sheet)</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>type</th>
+                      <th>Required / notable</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>postgres</code> / <code>mysql</code> (+ aliases)</td>
+                      <td>
+                        <code>hostEnv</code> <code>port</code> <code>database</code>
+                        <code>userEnv</code> <code>passwordEnv</code>; optional
+                        <code>sslMode</code> (postgres)
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>mssql</code></td>
+                      <td>Same required; optional <code>encrypt</code>; no <code>sslMode</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>sqlite</code></td>
+                      <td><code>pathEnv</code> only</td>
+                    </tr>
+                    <tr>
+                      <td><code>mongodb</code></td>
+                      <td><code>uriEnv</code>, <code>database</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>rest</code> / <code>ksql</code> / <code>graphql</code></td>
+                      <td>
+                        <code>baseUrlEnv</code>; optional <code>auth</code>
+                        (<code>none|bearer|header|basic</code>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>dynamodb</code></td>
+                      <td><code>region</code>; optional <code>endpointEnv</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>redis</code></td>
+                      <td><code>addrEnv</code> or <code>hostEnv</code>+<code>port</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>kafka</code></td>
+                      <td><code>brokersEnv</code>; optional TLS/SASL</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                REST/ksql <code>auth</code>: <code>bearer</code> → <code>tokenEnv</code>;
+                <code>header</code> → <code>name</code> + <code>valueEnv</code>;
+                <code>basic</code> → <code>userEnv</code> + <code>passwordEnv</code>.
+              </p>
+            </div>
+
+            <div class="field-block" id="pc-rest">
+              <h3>REST options.resources</h3>
+              <p>
+                Required to query. Catalog <code>binding.resource</code> must be a key of this map.
+                Each resource may define <code>list</code> and optional <code>getById</code>.
+              </p>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Operation field</th>
+                      <th>Meaning</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>method</code></td>
+                      <td>Default <code>GET</code>; with <code>readOnly</code> only GET/HEAD</td>
+                    </tr>
+                    <tr>
+                      <td><code>path</code></td>
+                      <td>Starts with <code>/</code>; <code>{name}</code> from <code>eq</code> on getById</td>
+                    </tr>
+                    <tr>
+                      <td><code>queryParams</code></td>
+                      <td>Documents filters; runtime does not enforce the list</td>
+                    </tr>
+                    <tr>
+                      <td><code>itemsKey</code></td>
+                      <td>JSON key holding the array/object (<code>data</code>, <code>items</code>, …)</td>
+                    </tr>
+                    <tr>
+                      <td><code>maxPages</code> / <code>pageSize</code></td>
+                      <td>Offset pagination; <code>maxPages</code> capped at 20</td>
+                    </tr>
+                    <tr>
+                      <td><code>limitParam</code> / <code>offsetParam</code></td>
+                      <td>Defaults <code>limit</code> / <code>offset</code></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="note">
+                Only <code>eq</code> filters push down to REST. Nested JSON → top-level
+                <code>type: json</code>. Missing echoed filter key → <code>fromFilter: true</code>.
+              </p>
+            </div>
+
+            <div class="field-block" id="pc-catalog">
+              <h3>qllm.catalog.yaml — entities[]</h3>
+              <p>Required root: <code>protocolVersion</code>, <code>project</code>, <code>entities</code> (≥1).</p>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>name</code></td>
+                      <td><code>FROM</code> / IR <code>from</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>aliases</code></td>
+                      <td>Optional alternate IR names</td>
+                    </tr>
+                    <tr>
+                      <td><code>description</code></td>
+                      <td>Text for the agent</td>
+                    </tr>
+                    <tr>
+                      <td><code>source</code></td>
+                      <td>Must match a preset <code>sources[].id</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>binding</code></td>
+                      <td>Physical mapping (below)</td>
+                    </tr>
+                    <tr>
+                      <td><code>primaryKey</code></td>
+                      <td>Logical field names</td>
+                    </tr>
+                    <tr>
+                      <td><code>fields</code></td>
+                      <td>≥ 1 field</td>
+                    </tr>
+                    <tr>
+                      <td><code>relations</code></td>
+                      <td>Hints only; do not create FKs</td>
+                    </tr>
+                    <tr>
+                      <td><code>scope</code></td>
+                      <td>
+                        Force <code>eq</code> from the credential (row scope —
+                        <a href="decisions.html#d21">decision D21</a>)
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="field-block" id="pc-binding">
+              <h3>binding.kind</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>kind</th>
+                      <th>Also required</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>table</code></td>
+                      <td><code>schema</code>, <code>table</code> (sqlite: <code>schema: main</code>)</td>
+                    </tr>
+                    <tr>
+                      <td><code>collection</code></td>
+                      <td><code>collection</code> (mongodb)</td>
+                    </tr>
+                    <tr>
+                      <td><code>rest_resource</code></td>
+                      <td><code>resource</code> → key of <code>options.resources</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>graphql_operation</code></td>
+                      <td><code>resource</code> → key of <code>options.operations</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>key</code></td>
+                      <td>redis: <code>keyPattern</code> + partition access path</td>
+                    </tr>
+                    <tr>
+                      <td><code>topic</code></td>
+                      <td>kafka: <code>topic</code> + access path</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="field-block" id="pc-fields">
+              <h3>fields[]</h3>
+              <p>Required: <code>name</code>, <code>type</code>, <code>physical</code>.</p>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>type</code></td>
+                      <td>
+                        <code>string</code> <code>number</code> <code>boolean</code>
+                        <code>timestamp</code> <code>json</code>. Big ids → <code>string</code>
+                        (<code>number</code> is DOUBLE in DuckDB).
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>physical</code></td>
+                      <td>Column/key; dotted paths OK except REST (top-level only)</td>
+                    </tr>
+                    <tr>
+                      <td><code>fromFilter</code></td>
+                      <td>
+                        REST: fill from <code>eq</code> when body omits the key
+                        (<a href="decisions.html#d20">decision D20</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>shape</code></td>
+                      <td>
+                        Free text for <code>type: json</code>; shown in catalog, not validated
+                        (<a href="decisions.html#d22">decision D22</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>description</code></td>
+                      <td>Optional agent hint</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="field-block" id="pc-relations">
+              <h3>relations[]</h3>
+              <p>
+                Required: <code>name</code>, <code>to</code>, <code>type</code>
+                (<code>many_to_one|one_to_many|one_to_one</code>, <code>on</code> (pairs of
+                <code>[local, remote]</code>). Hints for agents — queries must still express the join.
+              </p>
+            </div>
+          </section>
+
+          <!-- CONFIG -->
+          <section class="doc-panel" data-doc-panel="config" id="config" hidden>
+            <h2>qllm.config.yaml</h2>
+            <p>
+              Optional. Only the <code>serve</code> key. Precedence: secure defaults → this file →
+              CLI flags. If you set <code>authTokenEnv</code>, that env var must be non-empty or
+              serve refuses to start.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Field</th>
+                    <th>Default</th>
+                    <th>Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>serve.addr</code></td>
+                    <td><code>127.0.0.1:8088</code></td>
+                    <td>HTTP <code>/v1</code> bind</td>
+                  </tr>
+                  <tr>
+                    <td><code>serve.mcpAddr</code></td>
+                    <td><code>127.0.0.1:8089</code></td>
+                    <td>MCP HTTP bind</td>
+                  </tr>
+                  <tr>
+                    <td><code>serve.authTokenEnv</code></td>
+                    <td>(none)</td>
+                    <td>Name of env var holding the shared Bearer token</td>
+                  </tr>
+                  <tr>
+                    <td><code>serve.insecureBind</code></td>
+                    <td><code>false</code></td>
+                    <td>Required for non-loopback bind without auth</td>
+                  </tr>
+                    <tr>
+                      <td><code>serve.maxBodyBytes</code></td>
+                      <td>1048576 <strong>bytes</strong> (1&nbsp;MiB)</td>
+                      <td>POST body cap (≥ 1024 bytes)</td>
+                    </tr>
+                    <tr>
+                      <td><code>serve.maxRestResponseBytes</code></td>
+                      <td>10485760 <strong>bytes</strong> (10&nbsp;MiB)</td>
+                      <td>REST response cap (≥ 1024 bytes)</td>
+                    </tr>
+                  <tr>
+                    <td><code>serve.cors.origins</code></td>
+                    <td><code>[]</code></td>
+                    <td>Empty = CORS off; <code>*</code> rejected</td>
+                  </tr>
+                  <tr>
+                    <td><code>serve.cors.allowHeaders</code> / <code>allowMethods</code></td>
+                    <td>—</td>
+                    <td>Optional CORS lists</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <pre><code>serve:
+  addr: "127.0.0.1:8088"
+  mcpAddr: "127.0.0.1:8089"
+  authTokenEnv: "QLLM_AUTH_TOKEN"
+  insecureBind: false
+  cors:
+    origins: []</code></pre>
+            <p>
+              CLI overrides: <code>--addr</code>, <code>--mcp-addr</code>,
+              <code>--auth-token-env</code>, <code>--insecure-bind</code>,
+              <code>--cors-origin</code> (repeatable).
+            </p>
+            <h3>Optional: qllm.access.yaml</h3>
+            <p>
+              Replaces the single Bearer token with per-app keys and <code>tables</code>. Not part of
+              <code>qllm.config.yaml</code>, but often configured next to it. Row scope comes from the
+              credential (<a href="decisions.html#d21">decision D21</a>). Details:
+              <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/multi-user-safety.md"
+                >multi-user-safety.md</a
+              >.
+            </p>
+            <pre><code>apps:
+  - name: inventory-agent
+    key: ${QLLM_INVENTORY_AGENT_KEY}
+    tables: [products, stock_levels]</code></pre>
+          </section>
+
+          <!-- ENV -->
+          <section class="doc-panel" data-doc-panel="env" id="env" hidden>
+            <h2>qllm.env.yaml</h2>
+            <p>
+              Optional seed file. Required shape: root key <code>env</code> with at least one entry.
+              Used when the process does not already have the variable set — a non-empty process /
+              Secret value <strong>wins</strong> and is not overwritten.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rule</th>
+                    <th>Detail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Key names</td>
+                    <td><code>^[A-Za-z_][A-Za-z0-9_]*$</code></td>
+                  </tr>
+                  <tr>
+                    <td>Values</td>
+                    <td>Non-empty string; literal or exactly <code>${OTHER_ENV}</code></td>
+                  </tr>
+                  <tr>
+                    <td>Empty placeholders</td>
+                    <td>Do not create them — apply skips empty named refs</td>
+                  </tr>
+                  <tr>
+                    <td>Git / K8s</td>
+                    <td>Do not commit real secrets; on Kubernetes use a Secret</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <pre><code># qllm.env.yaml — local / compose style
+env:
+  QLLM_AUTH_TOKEN: ${QLLM_AUTH_TOKEN}
+  QLLM_PG_HOST: postgres
+  QLLM_PG_USER: qllm
+  QLLM_PG_PASSWORD: ${QLLM_PG_PASSWORD}
+  QLLM_STOCK_API_BASE: http://inventory:8080
+  QLLM_STOCK_API_TOKEN: ${QLLM_STOCK_API_TOKEN}</code></pre>
+            <p>
+              Every <code>*Env</code> name in the preset (and <code>authTokenEnv</code> in config)
+              must resolve at serve time. Hostnames like <code>postgres</code> are fine for Compose
+              DNS; passwords should stay as <code>${…}</code> injected by the environment.
+            </p>
+            <p class="note">
+              Prefer exporting vars in the shell or orchestration for production. This file is a
+              convenience for local layouts — see
+              <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/environments.md"
+                >environments.md</a
+              >.
+            </p>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__row">
+<span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

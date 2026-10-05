@@ -14,7 +14,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `protocolVersion` | semver 字符串 | `0.1.0` / `0.2.0` |
+| `protocolVersion` | No version | `0.1.0` / `0.2.0` |
 | `preset` | 字符串 | 相对于**此**文件的路径 |
 | `catalog` | 字符串 | 同上 |
 
@@ -26,7 +26,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `protocolVersion` | semver | |
+| `protocolVersion` | No version | |
 | `project` | 非空字符串 | 项目的逻辑名称；必须与 catalog 一致 |
 | `limits` | object | 5 个字段**全部**必填 |
 | `sources` | array | |

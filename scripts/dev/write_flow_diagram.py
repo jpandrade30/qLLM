@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""Regenerate site/assets/flow-diagram.svg (UTF-8, filter-safe)."""
+
+from pathlib import Path
+
+OUT = Path(__file__).resolve().parents[2] / "site" / "assets" / "flow-diagram.svg"
+
+# Columns (with breathing room):
+#   teams 36-286
+#   qLLM 450-650
+#   shared key under qLLM ~700-800
+#   SQL corridor 680-1020
+#   chatbot 1060-1340
+# board 1380 x 920
+
+SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1380 920" role="img" aria-labelledby="flowTitle flowDesc">
+  <title id="flowTitle">qLLM joins three team-owned sources for a chatbot over MCP</title>
+  <desc id="flowDesc">
+    Team A Postgres products, Team B MySQL orders, and Team C stock REST API share sku but not access.
+    They connect to qLLM. A chatbot uses MCP describe_catalog, execute_sql with a JOIN, then gets rows.
+  </desc>
+  <defs>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap");
+      .card { stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+      .label { font-family: "Comic Neue", "Segoe Print", "Comic Sans MS", cursive; fill: #243447; }
+      .tiny { font-family: "Comic Neue", "Segoe Print", "Comic Sans MS", cursive; fill: #4a5d73; }
+      .mono { font-family: "JetBrains Mono", ui-monospace, monospace; fill: #243447; }
+      .accent { fill: #2f6fed; }
+    </style>
+    <filter id="soft" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="1.5" dy="2" stdDeviation="1.2" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3d5a80"/>
+    </marker>
+    <marker id="arrowWarm" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#c45c26"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2f6b4f"/>
+    </marker>
+  </defs>
+
+  <rect x="16" y="16" width="1348" height="888" rx="18" fill="#f7f4ef" stroke="#e4ddd2" stroke-width="1.6"/>
+
+  <text class="label" x="40" y="48" font-size="24" font-weight="700">how an agent talks to many sources</text>
+  <text class="tiny" x="40" y="72" font-size="14">three teams - shared key sku - qLLM middle - MCP chatbot right</text>
+
+  <g filter="url(#soft)">
+    <rect x="36" y="88" width="760" height="52" rx="10" fill="#fff3a8" stroke="#b89b1a" stroke-width="1.8"/>
+    <text class="label" x="52" y="110" font-size="14" font-weight="700">why qLLM sits in the middle</text>
+    <text class="tiny" x="52" y="130" font-size="13">Teams do not share DB logins or API code - agent only sees the catalog.</text>
+  </g>
+
+  <!-- Team A -->
+  <g filter="url(#soft)">
+    <rect class="card" x="36" y="160" width="250" height="200" rx="14" fill="#dcefff" stroke="#3d5a80"/>
+    <text class="label" x="52" y="184" font-size="13" font-weight="700" fill="#2f6fed">Team A</text>
+    <text class="label" x="52" y="210" font-size="18" font-weight="700">Postgres</text>
+    <text class="tiny" x="52" y="230" font-size="13">owns product master data</text>
+    <ellipse cx="248" cy="196" rx="14" ry="6" fill="none" stroke="#3d5a80" stroke-width="1.5"/>
+    <path d="M234,196 v16 M262,196 v16" stroke="#3d5a80" stroke-width="1.5" fill="none"/>
+    <ellipse cx="248" cy="212" rx="14" ry="6" fill="none" stroke="#3d5a80" stroke-width="1.5"/>
+    <rect x="52" y="246" width="218" height="90" rx="8" fill="#fffdf8" stroke="#3d5a80" stroke-width="1.6"/>
+    <text class="mono" x="64" y="268" font-size="13" font-weight="500">products</text>
+    <text class="mono accent" x="64" y="288" font-size="12">sku</text>
+    <text class="mono" x="64" y="306" font-size="12">title</text>
+    <text class="mono" x="140" y="288" font-size="12">weight_kg</text>
+    <text class="mono" x="140" y="306" font-size="12">category</text>
+    <text class="tiny" x="52" y="350" font-size="12">no access to Team B / C</text>
+  </g>
+
+  <!-- Team B -->
+  <g filter="url(#soft)">
+    <rect class="card" x="36" y="380" width="250" height="200" rx="14" fill="#dff5e6" stroke="#2f6b4f"/>
+    <text class="label" x="52" y="404" font-size="13" font-weight="700" fill="#2f6b4f">Team B</text>
+    <text class="label" x="52" y="430" font-size="18" font-weight="700">MySQL</text>
+    <text class="tiny" x="52" y="450" font-size="13">owns order / sales lines</text>
+    <rect x="236" y="408" width="32" height="24" rx="4" fill="#fffdf8" stroke="#2f6b4f" stroke-width="1.5"/>
+    <path d="M242,414 h20 M242,422 h20 M242,430 h12" stroke="#2f6b4f" stroke-width="1.4" fill="none"/>
+    <rect x="52" y="466" width="218" height="90" rx="8" fill="#fffdf8" stroke="#2f6b4f" stroke-width="1.6"/>
+    <text class="mono" x="64" y="488" font-size="13" font-weight="500">orders</text>
+    <text class="mono accent" x="64" y="508" font-size="12">sku</text>
+    <text class="mono" x="64" y="526" font-size="12">qty</text>
+    <text class="mono" x="140" y="508" font-size="12">order_id</text>
+    <text class="mono" x="140" y="526" font-size="12">sold_at</text>
+    <text class="tiny" x="52" y="570" font-size="12">no access to Team A / C</text>
+  </g>
+
+  <!-- Team C -->
+  <g filter="url(#soft)">
+    <rect class="card" x="36" y="600" width="250" height="200" rx="14" fill="#ffe8d6" stroke="#c45c26"/>
+    <text class="label" x="52" y="624" font-size="13" font-weight="700" fill="#c45c26">Team C</text>
+    <text class="label" x="52" y="650" font-size="18" font-weight="700">Stock API</text>
+    <text class="tiny" x="52" y="670" font-size="13">owns live warehouse qty (REST)</text>
+    <path d="M230,630 c0-8 8-12 16-10 c4-8 16-8 20 0 c8 0 14 6 12 14 h-46 c-6 0-8-4-2-4z"
+      fill="#fff7f0" stroke="#c45c26" stroke-width="1.4"/>
+    <rect x="52" y="686" width="218" height="90" rx="8" fill="#fffdf8" stroke="#c45c26" stroke-width="1.6"/>
+    <text class="mono" x="64" y="708" font-size="13" font-weight="500">stock_levels</text>
+    <text class="mono accent" x="64" y="728" font-size="12">sku</text>
+    <text class="mono" x="64" y="746" font-size="12">qty</text>
+    <text class="mono" x="140" y="728" font-size="12">warehouse_id</text>
+    <text class="mono" x="140" y="746" font-size="12">updated_at</text>
+    <text class="tiny" x="52" y="790" font-size="12">no access to Team A / B</text>
+  </g>
+
+  <!-- Straight arrows: team mid-right -> qLLM left edge -->
+  <path d="M286,260 H450" fill="none" stroke="#3d5a80" stroke-width="2.2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+  <path d="M286,480 H450" fill="none" stroke="#2f6b4f" stroke-width="2.2" stroke-dasharray="6 5" marker-end="url(#arrowGreen)"/>
+  <path d="M286,700 H360 V520 H450" fill="none" stroke="#c45c26" stroke-width="2.2" stroke-dasharray="6 5" marker-end="url(#arrowWarm)"/>
+
+  <!-- qLLM -->
+  <g filter="url(#soft)">
+    <rect class="card" x="450" y="300" width="200" height="250" rx="16" fill="#e8eeff" stroke="#2f6fed"/>
+    <circle cx="550" cy="350" r="28" fill="#fffdf8" stroke="#2f6fed" stroke-width="2.2"/>
+    <path d="M560,334 L540,354 h12 L544,372 L564,350 h-12 Z" fill="#2f6fed"/>
+    <text class="label" x="500" y="408" font-size="28" font-weight="700">q<tspan fill="#2f6fed">LLM</tspan></text>
+    <text class="tiny" x="470" y="436" font-size="13">pushdown - join - agg</text>
+    <text class="tiny" x="470" y="456" font-size="12">(DuckDB when needed)</text>
+    <text class="mono" x="470" y="486" font-size="12" fill="#2f6fed">MCP - HTTP /v1</text>
+    <text class="tiny" x="470" y="516" font-size="12">catalog the agent may see</text>
+  </g>
+
+  <!-- Shared key under qLLM, further down -->
+  <g filter="url(#soft)">
+    <path d="M550,550 V700" fill="none" stroke="#b89b1a" stroke-width="2" stroke-dasharray="4 4"/>
+    <rect x="455" y="700" width="190" height="88" rx="12" fill="#fffce0" stroke="#b89b1a" stroke-width="2"/>
+    <text class="label" x="472" y="728" font-size="13" font-weight="700">shared join key</text>
+    <text class="label" x="472" y="748" font-size="12">across A / B / C</text>
+    <text class="mono accent" x="520" y="776" font-size="20">sku</text>
+  </g>
+
+  <!-- MCP corridor (ends before chatbot at x=1060) -->
+  <text class="tiny" x="680" y="292" font-size="13" fill="#2f6fed" font-weight="700">1 - describe_catalog (+ how_to_use_me)</text>
+  <path d="M650,325 H1020" fill="none" stroke="#2f6fed" stroke-width="2.3" marker-end="url(#arrow)"/>
+
+  <text class="tiny" x="760" y="368" font-size="13" fill="#c45c26" font-weight="700">2 - execute_sql</text>
+  <path d="M1020,395 H650" fill="none" stroke="#c45c26" stroke-width="2.3" marker-end="url(#arrowWarm)"/>
+
+  <g filter="url(#soft)">
+    <rect x="680" y="420" width="340" height="130" rx="10" fill="#fff7f0" stroke="#c45c26" stroke-width="2"/>
+    <text class="mono" x="696" y="448" font-size="12" fill="#8a4a22">SELECT p.sku, p.title, o.qty, s.qty</text>
+    <text class="mono" x="696" y="470" font-size="12" fill="#8a4a22">FROM products p</text>
+    <text class="mono" x="696" y="492" font-size="12" fill="#8a4a22">JOIN orders o ON o.sku = p.sku</text>
+    <text class="mono" x="696" y="514" font-size="12" fill="#8a4a22">JOIN stock_levels s ON s.sku = p.sku</text>
+    <text class="mono" x="696" y="536" font-size="12" fill="#8a4a22">WHERE p.sku = '42' LIMIT 20</text>
+  </g>
+
+  <path d="M650,575 H1020" fill="none" stroke="#2f6b4f" stroke-width="2.3" marker-end="url(#arrowGreen)"/>
+  <text class="tiny" x="780" y="608" font-size="13" fill="#2f6b4f" font-weight="700">3 - rows back</text>
+
+  <!-- Chatbot starts at 1060 — clear of SQL (ends ~1020) -->
+  <g filter="url(#soft)">
+    <rect class="card" x="1060" y="200" width="290" height="620" rx="16" fill="#fff0f5" stroke="#a33d6b"/>
+    <rect x="1160" y="224" width="84" height="70" rx="18" fill="#fffdf8" stroke="#a33d6b" stroke-width="2.2"/>
+    <circle cx="1184" cy="254" r="6" fill="#a33d6b"/>
+    <circle cx="1220" cy="254" r="6" fill="#a33d6b"/>
+    <path d="M1186,274 Q1202,286 1218,274" fill="none" stroke="#a33d6b" stroke-width="2.2"/>
+    <path d="M1202,224 v-12" stroke="#a33d6b" stroke-width="2.2"/>
+    <circle cx="1202" cy="206" r="5" fill="#a33d6b"/>
+    <text class="label" x="1080" y="330" font-size="22" font-weight="700">chatbot</text>
+    <text class="tiny" x="1080" y="354" font-size="13">MCP client - friendly agent</text>
+
+    <rect x="1080" y="380" width="250" height="78" rx="12" fill="#fffdf8" stroke="#a33d6b" stroke-width="1.7"/>
+    <text class="tiny" x="1094" y="408" font-size="13">"what tables can I see?"</text>
+    <text class="mono" x="1094" y="436" font-size="12" fill="#2f6fed">-&gt; describe_catalog</text>
+
+    <rect x="1080" y="478" width="250" height="96" rx="12" fill="#fffdf8" stroke="#a33d6b" stroke-width="1.7"/>
+    <text class="tiny" x="1094" y="506" font-size="13">"stock + orders for sku 42?"</text>
+    <text class="mono" x="1094" y="534" font-size="12" fill="#c45c26">-&gt; execute_sql</text>
+    <text class="mono" x="1094" y="556" font-size="12" fill="#c45c26">   JOIN on sku across teams</text>
+
+    <rect x="1080" y="596" width="250" height="86" rx="12" fill="#e8ffe8" stroke="#2f6b4f" stroke-width="1.7"/>
+    <text class="mono" x="1094" y="628" font-size="12" fill="#2f6b4f">&lt;- { sku, title,</text>
+    <text class="mono" x="1094" y="652" font-size="12" fill="#2f6b4f">     order_qty, stock_qty }</text>
+
+    <text class="tiny" x="1080" y="720" font-size="12">sees catalog only - not team secrets</text>
+    <text class="tiny" x="1080" y="742" font-size="12">or each team's private credentials</text>
+  </g>
+
+  <text x="980" y="180" font-size="16" fill="#2f6fed" opacity="0.4">*</text>
+  <text x="300" y="870" font-size="16" fill="#c45c26" opacity="0.35">~</text>
+</svg>
+"""
+
+OUT.write_text(SVG, encoding="utf-8", newline="\n")
+print(f"wrote {OUT} ({OUT.stat().st_size} bytes)")

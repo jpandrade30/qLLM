@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Query — qLLM</title>
+    <meta
+      name="description"
+      content="qLLM MCP tools, HTTP /v1 endpoints, catalog SQL vs Query IR, how_to_use_me, and the response envelope."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html" aria-current="page">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Agent surface</span>
+        <h1>Query</h1>
+        <p class="lead">
+          Agents call MCP or HTTP. Query IR is the closed JSON contract; catalog SQL is the MCP-facing
+          dialect over logical tables — not raw source SQL.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <h2>MCP tools</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>how_to_use_me</code></td>
+                <td>Closed contract: <code>never</code>, where shapes, invalidExamples. Call first.</td>
+              </tr>
+              <tr>
+                <td><code>describe_catalog</code></td>
+                <td>Logical entities and fields the agent may query.</td>
+              </tr>
+              <tr>
+                <td><code>execute_sql</code></td>
+                <td>Catalog SQL against the logical catalog. Logs SQL to stderr.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>No per-table tools. Query IR is HTTP/CLI, not an MCP tool.</p>
+      </section>
+
+      <section class="reveal">
+        <h2>HTTP <code>/v1</code></h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>GET /v1/health</code></td>
+                <td>Unauthenticated probe</td>
+              </tr>
+              <tr>
+                <td><code>GET /v1/howtouseme</code></td>
+                <td>Same closed IR contract as the MCP tool</td>
+              </tr>
+              <tr>
+                <td><code>GET /v1/catalog</code></td>
+                <td>Logical catalog for the caller</td>
+              </tr>
+              <tr>
+                <td><code>POST /v1/queries</code></td>
+                <td>Execute Query IR JSON</td>
+              </tr>
+              <tr>
+                <td><code>POST /v1/sql</code></td>
+                <td>Execute catalog SQL</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>curl -s http://127.0.0.1:8088/v1/howtouseme | jq .
+curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/catalog
+curl -s -X POST http://127.0.0.1:8088/v1/queries -d @query.json</code></pre>
+      </section>
+
+      <section class="reveal">
+        <h2>Catalog SQL vs Query IR</h2>
+        <div class="two-col">
+          <div>
+            <h3>Query IR</h3>
+            <p>
+              Structured JSON against the catalog. Preferred for HTTP clients and goldens. Schemas
+              live under
+              <a href="https://github.com/jpandrade30/qLLM/tree/main/planning/schemas"
+                >planning/schemas/</a
+              >.
+            </p>
+          </div>
+          <div>
+            <h3>Catalog SQL</h3>
+            <p>
+              SQL over logical table names for MCP <code>execute_sql</code> and
+              <code>POST /v1/sql</code>. Still governed by the catalog, limits, and read-only rules —
+              not a pass-through to Postgres/MySQL dialects.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Response envelope</h2>
+        <p>
+          Successful and typed-error responses follow the shared JSON envelope (columns, rows,
+          meta, errors). Agents should treat typed codes (<code>TIMEOUT</code>,
+          <code>UNSUPPORTED</code>, <code>VALIDATION_ERROR</code>, …) as machine-readable — not free
+          text. Details:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/responses.md"
+            >docs/en/responses.md</a
+          >.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>MCP transports</h2>
+        <pre><code>./qllm serve --mcp --config-dir ./my-project          # STDIO
+./qllm serve --mcp-http --config-dir ./my-project     # Streamable HTTP + SSE
+./qllm serve --http --mcp-http --config-dir ./my-project</code></pre>
+        <p>
+          MCP HTTP paths: <code>/mcp</code> (Streamable HTTP) and <code>/sse</code> (legacy
+          Inspector). Defaults bind loopback.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__row">
+<span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

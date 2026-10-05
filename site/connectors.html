@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connectors — qLLM</title>
+    <meta
+      name="description"
+      content="qLLM connector matrix: stable postgres/mysql/mongo/rest and experimental mssql, graphql, kafka, and more."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html" aria-current="page">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Sources</span>
+        <h1>Connectors</h1>
+        <p class="lead">
+          Harness / CI covers postgres, mysql, mongodb, and rest. Everything else ships in the
+          binary without Compose goldens — test against your own instance.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <h2>Stable</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>type</th>
+                <th>Pushdown</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>postgres</code> <span class="chip chip--ok">stable</span></td>
+                <td>filter, project, agg, groupBy, order, limit, same-source join</td>
+                <td><code>sslMode</code>; <code>statementTimeoutMs</code></td>
+              </tr>
+              <tr>
+                <td><code>mysql</code> <span class="chip chip--ok">stable</span></td>
+                <td>same as postgres</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><code>mongodb</code> <span class="chip chip--ok">stable</span></td>
+                <td>filter, project, agg, groupBy, order, limit</td>
+                <td>same-source join via DuckDB</td>
+              </tr>
+              <tr>
+                <td><code>rest</code> <span class="chip chip--ok">stable</span></td>
+                <td><code>eq</code> filter, project, limit/offset</td>
+                <td><code>options.resources</code> required; aggs in DuckDB</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Experimental</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>type</th>
+                <th>Pushdown</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>mssql</code> <span class="chip chip--exp">exp</span></td>
+                <td>same as postgres</td>
+                <td><code>encrypt</code></td>
+              </tr>
+              <tr>
+                <td><code>sqlite</code> <span class="chip chip--exp">exp</span></td>
+                <td>same as postgres</td>
+                <td><code>pathEnv</code>; <code>binding.schema: main</code></td>
+              </tr>
+              <tr>
+                <td><code>clickhouse</code> <span class="chip chip--exp">exp</span></td>
+                <td>same as postgres</td>
+                <td>native port typically 9000</td>
+              </tr>
+              <tr>
+                <td><code>dynamodb</code> <span class="chip chip--exp">exp</span></td>
+                <td>key equality, project, limit</td>
+                <td>pk/sk <code>accessPath</code> or <code>UNSUPPORTED</code></td>
+              </tr>
+              <tr>
+                <td><code>cassandra</code> <span class="chip chip--exp">exp</span></td>
+                <td>partition equality, project, limit</td>
+                <td><code>accessPath.partition</code> required</td>
+              </tr>
+              <tr>
+                <td><code>ksql</code> <span class="chip chip--exp">exp</span></td>
+                <td>key equality, project, limit</td>
+                <td>pull only; <code>ksqlKey</code> required</td>
+              </tr>
+              <tr>
+                <td><code>redis</code> <span class="chip chip--exp">exp</span></td>
+                <td>key equality, project, limit</td>
+                <td>GET/HGETALL/LRANGE/… only; never KEYS/delete</td>
+              </tr>
+              <tr>
+                <td><code>kafka</code> <span class="chip chip--exp">exp</span></td>
+                <td>partition+offset / key / time</td>
+                <td>no consumer group; never produces</td>
+              </tr>
+              <tr>
+                <td><code>graphql</code> <span class="chip chip--exp">exp</span></td>
+                <td><code>eq</code> → variables, project, optional limit</td>
+                <td><code>graphql_operation</code>; query-only documents</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Wire aliases</h2>
+        <p>
+          Same driver and connection shape as the parent; experimental, no harness.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Parent</th>
+                <th>Alias type values</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>mysql</code></td>
+                <td>
+                  <code>mariadb</code>, <code>tidb</code>, <code>vitess</code>,
+                  <code>aurora_mysql</code>, <code>planetscale</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>postgres</code></td>
+                <td>
+                  <code>cockroach</code>, <code>yugabyte</code>, <code>alloydb</code>,
+                  <code>aurora_postgres</code>, <code>neon</code>, <code>supabase</code>,
+                  <code>timescale</code>, <code>redshift</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Limits that matter</h2>
+        <ul class="ban">
+          <li>
+            <strong>Not sources</strong>
+            <span
+              >Oracle, BigQuery, Snowflake, Elasticsearch, S3-as-table are out of the matrix. Many
+              JSON APIs are already <code>rest</code> (+ <code>from-openapi</code>).</span
+            >
+          </li>
+          <li>
+            <strong>Access path</strong>
+            <span
+              >DynamoDB, Cassandra, ksql, Redis, and Kafka need the documented key/partition
+              equalities or return <code>UNSUPPORTED</code>.</span
+            >
+          </li>
+          <li>
+            <strong>Read-only streams</strong>
+            <span
+              >Redis/Kafka never mutate keys, offsets, or topics
+              (<a href="decisions.html#d19">decision D19</a>).</span
+            >
+          </li>
+          <li>
+            <strong>graphql source</strong>
+            <span
+              >Documents must be query-only; mutations are rejected before any HTTP call. Agents
+              still call Query IR / catalog SQL
+              (<a href="decisions.html#d17">decision D17</a>).</span
+            >
+          </li>
+        </ul>
+        <p>
+          Plain-language decision list:
+          <a href="decisions.html">Decisions</a>
+          <a href="contribute.html">Contribute</a>. Capability matrix:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/planning/04-connectors.md"
+            >planning/04-connectors.md</a
+          >.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__row">
+<span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

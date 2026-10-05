@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Security — qLLM</title>
+    <meta
+      name="description"
+      content="qLLM security defaults: read-only, Bearer auth, loopback bind, CORS for MCP only, SQL and GraphQL write denylist."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html" aria-current="page">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Defaults</span>
+        <h1>Security</h1>
+        <p class="lead">
+          qLLM is built for limited, intentional exposure: read-only queries, required limits,
+          secrets in env vars, and loopback bind until you opt into a wider surface.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <h2>Read-only and bounded</h2>
+        <ul class="ban">
+          <li>
+            <strong>Reads</strong>
+            <span>Agents query the catalog; writes and DDL are out of the agent contract.</span>
+          </li>
+          <li>
+            <strong>Limits</strong>
+            <span
+              >Row <code>limit</code> is required and capped. Default total budget
+              <code>maxSyncMs</code> ≈ 15000&nbsp;ms (15&nbsp;s); typed <code>TIMEOUT</code> on
+              cancel.</span
+            >
+          </li>
+          <li>
+            <strong>Secrets</strong>
+            <span>Connection material via <code>*Env</code> / <code>${QLLM_…}</code> — not pasted into agent prompts.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="reveal">
+        <h2>Bearer auth</h2>
+        <p>
+          Set <code>serve.authTokenEnv</code> (or <code>--auth-token-env</code>) to an env var that
+          holds the shared Bearer token for HTTP <code>/v1</code> and MCP HTTP. If the env name is
+          set, the variable must be non-empty or serve refuses to start. Stdio MCP is unaffected.
+        </p>
+        <pre><code>export QLLM_AUTH_TOKEN=dev-secret
+curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/catalog</code></pre>
+        <p>
+          <code>GET /v1/health</code> stays unauthenticated. For per-app table scopes, use
+          <code>qllm.access.yaml</code> instead of a single token — see
+          <a href="configure.html">Configure</a>.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>Bind loopback</h2>
+        <p>
+          Defaults: <code>127.0.0.1:8088</code> and <code>127.0.0.1:8089</code>. Binding a
+          non-loopback address without auth requires <code>--insecure-bind</code> or
+          <code>serve.insecureBind: true</code> — an explicit opt-in, not a silent default.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>CORS — MCP browser clients only</h2>
+        <p>
+          CORS is off when <code>origins</code> is empty. Wildcard <code>*</code> is rejected. Enable
+          an allowlist only if a browser client needs Streamable HTTP / SSE against MCP HTTP —
+          typical server-side agents do not need CORS.
+        </p>
+        <pre><code>serve:
+  cors:
+    origins: []   # empty = CORS off</code></pre>
+      </section>
+
+      <section class="reveal">
+        <h2>Write denylist</h2>
+        <ul class="ban">
+          <li>
+            <strong>SQL</strong>
+            <span
+              >Catalog SQL and planning reject write/DDL shapes; connectors stay on read paths
+              (Redis never deletes/pops/KEYS; Kafka never produces).</span
+            >
+          </li>
+          <li>
+            <strong>GraphQL</strong>
+            <span
+              >As a source, only query documents are accepted. Mutations and write operations are
+              forbidden at the document gate.</span
+            >
+          </li>
+        </ul>
+        <p class="note">
+          Deep reference for multi-user scoped credentials:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/multi-user-safety.md"
+            >docs/en/multi-user-safety.md</a
+          >.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__row">
+<span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

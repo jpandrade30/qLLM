@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>qLLM — Multi-source query runtime for agents</title>
+    <meta
+      name="description"
+      content="qLLM helps LLMs query multiple data sources through one governed catalog: YAML preset, Query IR or catalog SQL, HTTP /v1 and MCP, with cross-source joins and aggregations."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html" aria-current="page">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <div>
+          <p class="mono-label">Protocol 0.2.0 · Release 0.3.4</p>
+          <h1 class="hero__brand">q<em>LLM</em></h1>
+          <p class="lead">
+            Help LLMs ask real questions across the databases, APIs, and streams you already run —
+            one catalog, governed reads, not a warehouse.
+          </p>
+          <div class="hero__cta">
+            <a
+              class="btn"
+              href="https://github.com/jpandrade30/qLLM/releases"
+              >Download Release zip</a
+            >
+            <a class="btn btn--ghost" href="get-started.html">Get started</a>
+          </div>
+          <p class="note" style="margin-top: 1.25rem">
+            <strong>Experimental project.</strong> Provided as-is. The author accepts no
+            responsibility for any damage caused by its use.
+          </p>
+        </div>
+        <div class="hero__visual">
+          <img
+            src="assets/StudyingCat.png"
+            width="640"
+            height="640"
+            alt="Illustration of a cat studying at a laptop"
+          />
+        </div>
+      </section>
+
+      <section class="stage reveal" id="what">
+        <div class="stage__num">01 — What</div>
+        <div class="stage__body">
+          <h2>One catalog. Many sources. Built for LLM conversations with data.</h2>
+          <p>
+            An LLM is far more useful when it can <em>ask</em> your data — inventory next to pricing,
+            tickets next to accounts, metrics next to a REST profile — without you wiring a custom
+            tool per table. qLLM is that layer: you describe sources in a YAML preset, and only the
+            entities and fields you want in a logical catalog. The agent sees the catalog — nothing
+            else — then talks through HTTP <code>/v1</code> or MCP with Query IR or catalog SQL.
+          </p>
+          <p>
+            Organizations keep data in many places and expose only a few views or endpoints on
+            purpose. Read-only by default, with required row limits and a fail-fast budget. When the
+            answer lives across systems — for example products in Postgres and stock levels in an
+            HTTP API linked by <code>sku</code> — the model still writes one query. qLLM pushes
+            filters and limits to each source, then joins, aggregates, and shapes the result locally
+            (DuckDB) so the agent gets a single table back: totals by warehouse, top SKUs, filtered
+            joins — not three round-trips you have to glue in the prompt.
+          </p>
+
+          <div class="diagram-block diagram-block--in-stage reveal" id="picture" aria-labelledby="diagram-heading">
+            <div class="diagram-block__head">
+              <p class="mono-label">Example</p>
+              <h3 id="diagram-heading">From three team silos to one chatbot answer</h3>
+              <p>
+                Team A (Postgres products), Team B (MySQL orders), and Team C (Stock API) each own
+                one table keyed by <code>sku</code> — and they do <em>not</em> share DB logins or API
+                code. qLLM is the bridge; the bot asks MCP for the catalog, sends a JOIN, gets rows
+                back.
+              </p>
+            </div>
+            <figure class="diagram-frame">
+              <img
+                src="assets/flow-diagram.svg"
+                width="1380"
+                height="920"
+                alt="Hand-drawn diagram: Team A Postgres products, Team B MySQL orders, and Team C stock API share sku but not access; arrows into qLLM; chatbot uses describe_catalog, execute_sql with JOIN on sku, then receives rows."
+              />
+              <figcaption class="diagram-caption">
+                Whiteboard scribble — teams stay siloed; the agent only sees the catalog.
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <h3>Use it when</h3>
+              <ul class="ban">
+                <li>
+                  <strong>Agents</strong>
+                  <span
+                    >Chat, copilots, or MCP clients need governed answers from more than one system.</span
+                  >
+                </li>
+                <li>
+                  <strong>Cross-source</strong>
+                  <span
+                    >Keys line up across DB + API (or DB + DB): one SQL/IR query, join and aggregate
+                    in the runtime.</span
+                  >
+                </li>
+                <li>
+                  <strong>Governance</strong>
+                  <span
+                    >You want the model to see a catalog you chose — not raw credentials or every
+                    column in production.</span
+                  >
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3>What it is not</h3>
+              <ul class="ban">
+                <li>
+                  <strong>Warehouse</strong>
+                  <span
+                    >No ETL lake. Fail-fast budget (~15000&nbsp;ms / 15&nbsp;s). Slow sources are out
+                    of scope.</span
+                  >
+                </li>
+                <li>
+                  <strong>Raw SQL</strong>
+                  <span>Agents do not get source dialects or free-form credentials.</span>
+                </li>
+                <li>
+                  <strong>Per-table tools</strong>
+                  <span
+                    >Three MCP tools cover the surface; the catalog is the map, not a swarm of
+                    endpoints.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="flow">
+        <div class="stage__num">02 — Flow</div>
+        <div class="stage__body">
+          <h2>Preset → catalog → IR/SQL → pushdown → DuckDB</h2>
+          <p>
+            You write which sources exist and which logical tables the agent may see. The runtime
+            validates, serves, and plans. Same-source work pushes down where the connector allows;
+            cross-source joins, aggregations, and shaping finish in a small local DuckDB step — so
+            the LLM keeps asking in catalog SQL / Query IR, not in three vendor dialects.
+          </p>
+          <pre class="flow" aria-label="qLLM execution flow"><span class="accent">preset.yaml</span>  +  <span class="accent">catalog.yaml</span>
+        ↓
+     validate  →  HTTP /v1  or  MCP
+        ↓
+ Query IR  or  catalog SQL
+        ↓
+ pushdown per source  →  optional DuckDB join</pre>
+        </div>
+      </section>
+
+      <section class="stage reveal" id="surface">
+        <div class="stage__num">03 — Surface</div>
+        <div class="stage__body">
+          <h2>Three MCP tools. A small HTTP surface.</h2>
+          <p>
+            MVP tools: <code>how_to_use_me</code>, <code>describe_catalog</code>,
+            <code>execute_sql</code>. No per-table tools. HTTP exposes
+            <code>/v1/howtouseme</code>, <code>/v1/catalog</code>, <code>/v1/queries</code>,
+            <code>/v1/sql</code>, and <code>/v1/health</code>.
+          </p>
+          <p>
+            Stable harness connectors: postgres, mysql, mongodb, rest. Experimental types
+            (mssql, sqlite, clickhouse, dynamodb, cassandra, ksql, redis, kafka, graphql, and wire
+            aliases) ship in the binary without Compose goldens — see
+            <a href="connectors.html">Connectors</a>.
+          </p>
+        </div>
+      </section>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Prefer the Release zip</h2>
+          <p style="margin: 0.5rem 0 0">
+            Download <code>qllm-standalone-&lt;ver&gt;.zip</code> — not “Source code”. Clone only for
+            development or the harness.
+          </p>
+        </div>
+        <a class="btn" href="get-started.html">Install path →</a>
+      </div>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Need every field and flag?</h2>
+          <p style="margin: 0.5rem 0 0">
+            Product pages stay short. The implementer manuals cover field reference, CLI, HTTP/MCP,
+            and errors in depth.
+          </p>
+        </div>
+        <a class="btn btn--ghost" href="docs.html">Open docs index →</a>
+      </div>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Want to contribute?</h2>
+          <p style="margin: 0.5rem 0 0">
+            Fork, open a focused PR, follow the contract checklist and Code of Conduct.
+          </p>
+        </div>
+        <a class="btn btn--ghost" href="contribute.html">Contribute →</a>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__row">
+<span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

@@ -324,7 +324,7 @@ GraphQL source notes: `options.operations.<name>.document` must be a GraphQL **`
 
 | Campo | Tipo | Notas |
 |-------|------|-------|
-| `protocolVersion` | string | semver |
+| `protocolVersion` | string | No version |
 | `project` | string | nome lógico |
 | `limits` | object | ver abaixo |
 | `sources` | array | min 1 |

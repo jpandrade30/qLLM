@@ -14,7 +14,7 @@ Required: `protocolVersion`, `preset`, `catalog`.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `protocolVersion` | semver string | `0.1.0` / `0.2.0` |
+| `protocolVersion` | No version | `0.1.0` / `0.2.0` |
 | `preset` | string | Path relative to **this** file |
 | `catalog` | string | Same |
 
@@ -26,7 +26,7 @@ Required at the root: `protocolVersion`, `project`, `limits`, `sources` (at leas
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `protocolVersion` | semver | |
+| `protocolVersion` | No version | |
 | `project` | non-empty string | Logical project name; must match the catalog |
 | `limits` | object | **All** 5 fields are required |
 | `sources` | array | |
@@ -35,10 +35,10 @@ Required at the root: `protocolVersion`, `project`, `limits`, `sources` (at leas
 
 | Field | Type | Range |
 |-------|------|-------|
-| `maxSyncMs` | int | 100–60000; total query budget |
-| `maxSourceMs` | int | 100–60000; per source round trip |
-| `defaultLimit` | int | ≥ 1; used when the IR/SQL omits LIMIT |
-| `maxLimit` | int | ≥ 1; hard ceiling |
+| `maxSyncMs` | int | **milliseconds**; 100–60000 ms; total query budget (typical 15000 ms ≈ 15 s) |
+| `maxSourceMs` | int | **milliseconds**; 100–60000 ms; per source round trip (typical 12000 ms ≈ 12 s) |
+| `defaultLimit` | int | **rows**; ≥ 1; used when the IR/SQL omits LIMIT (typical 100 rows) |
+| `maxLimit` | int | **rows**; ≥ 1; hard ceiling (typical 1000 rows) |
 | `readOnly` | bool | must be `true` in the product |
 
 ### `sources[]` (each item)
@@ -100,8 +100,8 @@ Required: `type`.
 
 | Key | Applies to | Default | Meaning |
 |-----|------------|---------|---------|
-| `statementTimeoutMs` | postgres, mysql, their aliases, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Statement timeout. The effective value is the **smallest** of `statementTimeoutMs`, `timeoutMs`, and `maxSourceMs` |
-| `timeoutMs` | SQL sources (same rule as above), REST, ksql, redis, kafka, graphql | REST/graphql 10000, ksql/kafka 12000, redis 10000 | Client timeout |
+| `statementTimeoutMs` | postgres, mysql, their aliases, mssql, clickhouse, sqlite | `limits.maxSourceMs` | Statement timeout in **milliseconds**. The effective value is the **smallest** of `statementTimeoutMs`, `timeoutMs`, and `maxSourceMs` (all ms) |
+| `timeoutMs` | SQL sources (same rule as above), REST, ksql, redis, kafka, graphql | REST/graphql 10000 ms, ksql/kafka 12000 ms, redis 10000 ms | Client timeout in **milliseconds** |
 | `resources` | REST, **required** to query | none | Map of resource name to `list` / `getById` operations (see below) |
 
 Every other source type (mongodb, dynamodb, cassandra) reads no `options` keys today. Unknown keys are accepted by the schema and ignored by the runtime, so a typo fails silently.
@@ -206,7 +206,7 @@ Required: `name`, `source`, `binding`, `fields` (at least 1 field).
 | `primaryKey` | array of strings | Logical field names |
 | `fields` | array | |
 | `relations` | array | Hints only; they do not create foreign keys |
-| `scope` | `{ field, column? }` | D21: force `eq` on `column` (or `field`) from the credential |
+| `scope` | `{ field, column? }` | Force `eq` on `column` (or `field`) from the credential — row scope lives on the key, not in a model-supplied filter (decision **D21** in [`planning/01-decisions.md`](../../planning/01-decisions.md)) |
 
 ### `binding`
 
@@ -243,8 +243,8 @@ Required: `name`, `type`, `physical`.
 | `type` | `string` `number` `boolean` `timestamp` `json`. `number` is DOUBLE in DuckDB: ids above 2^53 must be `string` |
 | `physical` | column or key; dotted paths allowed (`addr.city`) except on REST (top-level keys only) |
 | `description` | optional string |
-| `fromFilter` | optional bool; REST only. The API does not return this field; qLLM copies the value from a top-level `eq` filter (D20) |
-| `shape` | optional free text; only for `type: json`. Inner structure for the LLM (`{street, city}`, `string[]`). Shown in `describe_catalog`. Not validated (D22) |
+| `fromFilter` | optional bool; REST only. The API does not return this field; qLLM copies the value from a top-level `eq` filter (decision **D20** in [`planning/01-decisions.md`](../../planning/01-decisions.md)) |
+| `shape` | optional free text; only for `type: json`. Inner structure for the LLM (`{street, city}`, `string[]`). Shown in `describe_catalog`. Not validated (decision **D22** in [`planning/01-decisions.md`](../../planning/01-decisions.md)) |
 
 ### `relations[]`
 
@@ -269,8 +269,8 @@ Optional root; only the `serve` key. Everything inside `serve` is optional, but 
 | `mcpAddr` | string | `127.0.0.1:8089` |
 | `authTokenEnv` | string | none (no Bearer) |
 | `insecureBind` | bool | `false` |
-| `maxBodyBytes` | int ≥ 1024 | 1048576 (1 MiB) |
-| `maxRestResponseBytes` | int ≥ 1024 | 10485760 (10 MiB) |
+| `maxBodyBytes` | int ≥ 1024 **bytes** | 1048576 bytes (1 MiB) |
+| `maxRestResponseBytes` | int ≥ 1024 **bytes** | 10485760 bytes (10 MiB) |
 | `cors.origins` | array of strings | `[]` = CORS off; no `*` |
 | `cors.allowHeaders` | array | |
 | `cors.allowMethods` | array | |

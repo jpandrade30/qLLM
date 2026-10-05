@@ -14,7 +14,7 @@ Obligatorios: `protocolVersion`, `preset`, `catalog`.
 
 | Campo | Tipo | Notas |
 |-------|------|-------|
-| `protocolVersion` | cadena semver | `0.1.0` / `0.2.0` |
+| `protocolVersion` | No version | `0.1.0` / `0.2.0` |
 | `preset` | cadena | Ruta relativa a **este** archivo |
 | `catalog` | cadena | Ídem |
 
@@ -26,7 +26,7 @@ Obligatorios en la raíz: `protocolVersion`, `project`, `limits`, `sources` (mí
 
 | Campo | Tipo | Notas |
 |-------|------|-------|
-| `protocolVersion` | semver | |
+| `protocolVersion` | No version | |
 | `project` | cadena no vacía | Nombre lógico del proyecto; debe coincidir con el del catálogo |
 | `limits` | object | Los 5 campos son **obligatorios** |
 | `sources` | array | |

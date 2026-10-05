@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Docs — qLLM</title>
+    <meta
+      name="description"
+      content="Deep implementer manuals for qLLM: field reference, CLI, HTTP/MCP, connectors, errors, and multi-user safety. Linked from the product site to docs/en on GitHub."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+                <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html" aria-current="page">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">Implementer manuals</span>
+        <h1>Docs</h1>
+        <p class="lead">
+          This product site is the short path. The manuals below are the deep path: every field,
+          flag, error code, and connector option. They live in the repo as Markdown and open on
+          GitHub.
+        </p>
+      </header>
+
+      <section class="reveal">
+        <p class="note">
+          Normative contracts (JSON Schema, Query IR, typed errors) stay in
+          <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>. If a
+          manual and <code>planning/</code> disagree, <strong>planning wins</strong>. Product rule
+          labels (<code>D17</code>–<code>D22</code>) are explained on
+          <a href="decisions.html">Decisions</a>
+          <a href="contribute.html">Contribute</a> — do not treat the bare id as enough context.
+        </p>
+        <p>
+          Start here if you are writing YAML from zero:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/from-scratch.md"
+            >from-scratch.md</a
+          >
+          and
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/field-reference.md"
+            >field-reference.md</a
+          >. Index:
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/README.md"
+            >docs/en/README.md</a
+          >.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>English guides</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Guide</th>
+                <th>Contents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/from-scratch.md"
+                    >from-scratch.md</a
+                  >
+                </td>
+                <td>Own folder, Postgres example, validate, prove the right YAML is loaded</td>
+              </tr>
+              <tr>
+                <td>
+                  <a
+                    href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/field-reference.md"
+                    >field-reference.md</a
+                  >
+                </td>
+                <td>Every field, enum, <code>*Env</code> key, and REST option</td>
+              </tr>
+              <tr>
+                <td>
+                  <a
+                    href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/point-your-folder.md"
+                    >point-your-folder.md</a
+                  >
+                </td>
+                <td>CLI, Dockerfile vs .dev, deploy/prd vs prd-tst</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/scope.md"
+                    >scope.md</a
+                  >
+                </td>
+                <td>What the product is and is not</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/project-files.md"
+                    >project-files.md</a
+                  >
+                </td>
+                <td>File discovery and precedence</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/cli.md">cli.md</a>
+                </td>
+                <td>Every command and flag</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/http-mcp.md"
+                    >http-mcp.md</a
+                  >
+                </td>
+                <td>HTTP <code>/v1</code>, MCP, auth, bind, CORS</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/queries.md"
+                    >queries.md</a
+                  >
+                </td>
+                <td>Catalog SQL vs Query IR: accepted and refused shapes</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/responses.md"
+                    >responses.md</a
+                  >
+                </td>
+                <td>Output envelope, column types, json cells, <code>shape</code></td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/connectors.md"
+                    >connectors.md</a
+                  >
+                </td>
+                <td>Source types, bindings, pushdown</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/errors.md"
+                    >errors.md</a
+                  >
+                </td>
+                <td>Typed error codes</td>
+              </tr>
+              <tr>
+                <td>
+                  <a
+                    href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/multi-user-safety.md"
+                    >multi-user-safety.md</a
+                  >
+                </td>
+                <td>
+                  Row scope on the credential
+                  (<a href="decisions.html#d21">decision D21</a>)
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/environments.md"
+                    >environments.md</a
+                  >
+                </td>
+                <td>Compose, images, PRD simulation, scripts</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/install.md"
+                    >install.md</a
+                  >
+                </td>
+                <td>Image, Go, DuckDB, standalone zip</td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/build.md"
+                    >build.md</a
+                  >
+                </td>
+                <td>Go, <code>-tags duckdb</code>, Docker</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2>Protocol &amp; history</h2>
+        <p>
+          Additive protocol differences:
+          <a href="protocol.html">0.1.0 → 0.2.0</a>. Full release notes:
+          <a href="changelog.html">Changelog</a> (from root
+          <code>CHANGELOG.md</code>).
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>Contribute</h2>
+        <p>
+          Fork/PR workflow, contract checklist, and Code of Conduct:
+          <a href="contribute.html">Contribute</a> ·
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>
+          ·
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/CODE_OF_CONDUCT.md"
+            >CODE_OF_CONDUCT.md</a
+          >.
+        </p>
+      </section>
+
+      <section class="reveal">
+        <h2>Other languages</h2>
+        <p>
+          The same 15 guides exist in
+          <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/pt">Português</a>,
+          <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/es">Español</a>, and
+          <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/zh">中文</a>. This product site
+          stays English-only.
+        </p>
+      </section>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Still onboarding?</h2>
+          <p style="margin: 0.5rem 0 0">
+            Use the short product pages first, then jump into the manuals when you need every option.
+          </p>
+        </div>
+        <a class="btn" href="get-started.html">Get started →</a>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__row">
+<span>qLLM product site</span>
+      <span>
+        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/docs/en">docs/en</a>
+        ·
+        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+      </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

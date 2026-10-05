@@ -160,7 +160,7 @@ To run `qllm.exe` from a normal terminal later, make sure `duckdb.dll` is next t
 
 Do **not** clone this monorepo just to host qLLM. Download **`qllm-standalone-<ver>.zip`** from the [GitHub Release](https://github.com/jpandrade30/qLLM/releases) (ignore automatic **Source code** archives), unzip, then `docker build` as in that folder's README.
 
-Only if you already have a clone and need a named folder (no docs, fixtures, or harness):
+Only if you already have a clone and need a named folder (no implementer `docs/`, fixtures, or harness):
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..
@@ -179,10 +179,13 @@ The result is `<out>/qllm-<slug>/` and the script prints that path. It contains:
 | Path | What it is |
 |------|-----------|
 | `go.mod`, `go.sum`, `cmd/qllm/`, `internal/` | The Go runtime, without tests |
-| `config/` | `qllm.preset.yaml`, `qllm.catalog.yaml`, `qllm.config.yaml`, `qllm.env.yaml`, `qllm.access.yaml` for a SQLite source with one table, `items` |
-| `data/app.db` | The SQLite file (`items`: `id=1`, `name=hello`) |
+| `planning/` | Protocol prose + JSON Schemas — keep this so humans/LLMs can author real config (`planning/` wins) |
+| `config/` | **Example** YAML only (SQLite `items`). Replace every value for your sources; see the [Configure](https://jpandrade30.github.io/qLLM/configure.html) product page |
+| `data/app.db` | The SQLite smoke file (`items`: `id=1`, `name=hello`) |
 | `Dockerfile` | Same two-stage build with `-tags duckdb`, bakes `config/` and `data/` |
 | `LICENSE.md`, `.env.example`, `.gitignore`, `README.md` | MIT license, token template, ignores, run instructions |
+
+In the full monorepo, `deploy/` is the same kind of **example** layout — copy the shape, replace the content.
 
 Run it in the new folder:
 

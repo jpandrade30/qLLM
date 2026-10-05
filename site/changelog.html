@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Changelog — qLLM</title>
+    <meta name="description" content="qLLM changelog: protocol and product releases, Keep a Changelog format." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/StudyingCat.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">q<span>LLM</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+        <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="get-started.html">Get started</a>
+          <a href="configure.html">Configure</a>
+          <a href="connectors.html">Connectors</a>
+          <a href="query.html">Query</a>
+          <a href="security.html">Security</a>
+          <a href="docs.html">Docs</a>
+          <a href="protocol.html">Protocol</a>
+          <a href="decisions.html">Decisions</a>
+          <a href="changelog.html" aria-current="page">Changelog</a>
+          <a href="contribute.html">Contribute</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="page-head">
+        <span class="mono-label">History</span>
+        <h1>Changelog</h1>
+        <p class="lead">Generated from root <a href="https://github.com/jpandrade30/qLLM/blob/main/CHANGELOG.md">CHANGELOG.md</a> (Keep a Changelog). Protocol versions are the <code>protocolVersion</code> field; product releases are separate.</p>
+      </header>
+
+      <section class="md-body reveal">
+<p>
+All notable changes to qLLM are documented here.
+</p>
+<p>
+The format follows <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>.
+<br />
+Protocol versions are the <code>protocolVersion</code> field (<code>planning/</code>). Runtime responses advertise <strong>0.2.0</strong>; <strong>0.1.0</strong> preset/catalog/IR files remain valid. Latest product release: <strong>0.3.4</strong>.
+</p>
+<h2 id="unreleased">[Unreleased]</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>Explicit experimental / no-liability disclaimer in the root README and on the product site (home note + footer on every page).</li>
+</ul>
+<h2 id="0-3-4-2026-10-04">[0.3.4] - 2026-10-04</h2>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Product site primary nav follows a reader journey: Get started → Configure → Connectors → Query → Security → Docs → Protocol → Decisions → Changelog → Contribute.</li>
+</ul>
+<h2 id="0-3-3-2026-10-04">[0.3.3] - 2026-10-04</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>GitHub Pages product site (<code>site/</code>, English): overview, get started, connectors, configure (side menu for preset/catalog/config/env), query, security, Docs index, Decisions (plain-language D17–D22), and Contribute — deployed via Actions to https://jpandrade30.github.io/qLLM/</li>
+<li>Site pages for protocol <strong>0.1.0 → 0.2.0</strong> (<code>protocol.html</code>) and a generated <strong>Changelog</strong> (<code>changelog.html</code> from root <code>CHANGELOG.md</code> via <code>scripts/dev/render_site_md.py</code>, also in the Pages workflow).</li>
+<li>Docs clarify units on time/size/row limits (<code>ms</code>, <code>bytes</code>, <code>rows</code>) in <code>docs/en/field-reference.md</code> and <code>project-files.md</code>; decision ids point at <code>planning/01-decisions.md</code> instead of bare <code>D##</code> shorthand.</li>
+<li><code>CONTRIBUTING.md</code> and <code>CODE_OF_CONDUCT.md</code> (Contributor Covenant 2.1): fork/PR workflow, contract-change checklist, changelog/README expectations.</li>
+<li>Standalone generator (<code>scripts/standalone/init-standalone.py</code>) copies <code>planning/</code> into the slim folder so LLMs/humans can author config against the contract; Get started / install docs stress that <code>config/</code> and monorepo <code>deploy/</code> are examples to replace.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Home-page flow sketch sits inside <strong>01 — What</strong> as the example diagram (no longer a separate band above that stage).</li>
+<li>Documentation type labels for <code>protocolVersion</code> say <strong>No version</strong> instead of “semver” (field-reference / from-scratch in en/pt/es/zh, plus planning D11 / protocol field table).</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>Standalone <code>config/qllm.env.yaml</code> template now uses the required root <code>env:</code> map.</li>
+</ul>
+<h2 id="0-3-2-2026-10-04">[0.3.2] - 2026-10-04</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>Experimental source type <code>graphql</code> (no harness): HTTP POST to <code>baseUrlEnv</code>, catalog binding <code>graphql_operation</code> + <code>options.operations.&lt;name&gt;</code> (<code>document</code>, <code>itemsPath</code>, optional <code>variables</code> / <code>limitVariable</code>). Documents must be GraphQL <strong><code>query</code> only</strong> — <code>mutation</code> / <code>subscription</code> and write keywords (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, …) fail at open/fetch with <code>CONFIG_ERROR</code> before any HTTP. Not a GraphQL agent API (D17 unchanged).</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Docs and root README Quick start recommend downloading the GitHub Release <strong><code>qllm-standalone-&lt;ver&gt;.zip</code></strong> instead of cloning the monorepo to run qLLM.</li>
+</ul>
+<h2 id="0-3-1-2026-10-03">[0.3.1] - 2026-10-03</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>GitHub Actions CI (<code>go vet</code> / <code>go test</code>, <code>-tags duckdb</code> job, generate + build + validate the slim folder).</li>
+<li>GitHub Release workflow on tags <code>v<em></code>: builds <code>qllm-standalone-&lt;ver&gt;.zip</code> from <code>scripts/standalone/init-standalone.py</code> (LICENSE included) and attaches it using the matching <code>CHANGELOG.md</code> section as the release body. Release notes warn that GitHub’s automatic <strong>Source code</strong> archives are the full monorepo — use only the <code>qllm-standalone-</em>.zip</code> asset.</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>DuckDB dialect unit tests: parenthesize <code>UNION ALL</code> arms that use <code>LIMIT</code>, use a window in <code>QUALIFY</code>, and express boolean XOR as <code>&lt;&gt;</code> (DuckDB has no boolean <code>XOR</code> / <code>xor(bool,bool)</code>).</li>
+</ul>
+<h2 id="0-3-0-2026-10-03">[0.3.0] - 2026-10-03</h2>
+<p>
+Product release. Protocol stays <strong>0.2.0</strong> (additive: D19–D22, extra <code>sources[].type</code> values).
+</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Source <code>type</code> values in this release (harness still only postgres / mysql / mongodb / rest):</li>
+<li>Stable: <code>postgres</code>, <code>mysql</code>, <code>mongodb</code>, <code>rest</code>.</li>
+<li>Experimental (in the binary, no compose/goldens): <code>mssql</code>, <code>sqlite</code>, <code>clickhouse</code>, <code>dynamodb</code>, <code>cassandra</code>, <code>ksql</code> (from 0.2.0), plus <strong><code>redis</code></strong> and <strong><code>kafka</code></strong> (D19).</li>
+<li>Experimental wire aliases (same driver and connection as the parent): MySQL family <code>mariadb</code>, <code>tidb</code>, <code>vitess</code>, <code>aurora_mysql</code>, <code>planetscale</code>; Postgres family <code>cockroach</code>, <code>yugabyte</code>, <code>alloydb</code>, <code>aurora_postgres</code>, <code>neon</code>, <code>supabase</code>, <code>timescale</code>, <code>redshift</code>.</li>
+<li>Redis (D19): <code>binding.kind: key</code> + <code>keyPattern</code>; allowlisted GET/HGETALL/LRANGE/SSCAN/ZRANGE/XRANGE only. Missing key predicate is <code>UNSUPPORTED</code>. Never deletes, pops, or <code>KEYS</code>.</li>
+<li>Kafka (D19): <code>binding.kind: topic</code>; fetch without a consumer group or offset commit (<code>read_committed</code>). Missing partition/offset, key, or time predicate is <code>UNSUPPORTED</code>. Never produces.</li>
+<li>REST <code>getById</code> runs when every <code>{name}</code> in the path has an <code>eq</code> filter. <code>list.itemsKey</code> (or resource-level) picks the JSON array key; <code>maxPages</code> / <code>pageSize</code> / <code>limitParam</code> / <code>offsetParam</code> walk offset pages (capped at 20).</li>
+<li>REST catalog field <code>fromFilter</code> (D20): when the API omits a key it already received as <code>eq</code>, qLLM fills that column so <code>GROUP BY</code> and joins work. Missing <code>eq</code> is <code>INVALID_IR</code>; a mismatched body value is <code>SOURCE_ERROR</code>.</li>
+<li>Catalog field <code>shape</code> (D22): optional free-text hint of the inner structure of a <code>type: json</code> field, shown in <code>describe_catalog</code>.</li>
+<li>Parsed <code>json</code> cells (objects and arrays) in query responses; SQL column types come from DuckDB instead of labeling every column <code>string</code>.</li>
+<li>Scoped keys (D21): one <code>qllm.access.yaml</code> entry per app type; derived Bearer <code>app.user.expiry.hmac</code> (or a static <code>scope</code> map) forces <code>eq</code> on catalog <code>entities[].scope</code>. Conflicting Query IR filters return <code>FORBIDDEN_SCOPE</code> (<code>scopeMode: reject</code>, default). Query tools gain no extra field.</li>
+<li>Example stack <code>Dockerfile.enforced</code> + <code>docker-compose.enforced.yml</code> + <code>deploy/prd/enforced/</code> (Postgres seed, LangGraph agent that mints keys and opens an MCP session per <code>execute_sql</code>).</li>
+<li><code>deploy/prd</code> split into <code>default/</code> (product image) and <code>enforced/</code> (scoped-key demo).</li>
+<li>REST entity <code>api_profiles</code> (nested <code>address</code> / <code>tags</code> / <code>prefs</code>) plus SQL goldens <code>rest_json_*</code> and dataset <code>fixtures/datasets/v1/api_profiles.json</code>.</li>
+<li>Docs: <code>responses.md</code> (en/pt/es/zh) for the query envelope, column types, and parsed json cells.</li>
+<li><code>scripts/standalone/init-standalone.py</code> (<code>.ps1</code> / <code>.sh</code>) writes a slim folder (<code>qllm-&lt;user&gt;</code>) with the Go runtime, blank SQLite YAML, and a Dockerfile.</li>
+<li><code>scripts/dev/check-live.ps1</code> / <code>.sh</code> runs SQL goldens against a live MCP (<code>-Filter rest_json</code> for nested JSON).</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Root README is reorganized (why, how it works, connector table, quick start, configuration, serving, containers, behavior, development).</li>
+<li>Operator scripts live under <code>scripts/dev/</code>, <code>scripts/prd-tst/</code>, and <code>scripts/standalone/</code> (old flat <code>scripts/*.ps1</code> paths no longer exist).</li>
+<li>Compose mounts <code>deploy/image/config</code> on <code>/config</code> and <code>fixtures/test-api/data.json</code> on the fake API so catalog/seed changes apply without rebuilding those images.</li>
+<li>Enforced demo compose project is <code>qllm-enforced</code> (does not reuse harness container names). The LangGraph node is <code>format_answer</code> so it no longer collides with the <code>answer</code> state key.</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>Kafka connector no longer sets <code>DisableAutoCommit</code> (invalid without a consumer group), which made <code>Open()</code> fail whenever a Kafka source was in the preset. Still no group, no commits.</li>
+<li>Catalog SQL (<code>execute_sql</code> / <code>POST /v1/sql</code>) applies entity <code>scope</code> on each source fetch (inject). A spoof <code>WHERE user_id = &#x27;…&#x27;</code> does not leak other users&#x27; rows.</li>
+</ul>
+<h2 id="0-2-0-2026-09-30">[0.2.0] - 2026-09-30</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>Docs (en/pt/es/zh): REST <code>options.resources</code> explained in detail (<code>list</code>, <code>getById</code>, <code>method</code>, <code>path</code>, <code>queryParams</code>, how queries map to HTTP, response shapes) and every <code>options</code> key with defaults; <code>getById</code> is documented as not called by the runtime. Root README gains a &quot;Why qLLM&quot; section.</li>
+<li>Experimental source types (no compose/goldens): <code>mssql</code>, <code>sqlite</code>, <code>clickhouse</code>, <code>dynamodb</code>, <code>cassandra</code>, <code>ksql</code> (pull only).</li>
+<li>Catalog <code>binding.accessPath</code> (<code>pk</code>/<code>partition</code>, <code>sk</code>/<code>sort</code>, <code>ksqlKey</code>). Queries without the required key equality return <code>UNSUPPORTED</code> (no Dynamo Scan / Cassandra <code>ALLOW FILTERING</code> / ksql <code>EMIT CHANGES</code>).</li>
+<li><code>qllm.env.yaml</code> values may be exactly <code>${ENV_NAME}</code>; empty names are not written as the placeholder string. Compose injects harness secrets via <code>environment:</code>.</li>
+<li>SQL catalog path: CTE aliases, richer dialect <code>&quot;2&quot;</code> coverage in goldens (<code>fixtures/sqlcheck</code>).</li>
+<li><code>scripts/prd-tst/prd-tst-up</code> / <code>prd-tst-down</code> (<code>.ps1</code> / <code>.sh</code>) to apply or remove the fleet-ops Kubernetes sim.</li>
+<li><code>deploy/prd/</code> example YAML baked by the product <code>Dockerfile</code> (copy of harness shapes). Fleet-ops K8s sim lives in <code>deploy/prd-tst/</code>.</li>
+<li>POSIX twins: <code>scripts/<em>.sh</code> for seed, CGO shell, and <code>prd-tst-</em></code> port-forward/Argo.</li>
+<li><code>docs/</code> implementer manual in four languages (<code>docs/en</code>, <code>docs/pt</code>, <code>docs/es</code>, <code>docs/zh</code>): from-scratch, field reference, <code>Dockerfile</code> vs <code>.dev</code>, and more. The README links to each language.</li>
+<li><code>execute_sql</code> logs a multiline block on stderr (status, queryId, SQL as written). MCP logs <code>how_to_use_me</code> / <code>describe_catalog</code> the same way.</li>
+<li>Cursor rules: keep <code>README.md</code> and this changelog in the same change set as user-visible work.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Runtime <code>protocolVersion</code> is <strong>0.2.0</strong>. Query IR shape is unchanged from 0.1.0.</li>
+<li>Go module toolchain requirement is <strong>1.26</strong> (deps). Image/harness still demo postgres, mysql, mongodb, REST only.</li>
+<li>Compose builds <code>Dockerfile.dev</code> (<code>deploy/image/config</code>). Default <code>Dockerfile</code> bakes <code>deploy/prd</code>.</li>
+<li>K8s sim scripts renamed <code>prd-tst-<em>.ps1</code> (old <code>prd-</em>.ps1</code> names removed).</li>
+<li>Production Go functions have Godoc comments.</li>
+<li>The manual moved from a flat <code>docs/</code> folder into per-language folders, with clearer English and Brazilian Portuguese text.</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>Docker build image is <code>golang:1.26.6-bookworm</code> so <code>go mod download</code> matches <code>go.mod</code> (was 1.25 with <code>GOTOOLCHAIN=local</code>).</li>
+<li>PRD sim: <code>qllm:local</code> uses <code>imagePullPolicy: Never</code> so kubelet does not pull <code>docker.io/library/qllm:local</code>. Build with <code>nerdctl --namespace k8s.io</code>.</li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li>Toolchain is <strong>Go 1.26.6</strong> (<code>go.mod</code> + <code>golang:1.26.6-bookworm</code>) so <code>govulncheck</code> stdlib findings on 1.26.0 (url/tls/http/x509/net/mail/xml/asn1) are closed. <code>golang.org/x/crypto</code> is <strong>v0.56.0</strong> (SSH DoS). Remaining module-only advisory GO-2026-5932 is <code>x/crypto/openpgp</code> (unmaintained, no fix; qLLM does not import it).</li>
+<li>Bearer compare uses HMAC-SHA256 + <code>hmac.Equal</code> (fixed-size digest; no <code>len</code> short-circuit). ACL lookup always compares against every app key.</li>
+<li>Demo tokens/passwords are not baked as literals in <code>deploy/image/config/qllm.env.yaml</code>; they come from process/compose env.</li>
+</ul>
+<h2 id="0-1-0-2026-09">[0.1.0] - 2026-09</h2>
+<p>
+Baseline shipped in this repo before the 0.2.0 source-type bump:
+</p>
+<ul>
+<li>Preset + logical catalog + JSON Query IR + HTTP <code>/v1</code> and MCP (<code>how_to_use_me</code>, <code>describe_catalog</code>, <code>execute_sql</code>).</li>
+<li>Connectors in the harness: postgres, mysql, mongodb, REST; DuckDB local join / <code>execute_sql</code> (<code>-tags duckdb</code>).</li>
+<li><code>qllm.access.yaml</code>, SQL dialect <code>&quot;1&quot;</code>/<code>&quot;2&quot;</code>, catalog <code>introspect</code> / <code>from-openapi</code>, D17 (no GraphQL API), D18 (harness isolated from the binary).</li>
+</ul>
+      </section>
+
+      <div class="cta-band reveal">
+        <div>
+          <h2>Protocol bump notes</h2>
+          <p style="margin: 0.5rem 0 0">
+            See what changed between protocol <code>0.1.0</code> and <code>0.2.0</code>.
+          </p>
+        </div>
+        <a class="btn btn--ghost" href="protocol.html">Protocol →</a>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__row">
+        <span>qLLM product site</span>
+        <span>
+          <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+          ·
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/CHANGELOG.md">CHANGELOG.md</a>
+          ·
+          <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+        </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

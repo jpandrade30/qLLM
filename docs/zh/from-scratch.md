@@ -17,7 +17,7 @@ C:\data\my-qllm\            （示例）
 
 支持的扩展名：`.yaml`、`.yml`、`.json`。不能使用没有 `qllm.` 前缀的 `preset.yaml`。
 
-YAML 中的 `protocolVersion`：`"0.1.0"` 或 `"0.2.0"`（semver `N.N.N`）。运行时的**响应**为 `0.2.0`。
+YAML 中的 `protocolVersion`：`"0.1.0"` 或 `"0.2.0"`（No version `N.N.N`）。运行时的**响应**为 `0.2.0`。
 
 所有字段：[field-reference.md](field-reference.md)。示例目录（演示配置的副本，由 `Dockerfile` 内嵌）：[`deploy/prd/`](../../deploy/prd)。Docker 与 Kubernetes：[point-your-folder.md](point-your-folder.md)。
 
