@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- YouTube embeds need a Referer; avoid same-origin / no-referrer (error 153) -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>qLLM — Multi-source query runtime for agents</title>
     <meta
       name="description"
@@ -70,6 +72,39 @@
             alt="Illustration of a cat studying at a laptop"
           />
         </div>
+      </section>
+
+      <section class="demo-block reveal" id="demo" aria-labelledby="demo-heading">
+        <div class="demo-block__head">
+          <p class="mono-label">Demo</p>
+          <h2 id="demo-heading">qLLM in action</h2>
+          <p class="lead">
+            Walkthrough of the
+            <a href="https://github.com/jpandrade30/SmallDemo">SmallDemo (Northline)</a>
+            stack — siloed services, approval console, and an agent querying through qLLM over MCP.
+          </p>
+        </div>
+        <figure class="video-frame">
+          <iframe
+            src="https://www.youtube.com/embed/1rozeLOgUE0?rel=0"
+            title="qLLM demo — SmallDemo / Northline"
+            width="1280"
+            height="720"
+            frameborder="0"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </figure>
+        <p class="demo-block__links">
+          <a href="https://www.youtube.com/watch?v=1rozeLOgUE0" rel="noopener noreferrer"
+            >Watch on YouTube</a
+          >
+          ·
+          <a href="https://github.com/jpandrade30/SmallDemo" rel="noopener noreferrer"
+            >SmallDemo repo</a
+          >
+        </p>
       </section>
 
       <section class="stage reveal" id="what">
@@ -167,6 +202,31 @@
               </ul>
             </div>
           </div>
+
+          <div class="demo-block demo-block--in-stage reveal" id="in-action" aria-labelledby="in-action-heading">
+            <div class="demo-block__head">
+              <p class="mono-label">In action</p>
+              <h3 id="in-action-heading">The system running</h3>
+              <p>
+                Northline
+                <a href="https://github.com/jpandrade30/SmallDemo">SmallDemo</a>
+                console — approval queue plus chat over qLLM (catalog SQL / MCP).
+              </p>
+            </div>
+            <figure class="shot-frame">
+              <img
+                src="assets/Uso.png"
+                width="1600"
+                height="900"
+                alt="Northline console with approval queue and qLLM chat answering across data silos"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption class="diagram-caption">
+                Live console: siloed data, approval pipeline, agent answer in one place.
+              </figcaption>
+            </figure>
+          </div>
         </div>
       </section>
 
@@ -207,37 +267,6 @@
             <a href="connectors.html">Connectors</a>.
           </p>
         </div>
-      </section>
-
-      <section class="demo-block reveal" id="demo" aria-labelledby="demo-heading">
-        <div class="demo-block__head">
-          <p class="mono-label">Demo</p>
-          <h2 id="demo-heading">qLLM in action</h2>
-          <p class="lead">
-            Walkthrough of the
-            <a href="https://github.com/jpandrade30/SmallDemo">SmallDemo (Northline)</a>
-            stack — siloed services, approval console, and an agent querying through qLLM over MCP.
-          </p>
-        </div>
-        <figure class="video-frame">
-          <iframe
-            src="https://www.youtube-nocookie.com/embed/1rozeLOgUE0"
-            title="qLLM demo — SmallDemo / Northline"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-          ></iframe>
-        </figure>
-        <p class="demo-block__links">
-          <a href="https://www.youtube.com/watch?v=1rozeLOgUE0" rel="noopener noreferrer"
-            >Watch on YouTube</a
-          >
-          ·
-          <a href="https://github.com/jpandrade30/SmallDemo" rel="noopener noreferrer"
-            >SmallDemo repo</a
-          >
-        </p>
       </section>
 
       <div class="cta-band reveal">

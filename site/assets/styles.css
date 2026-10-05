@@ -717,13 +717,28 @@ tr:last-child td {
   border-bottom: 1px solid var(--color-rule);
 }
 
+.demo-block--in-stage {
+  margin: var(--space-5) 0 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid var(--color-rule);
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .demo-block__head {
   max-width: 40rem;
   margin-bottom: var(--space-4);
 }
 
-.demo-block__head h2 {
+.demo-block__head h2,
+.demo-block__head h3 {
   margin: 0 0 var(--space-2);
+}
+
+.demo-block--in-stage .demo-block__head h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  color: var(--color-ink);
 }
 
 .demo-block__links {
@@ -750,6 +765,28 @@ tr:last-child td {
   height: 100%;
   border: 0;
   display: block;
+}
+
+.shot-frame {
+  margin: 0;
+  width: 100%;
+  background: var(--color-graphite);
+  border: 1px solid var(--color-rule);
+  overflow: hidden;
+}
+
+.shot-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+.shot-frame .diagram-caption {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-paper);
+  border-top: 1px solid var(--color-rule);
 }
 
 /* Configure docs layout */

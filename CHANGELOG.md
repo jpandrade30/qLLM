@@ -10,7 +10,7 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 ### Added
 
 - Link to the end-to-end demo repo [jpandrade30/SmallDemo](https://github.com/jpandrade30/SmallDemo) from the README and product site (home, Get started, Docs).
-- Home page embeds the SmallDemo walkthrough video ([YouTube](https://www.youtube.com/watch?v=1rozeLOgUE0)).
+- Home page embeds the SmallDemo walkthrough video ([YouTube](https://www.youtube.com/watch?v=1rozeLOgUE0)) before **01 — What**.
 
 ## [0.3.5] - 2026-10-04
 
