@@ -9,12 +9,12 @@
 | **A. 容器镜像**（`Dockerfile`） | Docker、nerdctl 或 podman | 完整构建（内嵌 DuckDB），已包含 `deploy/prd` 的 YAML | 生产环境，或不想装 C 工具链 |
 | **B. Go 构建（纯 Go）** | Go 1.26.6+ | 不含 CGO 的 `qllm`，不支持目录 SQL | 快速 `validate`、Query IR、无 CGO 的 CI |
 | **C. Go 构建（内嵌 DuckDB，`-tags duckdb`）** | Go 1.26.6+、CGO、C 编译器（Windows 还需 `duckdblib`） | 全部功能，含 `execute_sql` / `qllm sql` | 本地开发完整产品 |
-| **D. 独立 zip / 仓库**（Release 资源或 `init-standalone.*`） | Docker（运行）；仅重新生成时需要 Python 3 | 可托管到 GitHub/GitLab 的小型目录 | 不带文档、fixtures、harness 的自有副本 |
+| **D. 独立 zip**（优先 Release 资源；或 `init-standalone.*`） | Docker（运行）；仅从克隆重新生成时需要 Python 3 | 可托管到 GitHub/GitLab 的小型目录 | **默认建议：** 无需克隆本 monorepo 即可运行 |
 | **E. Compose harness**（`docker-compose.yml`） | nerdctl compose（Rancher Desktop） | qLLM + Postgres、MySQL、MongoDB、模拟 API | 运行 golden 测试、体验演示 |
 | **F. Kubernetes 模拟**（`deploy/prd-tst`） | 启用 Kubernetes 的 Rancher Desktop | fleet-ops 风格集群 | 测试发布。独立环境，见 [environments.md](environments.md) |
 | **G. 作用域密钥演示**（`docker-compose.enforced.yml`） | nerdctl/docker compose | qLLM + Postgres + LangGraph 代理 | 端到端查看行级作用域（D21） |
 
-拿不准时：运行用 **A**，开发用 **C**。
+拿不准时：运行用 **D**（Release zip）或 **A**；开发本仓库用 **C**。
 
 ## 2. 两种引擎：纯 Go 与内嵌 DuckDB
 
@@ -156,9 +156,11 @@ go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 
 之后要在普通终端运行 `qllm.exe`，请让 `duckdb.dll` 与可执行文件同目录，或位于 `PATH` 中。
 
-## 6. 方案 D：独立 zip / 仓库
+## 6. 方案 D：独立 zip（优先于克隆）
 
-从 [GitHub Release](https://github.com/jpandrade30/qLLM/releases) 下载 **`qllm-standalone-<ver>.zip`**，解压后按该目录 README 执行 `docker build`。也可从克隆仓库生成命名目录（不含文档、fixtures、harness）：
+不要仅为托管 qLLM 而克隆本 monorepo。从 [GitHub Release](https://github.com/jpandrade30/qLLM/releases) 下载 **`qllm-standalone-<ver>.zip`**（忽略自动附带的 **Source code**），解压后按该目录 README 执行 `docker build`。
+
+仅当你已有克隆并需要命名目录时（不含文档、fixtures、harness）：
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..

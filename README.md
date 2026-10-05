@@ -6,7 +6,7 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Release **0.3.1**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
+Release **0.3.2**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Why qLLM
 
@@ -79,13 +79,28 @@ Not a source type: Oracle, BigQuery, Snowflake, Elasticsearch, S3-as-table. Grap
 
 ## Quick start (5 minutes)
 
-### 1. Build
+**Prefer the Release zip** — do not clone this monorepo just to run qLLM. Download **`qllm-standalone-<ver>.zip`** from [Releases](https://github.com/jpandrade30/qLLM/releases) (not “Source code”), unzip, then:
+
+```bash
+cp .env.example .env   # set QLLM_AUTH_TOKEN
+docker build -t qllm-standalone .
+docker run --rm -p 8088:8088 -p 8089:8089 --env-file .env qllm-standalone
+```
+
+```bash
+curl -s http://127.0.0.1:8088/v1/health
+curl -s -H "Authorization: Bearer change-me" http://127.0.0.1:8088/v1/catalog
+```
+
+Edit `config/` in that folder for your sources. Clone this repo only for development, the compose harness, or docs.
+
+### Develop from a full clone
 
 ```bash
 go build -o qllm ./cmd/qllm
 ```
 
-### 2. Project files
+Project layout:
 
 ```text
 my-project/
@@ -111,7 +126,7 @@ Draft a catalog from a live SQL source or an OpenAPI file (review before serve):
 ./qllm catalog from-openapi -f ./other-team.yaml --source legacy_api --config-dir ./my-project --out ./draft.catalog.yaml --resources-out ./draft.resources.yaml
 ```
 
-### 3. First query
+First query (harness fixtures need a clone + seed):
 
 ```bash
 curl -s http://127.0.0.1:8088/v1/howtouseme | jq .
@@ -269,7 +284,7 @@ Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.
 
 ### Start a standalone repo
 
-Prefer the **`qllm-standalone-<ver>.zip`** asset on the [GitHub Release](https://github.com/jpandrade30/qLLM/releases) (unzip and `docker build`). Ignore **Source code (zip/tar.gz)** — GitHub always attaches those for the whole tag (docs, fixtures, harness). To generate a named folder from a clone:
+Same as Quick start: download **`qllm-standalone-<ver>.zip`** from [Releases](https://github.com/jpandrade30/qLLM/releases) (not **Source code**). To regenerate a named folder from an existing clone:
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..

@@ -9,12 +9,12 @@ Esta página cobre todas as formas de rodar o qLLM: o que cada opção faz, o qu
 | **A. Imagem de container** (`Dockerfile`) | Docker, nerdctl ou podman | Build completo (DuckDB embutido) com o YAML de `deploy/prd` já dentro | Produção, ou se você não quer toolchain C |
 | **B. Build Go, Go puro** | Go 1.26.6+ | `qllm` sem CGO. Sem SQL de catálogo | `validate` rápido, Query IR, CI sem CGO |
 | **C. Build Go, DuckDB embutido** (`-tags duckdb`) | Go 1.26.6+, CGO, compilador C (+ `duckdblib` no Windows) | Tudo, inclusive `execute_sql` / `qllm sql` | Desenvolver o produto completo localmente |
-| **D. Zip / repo standalone** (asset da Release ou `init-standalone.*`) | Docker (para rodar); Python 3 só se for regenerar | Uma pasta pequena para hospedar no GitHub/GitLab | Sua cópia sem docs, fixtures nem harness |
+| **D. Zip standalone** (prefira o asset da Release; ou `init-standalone.*`) | Docker (para rodar); Python 3 só se regenerar a partir de um clone | Uma pasta pequena para hospedar no GitHub/GitLab | **Sugestão padrão:** rodar sem clonar este monorepo |
 | **E. Harness Compose** (`docker-compose.yml`) | nerdctl compose (Rancher Desktop) | qLLM + Postgres, MySQL, MongoDB, API fake | Rodar os goldens e testar o demo |
 | **F. Simulação Kubernetes** (`deploy/prd-tst`) | Rancher Desktop com Kubernetes | Um cluster estilo fleet-ops | Testar rollouts. Mundo separado, veja [environments.md](environments.md) |
 | **G. Demo de chaves com escopo** (`docker-compose.enforced.yml`) | nerdctl/docker compose | qLLM + Postgres + agente LangGraph | Ver o escopo de linha (D21) de ponta a ponta |
 
-Na dúvida: **A** para rodar, **C** para desenvolver.
+Na dúvida: **D** (zip da Release) ou **A** para rodar; **C** para desenvolver este repo.
 
 ## 2. Os dois motores: Go puro vs DuckDB embutido
 
@@ -156,9 +156,11 @@ O `duckdb_smoke.go` abre o motor embutido e executa uma consulta mínima; é a f
 
 Para rodar o `qllm.exe` depois em um terminal comum, deixe o `duckdb.dll` ao lado do executável ou no `PATH`.
 
-## 6. Opção D: zip / repo standalone
+## 6. Opção D: zip standalone (prefira ao clone)
 
-Baixe o **`qllm-standalone-<ver>.zip`** na [Release do GitHub](https://github.com/jpandrade30/qLLM/releases), descompacte e faça `docker build` como no README da pasta. Ou gere uma pasta nomeada a partir do clone (sem docs, fixtures nem harness):
+Não clone este monorepo só para hospedar o qLLM. Baixe o **`qllm-standalone-<ver>.zip`** na [Release do GitHub](https://github.com/jpandrade30/qLLM/releases) (ignore os arquivos automáticos **Source code**), descompacte e faça `docker build` como no README da pasta.
+
+Só se você já tiver um clone e precisar de uma pasta nomeada (sem docs, fixtures nem harness):
 
 ```bash
 python scripts/standalone/init-standalone.py --user Alice --out ..
