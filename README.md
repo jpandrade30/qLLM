@@ -6,9 +6,11 @@
 
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
-Release **0.3.4**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
+Release **0.3.5**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
 
 Product site: https://jpandrade30.github.io/qLLM/
+
+**Example in action:** [jpandrade30/SmallDemo](https://github.com/jpandrade30/SmallDemo) (Northline) — fictional company on Rancher Desktop / k3s with siloed services, console, GitOps, and qLLM over HTTP + MCP.
 
 ## Experimental / disclaimer
 
@@ -41,7 +43,7 @@ You write two project files: which sources exist (`qllm.preset.yaml`) and which 
 
 ## Documentation
 
-Product overview (English): [jpandrade30.github.io/qLLM](https://jpandrade30.github.io/qLLM/) (`site/`). Deep manuals index: [Docs](https://jpandrade30.github.io/qLLM/docs.html). Protocol **0.1.0 → 0.2.0**: [Protocol](https://jpandrade30.github.io/qLLM/protocol.html). Release history: [Changelog](https://jpandrade30.github.io/qLLM/changelog.html). Product rules `D17`–`D22`: [Decisions](https://jpandrade30.github.io/qLLM/decisions.html).
+Product overview (English): [jpandrade30.github.io/qLLM](https://jpandrade30.github.io/qLLM/) (`site/`). Deep manuals index: [Docs](https://jpandrade30.github.io/qLLM/docs.html). Protocol **0.1.0 → 0.2.0**: [Protocol](https://jpandrade30.github.io/qLLM/protocol.html). Release history: [Changelog](https://jpandrade30.github.io/qLLM/changelog.html). Product rules `D17`–`D22`: [Decisions](https://jpandrade30.github.io/qLLM/decisions.html). End-to-end demo: [SmallDemo](https://github.com/jpandrade30/SmallDemo).
 
 Pick the folder for your language. Each one has the same 15 guides, including the response format (`responses.md`), installation options (`install.md`), writing your YAML from zero (`from-scratch.md`) and the full field list (`field-reference.md`).
 
