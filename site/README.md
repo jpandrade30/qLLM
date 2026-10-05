@@ -2,6 +2,8 @@
 
 Static English product pages for GitHub Pages (`https://jpandrade30.github.io/qLLM/`).
 
+qLLM is **experimental**; every page footer (and the home hero) states that the software is provided as-is and the author accepts no responsibility for damage caused by its use — keep that aligned with the root README disclaimer.
+
 ## Edit
 
 - HTML lives in this folder (`index.html`, `get-started.html`, `docs.html`, …). Primary nav order (all pages): Home → Get started → Configure → Connectors → Query → Security → Docs → Protocol → Decisions → Changelog → Contribute (keep in sync with `scripts/dev/render_site_md.py` `NAV_LINKS`).

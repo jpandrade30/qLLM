@@ -10,6 +10,10 @@ Release **0.3.4**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planni
 
 Product site: https://jpandrade30.github.io/qLLM/
 
+## Experimental / disclaimer
+
+**qLLM is an experimental project.** It is provided as-is, without warranty of any kind. Use it at your own risk. The author accepts **no responsibility** for any damage, data loss, outage, security incident, or other harm arising from using, configuring, or deploying this software.
+
 ## Why qLLM
 
 Most organizations keep their data in many places: several databases, internal APIs, event streams. Access to those sources is usually **limited on purpose**. Teams expose a few database views or a handful of API endpoints, not the full schema, and nobody wants to hand an LLM raw credentials or free-form SQL.

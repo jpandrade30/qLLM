@@ -54,6 +54,10 @@ The format follows <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changel
 Protocol versions are the <code>protocolVersion</code> field (<code>planning/</code>). Runtime responses advertise <strong>0.2.0</strong>; <strong>0.1.0</strong> preset/catalog/IR files remain valid. Latest product release: <strong>0.3.4</strong>.
 </p>
 <h2 id="unreleased">[Unreleased]</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>Explicit experimental / no-liability disclaimer in the root README and on the product site (home note + footer on every page).</li>
+</ul>
 <h2 id="0-3-4-2026-10-04">[0.3.4] - 2026-10-04</h2>
 <h3 id="changed">Changed</h3>
 <ul>
@@ -190,14 +194,20 @@ Baseline shipped in this repo before the 0.2.0 source-type bump:
     </main>
 
     <footer class="site-footer">
-      <span>qLLM product site</span>
-      <span>
-        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
-        ·
-        <a href="https://github.com/jpandrade30/qLLM/blob/main/CHANGELOG.md">CHANGELOG.md</a>
-        ·
-        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
-      </span>
+      <div class="site-footer__row">
+        <span>qLLM product site</span>
+        <span>
+          <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+          ·
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/CHANGELOG.md">CHANGELOG.md</a>
+          ·
+          <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+        </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
     </footer>
     <script src="assets/site.js"></script>
   </body>

@@ -5,7 +5,11 @@ All notable changes to qLLM are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.4**.
 
-## [Unreleased]
+## [0.3.5] - 2026-10-04
+
+### Added
+
+- Explicit experimental / no-liability disclaimer in the root README and on the product site (home note + footer on every page).
 
 ## [0.3.4] - 2026-10-04
 

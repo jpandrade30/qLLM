@@ -544,6 +544,13 @@ tr:last-child td {
   max-width: var(--max);
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  color: var(--color-muted);
+}
+
+.site-footer__row {
+  display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   justify-content: space-between;
@@ -551,7 +558,16 @@ tr:last-child td {
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-muted);
+}
+
+.site-footer__disclaimer {
+  margin: 0;
+  max-width: 42rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.5;
 }
 
 .site-footer a {
