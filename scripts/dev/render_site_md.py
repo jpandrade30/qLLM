@@ -197,14 +197,20 @@ def page_shell(
     </main>
 
     <footer class="site-footer">
-      <span>qLLM product site</span>
-      <span>
-        <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
-        ·
-        <a href="https://github.com/jpandrade30/qLLM/blob/main/CHANGELOG.md">CHANGELOG.md</a>
-        ·
-        <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
-      </span>
+      <div class="site-footer__row">
+        <span>qLLM product site</span>
+        <span>
+          <a href="https://github.com/jpandrade30/qLLM">GitHub</a>
+          ·
+          <a href="https://github.com/jpandrade30/qLLM/blob/main/CHANGELOG.md">CHANGELOG.md</a>
+          ·
+          <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
+        </span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Experimental project. Provided as-is. The author accepts no responsibility for any damage
+        caused by its use.
+      </p>
     </footer>
     <script src="assets/site.js"></script>
   </body>
