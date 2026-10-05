@@ -3,13 +3,19 @@
 All notable changes to qLLM are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.1**.
+Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.2**.
 
 ## [Unreleased]
+
+## [0.3.2] - 2026-10-04
 
 ### Added
 
 - Experimental source type `graphql` (no harness): HTTP POST to `baseUrlEnv`, catalog binding `graphql_operation` + `options.operations.<name>` (`document`, `itemsPath`, optional `variables` / `limitVariable`). Documents must be GraphQL **`query` only** — `mutation` / `subscription` and write keywords (`INSERT`, `UPDATE`, `DELETE`, …) fail at open/fetch with `CONFIG_ERROR` before any HTTP. Not a GraphQL agent API (D17 unchanged).
+
+### Changed
+
+- Docs and root README Quick start recommend downloading the GitHub Release **`qllm-standalone-<ver>.zip`** instead of cloning the monorepo to run qLLM.
 
 ## [0.3.1] - 2026-10-03
 
