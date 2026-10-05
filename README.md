@@ -10,7 +10,7 @@ Release **0.3.5**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planni
 
 Product site: https://jpandrade30.github.io/qLLM/
 
-**Example in action:** [jpandrade30/SmallDemo](https://github.com/jpandrade30/SmallDemo) (Northline) — fictional company on Rancher Desktop / k3s with siloed services, console, GitOps, and qLLM over HTTP + MCP.
+**Example in action:** [jpandrade30/SmallDemo](https://github.com/jpandrade30/SmallDemo) (Northline) — fictional company on Rancher Desktop / k3s with siloed services, console, GitOps, and qLLM over HTTP + MCP. Demo video: [YouTube](https://www.youtube.com/watch?v=1rozeLOgUE0).
 
 ## Experimental / disclaimer
 
