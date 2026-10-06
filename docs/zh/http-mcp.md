@@ -10,7 +10,7 @@
 | GET | `/v1/howtouseme` | 是* | 面向 IR 和 SQL 的封闭式指南 |
 | GET | `/v1/catalog` | 是* | catalog（按 ACL 过滤） |
 | POST | `/v1/queries` | 是* | 请求体为 Query IR |
-| POST | `/v1/sql` | 是* | `{ "sql", "version"? }` |
+| POST | `/v1/sql` | 是* | `{ "sql", "version"?, "constraints"?, "constraintMode"? }` |
 | GET | `/v1/queries/{id}` | 是* | 异步状态 |
 | GET | `/v1/queries/{id}/result` | 是* | 结果；尚未完成时返回 `NOT_READY` |
 
@@ -30,7 +30,7 @@
 |------|------|------|
 | `how_to_use_me` | 无 | 与 `/v1/howtouseme` 作用相同 |
 | `describe_catalog` | 无 | catalog 的 JSON（已应用 ACL） |
-| `execute_sql` | `sql`（必填）、`version`（可选） | 与 `POST /v1/sql` 相同 |
+| `execute_sql` | `sql`（必填）、`version`（可选）、`constraints` / `constraintMode`（可选，D23） | 与 `POST /v1/sql` 相同 |
 
 没有 Query IR 工具。
 

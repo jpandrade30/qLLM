@@ -184,7 +184,7 @@ curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/cat
 
 `GET /v1/health` stays unauthenticated for probes.
 
-Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`) and `tables` from the catalog. One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. See [multi-user safety](docs/en/multi-user-safety.md).
+Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`) and `tables` from the catalog. One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. Optional SQL `constraints` / `constraintMode` (D23) are a lighter host-bound assist — see [multi-user safety](docs/en/multi-user-safety.md).
 
 ```yaml
 apps:
@@ -287,6 +287,16 @@ go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 **Windows users:** download the DuckDB C/C++ library (`duckdb.dll` and `duckdb.lib`) from the [official DuckDB site](https://duckdb.org/docs/installation/) (the `libduckdb-windows-amd64` zip) and place both files in the `duckdblib/` folder at the repo root before using `-tags duckdb`. `scripts/dev/dev-shell.ps1` expects them there.
 
 Without `-tags duckdb`, `go test ./...` stays CGO-free.
+
+**Prefer Linux for unit tests with DuckDB:** [`Dockerfile.test`](Dockerfile.test) mirrors CI (`go vet`, `go test ./...`, `go test -tags duckdb` on `duckdblocal` + `executor`). No compose / DBs.
+
+```powershell
+.\scripts\dev\test-in-container.ps1
+# or: nerdctl build -f Dockerfile.test --target test .
+# re-run (TTY for colors): nerdctl run --rm -t qllm-test
+```
+
+Quiet / no color: `-e QLLM_TEST_V=0` / `-e QLLM_TEST_COLOR=0`.
 
 ## Development
 

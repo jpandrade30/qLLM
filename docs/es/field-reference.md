@@ -311,6 +311,8 @@ No uses este archivo para secretos versionados en git. En Kubernetes, usa un Sec
 
 Obligatorio: `sql`. Opcional: `version` (`"1"` congelado; omitido o `"2"` es el más reciente).
 
+Opcional (D23): `constraints` (objeto campo→string/número/boolean) y `constraintMode` (`validate` | `inject`). Por defecto con mapa no vacío: `validate`. Preferir mapa fijado en el host; ver [multi-user-safety.md](multi-user-safety.md).
+
 ---
 
 ## Query IR (campos)

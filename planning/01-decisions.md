@@ -125,8 +125,8 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 
 ### D21 — Escopo na credencial, não na query
 
-- **Decisão:** `qllm.access.yaml` tem **uma entrada por tipo de app** (`mobile`, `admin`), nunca por usuário. O código do usuário vive na chave derivada `app.scopeValue.expiryUnix.hmac` (HMAC-SHA256 do `keySecret`, Base64URL). O catálogo marca entidades com `scope.field` (coluna opcional `scope.column`). O runtime força `eq` nessa coluna. `scopeMode` default `reject` (filtro conflitante → `FORBIDDEN_SCOPE`); `inject` faz AND. Tools de query **sem** campo novo. Variante estática `scope: { user_id: "acme" }` só para poucos principals fixos. MCP stdio: `QLLM_SCOPE` / `--scope`.
-- **Por quê:** Se o modelo pudesse passar o `user_id` na tool, trocaria 42 por 7.
+- **Decisão:** `qllm.access.yaml` tem **uma entrada por tipo de app** (`mobile`, `admin`), nunca por usuário. O código do usuário vive na chave derivada `app.scopeValue.expiryUnix.hmac` (HMAC-SHA256 do `keySecret`, Base64URL). O catálogo marca entidades com `scope.field` (coluna opcional `scope.column`). O runtime força `eq` nessa coluna. `scopeMode` default `reject` (filtro conflitante → `FORBIDDEN_SCOPE`); `inject` faz AND. Tools de query **não exigem** campo de sujeito; o caminho forte continua na credencial. Variante estática `scope: { user_id: "acme" }` só para poucos principals fixos. MCP stdio: `QLLM_SCOPE` / `--scope`. Constraints opcionais no SQL (D23) são **aditivos** e **não** substituem este mecanismo.
+- **Por quê:** Se o modelo pudesse ser a única fonte do `user_id` na tool, trocaria 42 por 7.
 - **Consequência:** `key` e `keySecret` são mutuamente exclusivos. App com `scope` precisa que cada `tables[]` tenha `scope` no catalog ou esteja em `unscopedTables`. App sem `scope` (admin) não injeta. Sem denylist; revogação = expiração curta ou rotacionar o segredo. RLS/view no banco continua recomendado.
 
 ### D22 — Célula `json` é JSON parseado; tipo de coluna vem da fonte/DuckDB
@@ -134,3 +134,9 @@ Formato: **Decisão** → **Por quê** → **Consequência**.
 - **Decisão:** Uma coluna `type: json` devolve o valor **já parseado** (objeto ou lista) em Query IR e em catalog SQL. `result.rows` aceita `array`. `fields[].shape` (texto livre, opcional) descreve a estrutura interna para o LLM; aparece no `describe_catalog`. O SQL path infere `columns[].type` a partir do tipo DuckDB (não força `string`). Inteiros acima de 2^53 devem ser `string` no catálogo: `number` materializa como `DOUBLE`.
 - **Por quê:** Sem isso, `execute_sql` mentia o tipo, `jsonb` virava texto, e uma lista de tags violava o schema de resposta. O LLM precisa saber o que tem dentro de um objeto.
 - **Consequência:** Aditivo; `protocolVersion` permanece **0.2.0**. REST continua lendo só chaves de topo. Sem filtro/agregação dentro do JSON. Sem caminho pontilhado no REST.
+
+### D23 — Constraints opcionais em `execute_sql` / `POST /v1/sql`
+
+- **Decisão:** O body/tool pode incluir `constraints` (mapa campo→escalar) e `constraintMode` (`validate` | `inject`). Default quando `constraints` não está vazio: `validate`. **validate:** se o SQL já tem igualdade naquele campo com valor diferente → `FORBIDDEN_SCOPE`; campo ausente no WHERE → permite (footgun documentado). **inject:** força `eq` no fetch da fonte para entidades que possuem o campo; igualdade conflitante no SQL → `FORBIDDEN_SCOPE`. Chave desconhecida no catalog das tabelas citadas → `INVALID_SQL`. Se D21 já escopa o campo `F` na credencial, constraint `F` deve coincidir ou → `FORBIDDEN_SCOPE`. Preferir amarrar o mapa no host (BFF/LangGraph), não deixar o LLM inventar. Não há 4ª tool MCP.
+- **Por quê:** Camada mais simples que Bearer derivado para gateways que já conhecem o sujeito; defesa em profundidade sem substituir D21.
+- **Consequência:** Schema `sql-request` e MCP `execute_sql` ganham campos opcionais. Query IR **não** ganha o mesmo mapa neste bump (só SQL path). Extração de igualdade cobre cadeia `AND` de `eq` no WHERE externo; `OR`/`NOT`/`IN` no WHERE tornam o campo ambíguo → tratado como conflito se o campo estiver sob constraints.

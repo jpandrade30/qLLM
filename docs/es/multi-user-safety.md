@@ -27,3 +27,7 @@ Unos pocos principals fijos pueden usar `key` + `scope: { user_id: "acme" }`.
 Filtro de otro usuario en Query IR: `FORBIDDEN_SCOPE` (`scopeMode: reject`). En SQL de catálogo el alcance se **inyecta** en el fetch (resultado vacío). Una app sin `scope` (admin) no inyecta. Una entidad sin `scope` no está protegida; declara `unscopedTables`. Sigue siendo recomendable RLS en la base.
 
 Grafo LangGraph: compile una vez; el Bearer va en `config["configurable"]["qllm_token"]`; cada `execute_sql` abre una sesión MCP corta. Ejemplo: [`deploy/prd/enforced/`](../../deploy/prd/enforced/README.md).
+
+## Constraints en el request (D23)
+
+Opcional en `execute_sql` / `POST /v1/sql`: `constraints` + `constraintMode` (`validate` | `inject`). Preferir fijar el mapa en el host. No sustituye el Bearer derivado (D21). Detalle: [en/multi-user-safety.md](../en/multi-user-safety.md).

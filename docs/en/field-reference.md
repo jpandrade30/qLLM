@@ -313,6 +313,8 @@ Do not use this file for secrets in git. On Kubernetes, use a Secret.
 
 Required: `sql`. Optional: `version` (`"1"` frozen; omitted or `"2"` latest).
 
+Optional (D23): `constraints` (object of catalog field → string/number/boolean) and `constraintMode` (`validate` | `inject`). Default mode when `constraints` is non-empty: `validate`. Prefer host-bound maps; see [multi-user-safety.md](multi-user-safety.md).
+
 ---
 
 ## Query IR (fields)

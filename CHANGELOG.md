@@ -11,6 +11,8 @@ Protocol versions are the `protocolVersion` field (`planning/`). Runtime respons
 
 - Link to the end-to-end demo repo [jpandrade30/SmallDemo](https://github.com/jpandrade30/SmallDemo) from the README and product site (home, Get started, Docs).
 - Home page embeds the SmallDemo walkthrough video ([YouTube](https://www.youtube.com/watch?v=1rozeLOgUE0)) before **01 — What**.
+- Optional SQL request `constraints` + `constraintMode` (`validate` | `inject`) on `execute_sql` / `POST /v1/sql` (D23): abort on mismatched field equality; inject forces eq on source fetch. Credential scope (D21) still wins when both apply.
+- `Dockerfile.test` (+ `scripts/dev/test-in-container.ps1` / `.sh`) runs the CI unit suite (pure Go + `-tags duckdb`) in Linux via nerdctl — useful on Windows without local CGO/duckdblib. Verbose colored output via `scripts/dev/run-go-tests.sh` (`nerdctl run -t`).
 
 ## [0.3.5] - 2026-10-04
 

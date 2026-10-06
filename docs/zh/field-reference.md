@@ -311,6 +311,8 @@ sources:
 
 必填：`sql`。可选：`version`（`"1"` 为冻结版本；省略或 `"2"` 为最新版本）。
 
+可选（D23）：`constraints`（字段→字符串/数字/布尔）与 `constraintMode`（`validate` | `inject`）。有 `constraints` 时默认 `validate`。优先由宿主绑定该映射；见 [multi-user-safety.md](multi-user-safety.md)。
+
 ---
 
 ## Query IR（字段）

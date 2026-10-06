@@ -27,3 +27,7 @@ stdio MCP：`--app mobile` 加上 `--scope 42`（或 `QLLM_SCOPE`）。
 Query IR 过滤其他用户时返回 `FORBIDDEN_SCOPE`（默认 `scopeMode: reject`）。目录 SQL 在拉取时**注入**范围（结果为空）。没有 `scope` 的应用（管理员）不注入。目录中未声明 `scope` 的实体不受保护，需写明 `unscopedTables`。数据库 RLS/视图仍建议作为第二层。
 
 LangGraph：图只编译一次；Bearer 放在 `config["configurable"]["qllm_token"]`；每次 `execute_sql` 打开短 MCP 会话。示例：[`deploy/prd/enforced/`](../../deploy/prd/enforced/README.md)。
+
+## 请求约束（D23）
+
+`execute_sql` / `POST /v1/sql` 可选：`constraints` + `constraintMode`（`validate` | `inject`）。优先由宿主绑定映射。不能替代派生 Bearer（D21）。详见 [en/multi-user-safety.md](../en/multi-user-safety.md)。

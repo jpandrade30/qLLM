@@ -136,7 +136,7 @@ func executeSQLDescription(idx *catalogidx.Index) string {
 	var b strings.Builder
 	b.WriteString("Run a catalog SQL SELECT (DuckDB after fetch). Args: sql (required), version (optional 1|2, omit=latest ")
 	b.WriteString(protocol.SQLDialectLatest)
-	b.WriteString(").\n")
+	b.WriteString("), optional constraints (field→scalar; host-bound preferred) and constraintMode validate|inject (default validate).\n")
 	b.WriteString(sqlCapabilities)
 	b.WriteByte('\n')
 	b.WriteString(catalogBody(idx))

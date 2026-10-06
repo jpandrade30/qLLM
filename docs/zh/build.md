@@ -34,6 +34,19 @@ go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 
 [`Dockerfile`](../../Dockerfile) 和 [`Dockerfile.dev`](../../Dockerfile.dev) 都会执行 `go build -tags duckdb`。产品镜像复制 `deploy/prd`；Compose 使用 `.dev` 以及 `deploy/image/config`。
 
+## 容器内单元测试（`Dockerfile.test`）
+
+与 CI 相同（纯 Go + `duckdblocal` / `executor` 的 `-tags duckdb`）。无 compose。适合在 Windows 上避免本地 CGO/duckdblib：
+
+```bash
+nerdctl build -f Dockerfile.test --target test .
+# 或 build + run（-t 以显示颜色）：
+nerdctl build -f Dockerfile.test -t qllm-test .
+nerdctl run --rm -t qllm-test
+```
+
+助手脚本：`scripts/dev/test-in-container.ps1` / `test-in-container.sh`。环境变量：`QLLM_TEST_V=0`（安静），`QLLM_TEST_COLOR=0`（无 ANSI）。
+
 ## Docker / nerdctl
 
 ```bash

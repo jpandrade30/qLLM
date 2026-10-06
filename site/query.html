@@ -71,7 +71,11 @@
               </tr>
               <tr>
                 <td><code>execute_sql</code></td>
-                <td>Catalog SQL against the logical catalog. Logs SQL to stderr.</td>
+                <td>
+                  Catalog SQL against the logical catalog. Optional
+                  <code>constraints</code> / <code>constraintMode</code> (D23) for host-bound
+                  equality checks or inject. Logs SQL to stderr.
+                </td>
               </tr>
             </tbody>
           </table>
@@ -108,7 +112,10 @@
               </tr>
               <tr>
                 <td><code>POST /v1/sql</code></td>
-                <td>Execute catalog SQL</td>
+                <td>
+                  Execute catalog SQL (<code>constraints</code> /
+                  <code>constraintMode</code> optional)
+                </td>
               </tr>
             </tbody>
           </table>

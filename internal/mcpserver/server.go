@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"qLLM/internal/access"
 	"qLLM/internal/agentguide"
@@ -52,6 +53,8 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 		mcp.WithDescription(d.ExecuteSQL),
 		mcp.WithString("sql", mcp.Required(), mcp.Description("SELECT using catalog entity names; output AS aliases OK")),
 		mcp.WithString("version", mcp.Description("SQL dialect: \"1\" (frozen) or \"2\" (latest). Omit for latest.")),
+		mcp.WithObject("constraints", mcp.Description("Optional catalog field→scalar map (D23). Prefer host-bound values, not model-invented subjects.")),
+		mcp.WithString("constraintMode", mcp.Description("validate (default if constraints set) or inject. inject also forces eq on source fetch.")),
 	), func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		sqlStr, err := req.RequireString("sql")
 		if err != nil {
@@ -61,7 +64,25 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 		if v, err := req.RequireString("version"); err == nil {
 			version = v
 		}
-		resp := exec.ExecuteSQL(ctx, &protocol.SQLRequest{SQL: sqlStr, Version: version})
+		sqlReq := &protocol.SQLRequest{SQL: sqlStr, Version: version}
+		if args := req.GetArguments(); args != nil {
+			if mode, ok := args["constraintMode"].(string); ok {
+				sqlReq.ConstraintMode = mode
+			}
+			if raw, ok := args["constraints"]; ok && raw != nil {
+				m, cerr := constraintsFromMCP(raw)
+				if cerr != nil {
+					b, _ := json.Marshal(protocol.QueryResponse{
+						ProtocolVersion: protocol.ProtocolVersion,
+						Status:          protocol.StatusFailed,
+						Error:           cerr,
+					})
+					return mcp.NewToolResultError(string(b)), nil
+				}
+				sqlReq.Constraints = m
+			}
+		}
+		resp := exec.ExecuteSQL(ctx, sqlReq)
 		b, err := json.Marshal(resp)
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -73,6 +94,24 @@ func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store
 	})
 
 	return s
+}
+
+func constraintsFromMCP(raw any) (map[string]any, *protocol.ProtocolError) {
+	switch t := raw.(type) {
+	case map[string]any:
+		return t, nil
+	case string:
+		if strings.TrimSpace(t) == "" {
+			return nil, nil
+		}
+		var m map[string]any
+		if err := json.Unmarshal([]byte(t), &m); err != nil {
+			return nil, protocol.NewError(protocol.ErrInvalidSQL, "constraints must be a JSON object", map[string]any{"error": err.Error()})
+		}
+		return m, nil
+	default:
+		return nil, protocol.NewError(protocol.ErrInvalidSQL, "constraints must be an object", map[string]any{"type": fmt.Sprintf("%T", raw)})
+	}
 }
 
 // allowFrom implements runtime behavior for this package.

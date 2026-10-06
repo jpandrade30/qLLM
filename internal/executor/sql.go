@@ -99,6 +99,25 @@ func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (re
 	if perr != nil {
 		return fail(queryID, mode, start, perr, app)
 	}
+	constraints, cerr := normalizeConstraints(req.Constraints)
+	if cerr != nil {
+		return fail(queryID, mode, start, cerr, app)
+	}
+	cMode, merr := protocol.ResolveConstraintMode(req.ConstraintMode, req.Constraints)
+	if merr != nil {
+		return fail(queryID, mode, start, merr, app)
+	}
+	if len(constraints) > 0 {
+		if err := checkConstraintsKnown(constraints, scans); err != nil {
+			return fail(queryID, mode, start, err, app)
+		}
+		if err := checkConstraintsVsD21(app, constraints); err != nil {
+			return fail(queryID, mode, start, err, app)
+		}
+		if err := validateSQLConstraints(req.SQL, constraints); err != nil {
+			return fail(queryID, mode, start, err, app)
+		}
+	}
 	limits := e.Idx.Preset.Limits
 	sqlText := strings.TrimSpace(req.SQL)
 	if parsed.Limit == nil {
@@ -138,6 +157,7 @@ func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (re
 		if serr != nil {
 			return fail(queryID, mode, start, serr, app)
 		}
+		where = mergeConstraintWhere(where, sc.entity, constraints, cMode)
 		step := def.PushdownStep{
 			SourceID: sc.entity.Source,
 			Entity:   sc.entity,

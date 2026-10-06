@@ -128,10 +128,12 @@ curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/cat
           </li>
         </ul>
         <p class="note">
-          Deep reference for multi-user scoped credentials:
+          Deep reference for multi-user scoped credentials and optional SQL
+          <code>constraints</code> (D23):
           <a href="https://github.com/jpandrade30/qLLM/blob/main/docs/en/multi-user-safety.md"
             >docs/en/multi-user-safety.md</a
-          >.
+          >. Derived Bearer remains the strong path; request constraints are a lighter host-bound
+          assist.
         </p>
       </section>
     </main>

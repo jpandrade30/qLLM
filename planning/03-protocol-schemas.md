@@ -110,7 +110,7 @@ apps:
 - `scope.field` no app = nome do valor na chave. `entities[].scope.field` (e `column` se o nome físico/lógico diferir) marca a coluna filtrada.
 - `tables: ["*"]` = todas as entidades do catalog. `unscopedTables` = tabelas compartilhadas exigidas quando o app tem `scope`.
 - HTTP/MCP HTTP: `Authorization: Bearer` (key estática ou derivada). MCP stdio / CLI: `--app` / `QLLM_APP` e, se o app for template, `--scope` / `QLLM_SCOPE` (`42` ou `user_id=42`).
-- `execute_sql` e o IR **não** ganham campo de constraint.
+- Escopo forte = credencial (D21). Constraints opcionais no SQL (D23) são aditivos e não substituem D21.
 
 ### `qllm.env.yaml` (opcional — seed de env)
 
@@ -720,14 +720,20 @@ Nota: mesmo em async, o job respeita `maxSyncMs` / budget; status final será `s
 JSON Schema: [`schemas/sql-request.schema.json`](schemas/sql-request.schema.json).
 
 ```json
-{ "version": "1", "sql": "SELECT c.id, i.total FROM customers c INNER JOIN invoices i ON i.customer_id = c.id LIMIT 100" }
+{
+  "version": "1",
+  "sql": "SELECT c.id, i.total FROM customers c INNER JOIN invoices i ON i.customer_id = c.id LIMIT 100",
+  "constraints": { "user_id": "42" },
+  "constraintMode": "inject"
+}
 ```
 
 - `version` opcional; omitido = dialeto mais novo (`"2"`). `"1"` e `"2"` suportados. Desconhecido = `UNSUPPORTED_VERSION`. Ver [`07-sql-dialect.md`](07-sql-dialect.md).
+- `constraints` / `constraintMode` opcionais (D23): mapa campo→escalar; mode `validate` (default se o mapa não está vazio) ou `inject`. Preferir amarrar no host. D21 na credencial ganha se ambos escopam o mesmo campo.
 - Resposta tabular igual a `POST /v1/queries` (`query-response.schema.json`). `meta.app` = nome do app quando ACL está ativo.
 - Dialeto `"1"`: uma statement `SELECT` (WITH, HAVING, DISTINCT, CASE, LIKE, BETWEEN, subquery, aritmética). Sem `UNION`/`INTERSECT`/`EXCEPT`/`QUALIFY`.
 - Dialeto `"2"`: inclui set ops, `QUALIFY`, windows/`XOR`/`COUNT(DISTINCT …)` quando DuckDB aceita. Ambos recusam DML/DDL, multi-statement, schema físico, `read_csv` / `read_parquet` / `read_json` / `postgres_scan` / `httpfs` / `glob` e afins.
-- Runtime: parser lista tabelas/colunas; connectors fazem scan (sem `WHERE` pushdown); DuckDB materializa nomes lógicos e executa o SQL com `enable_external_access=false`. Sem `LIMIT` no SELECT externo, aplica `defaultLimit`. `LIMIT` > `maxLimit` = `LIMIT_EXCEEDED`.
+- Runtime: parser lista tabelas/colunas; connectors fazem scan (sem `WHERE` pushdown do SQL do agente); DuckDB materializa nomes lógicos e executa o SQL com `enable_external_access=false`. Sem `LIMIT` no SELECT externo, aplica `defaultLimit`. `LIMIT` > `maxLimit` = `LIMIT_EXCEEDED`.
 - Sem build `-tags duckdb`: `UNSUPPORTED`.
 
 CLI: `qllm sql --config-dir … -f query.sql` (`--version` opcional).
@@ -807,7 +813,7 @@ Todo erro de API:
 |------|-------|--------|
 | `how_to_use_me` | `{}` | body de `GET /v1/howtouseme` (contrato LLM) |
 | `describe_catalog` | `{}` | body de `GET /v1/catalog` |
-| `execute_sql` | `{ sql, version? }` | body de `POST /v1/sql` |
+| `execute_sql` | `{ sql, version?, constraints?, constraintMode? }` | body de `POST /v1/sql` |
 
 Descriptions MCP no `serve` interpolam nomes do **catalog carregado** (teto ~4k chars). Sem entidades no YAML, as descriptions não citam tabelas de demo. Sem N tools por tabela (D06).
 

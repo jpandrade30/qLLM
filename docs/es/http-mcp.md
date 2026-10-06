@@ -10,7 +10,7 @@ Listener: `--addr` / `serve.addr` (por defecto `127.0.0.1:8088`).
 | GET | `/v1/howtouseme` | sí* | Guía cerrada para IR y SQL |
 | GET | `/v1/catalog` | sí* | Catálogo (filtrado por ACL) |
 | POST | `/v1/queries` | sí* | El cuerpo es un Query IR |
-| POST | `/v1/sql` | sí* | `{ "sql", "version"? }` |
+| POST | `/v1/sql` | sí* | `{ "sql", "version"?, "constraints"?, "constraintMode"? }` |
 | GET | `/v1/queries/{id}` | sí* | Estado asíncrono |
 | GET | `/v1/queries/{id}/result` | sí* | Resultado; `NOT_READY` si aún no terminó |
 
@@ -30,7 +30,7 @@ Tools (solo estas):
 |------|------------|--------|
 | `how_to_use_me` | ninguno | Mismo propósito que `/v1/howtouseme` |
 | `describe_catalog` | ninguno | JSON del catálogo (con ACL aplicada) |
-| `execute_sql` | `sql` (obligatorio), `version` opcional | Igual que `POST /v1/sql` |
+| `execute_sql` | `sql` (obligatorio), `version` opcional, `constraints` / `constraintMode` opcional (D23) | Igual que `POST /v1/sql` |
 
 No existe ninguna tool de Query IR.
 

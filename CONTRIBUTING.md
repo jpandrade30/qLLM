@@ -48,6 +48,7 @@ go test ./...
 
 CI also runs `go test -tags duckdb` on Linux and builds the slim standalone
 folder. Match that locally when you touch DuckDB or release packaging.
+On Windows without CGO: `.\scripts\dev\test-in-container.ps1` (`Dockerfile.test`).
 
 ## Fork and pull request workflow
 
