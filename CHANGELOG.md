@@ -3,9 +3,11 @@
 All notable changes to qLLM are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.5**.
+Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.6-rc.1**.
 
 ## [Unreleased]
+
+## [0.3.6-rc.1] - 2026-10-08
 
 ### Added
 
