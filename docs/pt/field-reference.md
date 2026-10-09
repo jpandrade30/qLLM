@@ -64,12 +64,14 @@ Obrigatórios: `id`, `type`, `connection`.
 | `userEnv` | string | |
 | `passwordEnv` | string | |
 | `sslMode` | enum opcional | `disable` `require` `verify-ca` `verify-full` (postgres; o mysql ignora quando não é usado) |
+| `maxOpenConns` | int opcional | `1`–`100`; teto do pool `database/sql` (padrão **5**). Em muitos pods, baixe por réplica (`pods × maxOpenConns ≲ max_connections` do DB) |
+| `maxOpenConnsEnv` | string opcional | Nome da env com um inteiro; se definida, ganha de `maxOpenConns`. Vazia ou não numérica → `CONFIG_ERROR` ao abrir a source |
 
-**mssql**: mesmos obrigatórios. Extra opcional: `encrypt`: `true` \| `false` \| `disable`. Não tem `sslMode`.
+**mssql**: mesmos obrigatórios. Extra opcional: `encrypt`: `true` \| `false` \| `disable`. Mesmos `maxOpenConns` / `maxOpenConnsEnv` opcionais. Não tem `sslMode`.
 
-**clickhouse**: mesmos obrigatórios. Extra opcional: `secure` (bool).
+**clickhouse**: mesmos obrigatórios. Extra opcional: `secure` (bool). Mesmos `maxOpenConns` / `maxOpenConnsEnv` opcionais.
 
-**sqlite**: apenas `pathEnv` (a variável de ambiente com o caminho do arquivo `.db`).
+**sqlite**: `pathEnv` (a variável de ambiente com o caminho do arquivo `.db`). `maxOpenConns` / `maxOpenConnsEnv` são aceites, mas o teto efetivo é sempre **1**.
 
 **mongodb**: obrigatórios `uriEnv`, `database`.
 

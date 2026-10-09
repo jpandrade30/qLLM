@@ -62,13 +62,13 @@ Harness / CI covers **postgres**, **mysql**, **mongodb**, and **rest**. Everythi
 
 | `type` | Status | Pushdown | Notes |
 |--------|--------|----------|-------|
-| `postgres` | stable | filter, project, agg, groupBy, order, limit, same-source join | `sslMode`; `statementTimeoutMs` |
-| `mysql` | stable | same as postgres | |
+| `postgres` | stable | filter, project, agg, groupBy, order, limit, same-source join | `sslMode`; `statementTimeoutMs`; optional `maxOpenConns` / `maxOpenConnsEnv` (pool; default 5) |
+| `mysql` | stable | same as postgres | same optional pool keys as postgres |
 | `mongodb` | stable | filter, project, agg, groupBy, order, limit | same-source join goes through DuckDB |
 | `rest` | stable | `eq` filter, project, limit/offset | `options.resources` required; aggregations in DuckDB; optional `getById`, `itemsKey`, offset pagination; `fromFilter` fills keys the API omits |
-| `mssql` | experimental | same as postgres | `encrypt` |
-| `sqlite` | experimental | same as postgres | `pathEnv`; `binding.schema: main` |
-| `clickhouse` | experimental | same as postgres | native port is typically 9000 |
+| `mssql` | experimental | same as postgres | `encrypt`; optional `maxOpenConns` / `maxOpenConnsEnv` |
+| `sqlite` | experimental | same as postgres | `pathEnv`; `binding.schema: main`; pool always capped at 1 |
+| `clickhouse` | experimental | same as postgres | native port is typically 9000; optional pool keys |
 | `dynamodb` | experimental | key equality, project, limit | `binding.accessPath` pk/sk required or `UNSUPPORTED` |
 | `cassandra` | experimental | partition equality, project, limit | `accessPath.partition` required or `UNSUPPORTED` |
 | `ksql` | experimental | key equality, project, limit | **pull only**; `accessPath.ksqlKey` required or `UNSUPPORTED` |

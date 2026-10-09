@@ -232,6 +232,8 @@ sources:
       userEnv: QLLM_CRM_PG_USER
       passwordEnv: QLLM_CRM_PG_PASSWORD
       sslMode: disable
+      # optional pool cap (database/sql MaxOpenConns); default 5. Or maxOpenConnsEnv: QLLM_PG_MAX_OPEN
+      # maxOpenConns: 3
     options:
       statementTimeoutMs: 12000
 
@@ -331,6 +333,8 @@ GraphQL source notes: `options.operations.<name>.document` must be a GraphQL **`
 | `sources[].id` | string | `[a-z][a-z0-9_]*` |
 | `sources[].type` | enum | `postgres` \| `mysql` \| `mongodb` \| `rest` \| `mssql` \| `sqlite` \| `clickhouse` \| `dynamodb` \| `cassandra` \| `ksql` \| `redis` \| `kafka` \| `graphql` \| MySQL-wire aliases (`mariadb`, `tidb`, `vitess`, `aurora_mysql`, `planetscale`) \| Postgres-wire aliases (`cockroach`, `yugabyte`, `alloydb`, `aurora_postgres`, `neon`, `supabase`, `timescale`, `redshift`) |
 | `sources[].connection` | object | por tipo (ver schemas) |
+
+SQL `database/sql` sources (`postgres` / `mysql` + wire aliases, `mssql`, `clickhouse`, `sqlite`): optional `maxOpenConns` (`1`–`100`, default **5**) or `maxOpenConnsEnv` (env holding an integer; wins over the literal). Invalid / empty env → `CONFIG_ERROR` at open. **sqlite** always clamps the effective pool to **1**. Multi-pod: keep `pods × maxOpenConns` under the database `max_connections`.
 
 ### `limits`
 

@@ -64,12 +64,14 @@ Required: `id`, `type`, `connection`.
 | `userEnv` | string | |
 | `passwordEnv` | string | |
 | `sslMode` | optional enum | `disable` `require` `verify-ca` `verify-full` (postgres; mysql ignores it when unused) |
+| `maxOpenConns` | optional int | `1`–`100`; `database/sql` pool cap (default **5**). Prefer lowering per pod when many replicas share one DB (`pods × maxOpenConns ≲ DB max_connections`) |
+| `maxOpenConnsEnv` | optional string | Env var name whose value is an integer; if set, wins over `maxOpenConns`. Empty or non-integer → `CONFIG_ERROR` at source open |
 
-**mssql**: same required fields. Optional extra: `encrypt`: `true` \| `false` \| `disable`. No `sslMode`.
+**mssql**: same required fields. Optional extra: `encrypt`: `true` \| `false` \| `disable`. Same optional `maxOpenConns` / `maxOpenConnsEnv`. No `sslMode`.
 
-**clickhouse**: same required fields. Optional extra: `secure` (bool).
+**clickhouse**: same required fields. Optional extra: `secure` (bool). Same optional `maxOpenConns` / `maxOpenConnsEnv`.
 
-**sqlite**: only `pathEnv` (the env var that holds the `.db` file path).
+**sqlite**: `pathEnv` (the env var that holds the `.db` file path). Optional `maxOpenConns` / `maxOpenConnsEnv` are accepted but the effective pool cap is always **1**.
 
 **mongodb**: required `uriEnv`, `database`.
 

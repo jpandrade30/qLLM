@@ -98,7 +98,10 @@ func OpenPostgres(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	}
 
 	db := stdlib.OpenDB(*cfg)
-	db.SetMaxOpenConns(5)
+	if err := applyMaxOpenConns(db, src); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
 	db.SetConnMaxLifetime(30 * time.Minute)
 	return &SQLConnector{
 		id: src.ID, srcType: src.Type, db: db,
@@ -150,7 +153,10 @@ func OpenMySQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 		return nil, protocol.NewError(protocol.ErrConfigError, "mysql connector failed", map[string]any{"source": src.ID})
 	}
 	db := sql.OpenDB(connector)
-	db.SetMaxOpenConns(5)
+	if err := applyMaxOpenConns(db, src); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
 	return &SQLConnector{
 		id: src.ID, srcType: src.Type, db: db,
 		dialect: sqlbuild.MySQL,
