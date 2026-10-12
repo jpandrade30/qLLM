@@ -10,6 +10,7 @@ import (
 
 	"qLLM/internal/access"
 	"qLLM/internal/appctx"
+	"qLLM/internal/catalogdesc"
 	"qLLM/internal/catalogidx"
 	"qLLM/internal/executor"
 	"qLLM/internal/protocol"
@@ -35,17 +36,28 @@ func (s *Server) logger() *slog.Logger {
 	return slog.Default()
 }
 
-// Handler handles an HTTP or MCP request.
-func (s *Server) Handler() http.Handler {
-	mux := http.NewServeMux()
+// Register attaches /v1 routes onto mux (no auth). Used by dedicated HTTP and MCP HTTP.
+func (s *Server) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /v1/health", s.health)
 	mux.HandleFunc("GET /v1/howtouseme", s.howToUseMe)
 	mux.HandleFunc("GET /v1/catalog", s.catalog)
+	mux.HandleFunc("POST /v1/catalog/describe", s.catalogDescribe)
 	mux.HandleFunc("POST /v1/queries", s.createQuery)
 	mux.HandleFunc("POST /v1/sql", s.createSQL)
 	mux.HandleFunc("GET /v1/queries/{id}", s.getQuery)
 	mux.HandleFunc("GET /v1/queries/{id}/result", s.getResult)
-	var h http.Handler = s.logMiddleware(mux)
+}
+
+// Routes returns the /v1 mux with logging and no auth (for mounting under MCP HTTP).
+func (s *Server) Routes() http.Handler {
+	mux := http.NewServeMux()
+	s.Register(mux)
+	return s.logMiddleware(mux)
+}
+
+// Handler handles an HTTP or MCP request.
+func (s *Server) Handler() http.Handler {
+	var h http.Handler = s.Routes()
 	if s.ACL != nil {
 		h = serveauth.AppsMiddleware(s.ACL, h)
 	} else {
@@ -62,6 +74,58 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 // catalog implements runtime behavior for this package.
 func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, s.Idx.CatalogResponseFor(s.allow(r)))
+}
+
+// catalogDescribe returns an execute_sql-style description for selected tables.
+func (s *Server) catalogDescribe(w http.ResponseWriter, r *http.Request) {
+	max := s.MaxBodyBytes
+	if max <= 0 {
+		max = protocol.DefaultMaxBodyBytes
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, max)
+	var req protocol.CatalogDescribeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		msg := err.Error()
+		if err == io.EOF {
+			msg = "empty body"
+		}
+		writeErr(w, http.StatusBadRequest, protocol.NewError(protocol.ErrInvalidIR, msg, nil))
+		return
+	}
+	if len(req.Tables) == 0 {
+		writeErr(w, http.StatusBadRequest, protocol.NewError(protocol.ErrInvalidIR, "tables is required", nil))
+		return
+	}
+	allow := s.allow(r)
+	if allow != nil {
+		for _, name := range req.Tables {
+			if _, ok := allow[name]; !ok {
+				writeErr(w, http.StatusForbidden, protocol.NewError(protocol.ErrForbidden,
+					"table not allowed for this app: "+name, map[string]any{"table": name}))
+				return
+			}
+		}
+	}
+	base := s.Idx.CatalogFor(allow)
+	out, perr := catalogdesc.Describe(s.Idx.Preset, base, req.Tables, req.Strict)
+	if perr != nil {
+		writeErr(w, httpStatus(perr.Code), perr)
+		return
+	}
+	issues := make([]protocol.CatalogDescribeIssue, 0, len(out.Issues))
+	for _, iss := range out.Issues {
+		issues = append(issues, protocol.CatalogDescribeIssue{
+			Severity: iss.Severity, Code: iss.Code, Message: iss.Message,
+			Entity: iss.Entity, Relation: iss.Relation,
+		})
+	}
+	writeJSON(w, http.StatusOK, protocol.CatalogDescribeResponse{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Description:     out.Description,
+		Entities:        out.Entities,
+		Issues:          issues,
+		Catalog:         out.Catalog,
+	})
 }
 
 // allow implements runtime behavior for this package.

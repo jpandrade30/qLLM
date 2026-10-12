@@ -4,6 +4,11 @@
   <img src="StudyingCat.png" alt="A cat studying at a laptop screen" width="360">
 </p>
 
+<p align="center">
+  <a href="https://duckdb.org/"><img src="site/assets/duckdb.svg" alt="DuckDB" height="28"></a><br>
+  <sub>Local joins and catalog SQL powered by <a href="https://duckdb.org/">DuckDB</a></sub>
+</p>
+
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
 Release **0.3.5**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
@@ -133,6 +138,8 @@ Draft a catalog from a live SQL source or an OpenAPI file (review before serve):
 
 ```bash
 ./qllm catalog introspect --source crm_pg --config-dir ./my-project --out ./my-project/qllm.catalog.yaml
+# Host-side subset tool description (CLI or POST /v1/catalog/describe; not an MCP tool):
+./qllm catalog describe --config-dir ./my-project --tables customers,invoices
 ./qllm catalog from-openapi -f ./other-team.yaml --source legacy_api --config-dir ./my-project --out ./draft.catalog.yaml --resources-out ./draft.resources.yaml
 ```
 

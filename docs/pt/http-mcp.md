@@ -9,6 +9,7 @@ Listener: `--addr` / `serve.addr` (padrão `127.0.0.1:8088`).
 | GET | `/v1/health` | **não** | Probes |
 | GET | `/v1/howtouseme` | sim* | Guia fechado para IR e SQL |
 | GET | `/v1/catalog` | sim* | Catálogo (filtrado pela ACL) |
+| POST | `/v1/catalog/describe` | sim* | `{ "tables": ["…"], "strict"? }` → descrição estilo execute_sql para um subconjunto (tools no host; não é tool MCP) |
 | POST | `/v1/queries` | sim* | O corpo é um Query IR |
 | POST | `/v1/sql` | sim* | `{ "sql", "version"?, "constraints"?, "constraintMode"? }` |
 | GET | `/v1/queries/{id}` | sim* | Status assíncrono |
@@ -52,6 +53,9 @@ Inspector local. Sem Bearer; a ACL vem de `--app` / `QLLM_APP`.
 |---------|------------|
 | `/mcp` | Streamable HTTP |
 | `/sse` + `/message` | SSE (Inspector mais antigo) |
+| `/v1/*` | Mesma API REST de `--http` (incl. `POST /v1/catalog/describe`) neste porto |
+
+Um porto publicado basta: só `--mcp-http`. Se `--http` e `--mcp-http` usarem o mesmo endereço, há um único listener.
 
 Autenticação: o mesmo Bearer e a mesma ACL de `/v1`. O CORS vale somente aqui (`serve.cors` / `--cors-origin`). Origins vazias significam CORS desativado, então o navegador no modo **Direct** falha; use **Via Proxy** no Inspector.
 

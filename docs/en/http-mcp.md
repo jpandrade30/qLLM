@@ -9,6 +9,7 @@ Listener: `--addr` / `serve.addr` (default `127.0.0.1:8088`).
 | GET | `/v1/health` | **no** | Probes |
 | GET | `/v1/howtouseme` | yes* | Closed guide for IR and SQL |
 | GET | `/v1/catalog` | yes* | Catalog (filtered by ACL) |
+| POST | `/v1/catalog/describe` | yes* | `{ "tables": ["…"], "strict"? }` → execute_sql-style description for a subset (host custom tools; not an MCP tool) |
 | POST | `/v1/queries` | yes* | Body is a Query IR |
 | POST | `/v1/sql` | yes* | `{ "sql", "version"?, "constraints"?, "constraintMode"? }` |
 | GET | `/v1/queries/{id}` | yes* | Async status |
@@ -52,6 +53,9 @@ Local Inspector. No Bearer; ACL comes from `--app` / `QLLM_APP`.
 |------|-----------|
 | `/mcp` | Streamable HTTP |
 | `/sse` + `/message` | SSE (older Inspector) |
+| `/v1/*` | Same REST API as `--http` (including `POST /v1/catalog/describe`) on **this** port |
+
+One published port is enough: use `--mcp-http` only (default `--mcp-addr` `127.0.0.1:8089`). If you also pass `--http` with the **same** `--addr` as `--mcp-addr`, qLLM binds once and does not start a second listener.
 
 Auth: the same Bearer and ACL as `/v1`. CORS applies only here (`serve.cors` / `--cors-origin`). Empty origins mean CORS is off, so the browser in **Direct** mode fails; use **Via Proxy** in the Inspector.
 

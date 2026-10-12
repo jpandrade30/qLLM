@@ -147,9 +147,12 @@ type HTTPOptions struct {
 	ACL          *access.Registry
 	CORS         protocol.CORSConfig
 	MaxBodyBytes int64
+	// RegisterAPI adds /v1 routes onto the same ServeMux (single-port deployments).
+	RegisterAPI func(*http.ServeMux)
 }
 
 // Handler returns the MCP HTTP mux (Streamable /mcp + SSE /sse,/message).
+// When opts.RegisterAPI is set, /v1/* is registered on the same mux.
 func Handler(mcpServer *server.MCPServer, opts HTTPOptions) http.Handler {
 	streamable := server.NewStreamableHTTPServer(mcpServer,
 		server.WithEndpointPath("/mcp"),
@@ -164,6 +167,9 @@ func Handler(mcpServer *server.MCPServer, opts HTTPOptions) http.Handler {
 	mux.Handle("/mcp", streamable)
 	mux.Handle("/sse", sseServer)
 	mux.Handle("/message", sseServer)
+	if opts.RegisterAPI != nil {
+		opts.RegisterAPI(mux)
+	}
 
 	var h http.Handler = mux
 	h = serveauth.MaxBytes(opts.MaxBodyBytes, h)
@@ -178,6 +184,10 @@ func Handler(mcpServer *server.MCPServer, opts HTTPOptions) http.Handler {
 
 // ListenAndServe serves Streamable HTTP at /mcp and SSE at /sse + /message.
 func ListenAndServe(addr string, mcpServer *server.MCPServer, opts HTTPOptions) error {
-	fmt.Fprintf(os.Stderr, "qllm mcp-http listening on %s (/mcp streamable, /sse SSE)\n", addr)
+	extra := ""
+	if opts.RegisterAPI != nil {
+		extra = ", /v1 API"
+	}
+	fmt.Fprintf(os.Stderr, "qllm mcp-http listening on %s (/mcp streamable, /sse SSE%s)\n", addr, extra)
 	return http.ListenAndServe(addr, Handler(mcpServer, opts))
 }

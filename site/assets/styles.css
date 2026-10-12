@@ -570,6 +570,34 @@ tr:last-child td {
   line-height: 1.5;
 }
 
+.site-footer__powered {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.4;
+}
+
+.powered-by-duckdb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.powered-by-duckdb img {
+  display: block;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.powered-by-duckdb:hover {
+  color: var(--color-accent);
+}
+
 .site-footer a {
   color: var(--color-muted);
   text-decoration: none;

@@ -648,6 +648,16 @@ Chamar **antes** de inventar queries; depois `GET /v1/catalog` para fields/relat
 
 Resposta: catalog efetivo (entities + fields + relations + capabilities resumidas por source).
 
+### 4.3b `POST /v1/catalog/describe`
+
+Descrição estilo `execute_sql` para um **subconjunto** de entidades (hosts / tools custom). **Não** é tool MCP (D06). Body:
+
+```json
+{ "tables": ["customers", "addresses"], "strict": false }
+```
+
+Resposta: `{ protocolVersion, description, entities, issues, catalog }`. ACL: cada tabela tem de estar na allowlist do app. `strict: true` falha se houver `relation_outside_slice`. Mesma lógica que `qllm catalog describe`.
+
 ```json
 {
   "protocolVersion": "0.1.0",

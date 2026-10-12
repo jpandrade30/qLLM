@@ -5,6 +5,14 @@ All notable changes to qLLM are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.6-rc.1**.
 
+## [Unreleased]
+
+### Added
+
+- Product site footer and README credit: **Powered by DuckDB** (SVG mark in `site/assets/duckdb.svg`).
+- `qllm catalog describe --tables …` and `POST /v1/catalog/describe` generate an execute_sql-style agent description for a catalog subset (host custom tools), with relation/join-key validation (`--strict`). MCP tools unchanged (no 4th tool).
+- `--mcp-http` also mounts `/v1/*` on the MCP listen address (single-port deploys); same `--addr` and `--mcp-addr` bind once.
+
 ## [0.3.6-rc.2] - 2026-10-09
 
 ### Added

@@ -9,6 +9,7 @@
 | GET | `/v1/health` | **否** | 探针 |
 | GET | `/v1/howtouseme` | 是* | 面向 IR 和 SQL 的封闭式指南 |
 | GET | `/v1/catalog` | 是* | catalog（按 ACL 过滤） |
+| POST | `/v1/catalog/describe` | 是* | `{ "tables": ["…"], "strict"? }` → 子集的 execute_sql 风格描述（宿主自定义 tool；不是 MCP tool） |
 | POST | `/v1/queries` | 是* | 请求体为 Query IR |
 | POST | `/v1/sql` | 是* | `{ "sql", "version"?, "constraints"?, "constraintMode"? }` |
 | GET | `/v1/queries/{id}` | 是* | 异步状态 |
@@ -52,6 +53,9 @@
 |------|----------|
 | `/mcp` | Streamable HTTP |
 | `/sse` + `/message` | SSE（旧版 Inspector） |
+| `/v1/*` | 与 `--http` 相同的 REST API（含 `POST /v1/catalog/describe`）在此端口 |
+
+只需发布一个端口：只用 `--mcp-http`。若 `--http` 与 `--mcp-http` 地址相同，则只绑定一次。
 
 认证：与 `/v1` 使用相同的 Bearer 和 ACL。CORS 仅在此处生效（`serve.cors` / `--cors-origin`）。origins 为空表示关闭 CORS，因此浏览器在 **Direct** 模式下会失败；请在 Inspector 中使用 **Via Proxy**。
 

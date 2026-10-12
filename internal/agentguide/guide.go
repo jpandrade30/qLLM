@@ -50,6 +50,7 @@ func Build(preset *protocol.Preset, catalog *protocol.Catalog) protocol.HowToUse
 			{Method: "GET", Path: "/v1/howtouseme", Use: "This SQL guide. Call first."},
 			{Method: "GET", Path: "/v1/health", Use: "Liveness + protocolVersion."},
 			{Method: "GET", Path: "/v1/catalog", Use: "Authoritative entities, fields, relations, sources."},
+			{Method: "POST", Path: "/v1/catalog/describe", Use: "Subset execute_sql-style description for host custom tools. Body {tables, strict?}."},
 			{Method: "POST", Path: "/v1/sql", Use: "Execute catalog SQL. Body {sql, version?}. version omitted = latest \"" + protocol.SQLDialectLatest + "\"."},
 		},
 		Grammar: "SELECT … FROM <catalog_entity> [JOIN <catalog_entity> …] WHERE … GROUP BY … HAVING … ORDER BY … LIMIT n  (dialect " + protocol.SQLDialectLatest + "; see sql)",
