@@ -36,6 +36,19 @@ go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 
 [`Dockerfile`](../../Dockerfile) and [`Dockerfile.dev`](../../Dockerfile.dev) both run `go build -tags duckdb`. The product image copies `deploy/prd`; Compose uses `.dev` plus `deploy/image/config`.
 
+## Unit tests in a container (`Dockerfile.test`)
+
+Same suite as CI (pure Go + `-tags duckdb` for `duckdblocal` / `executor`). No compose. Handy on Windows when local CGO/duckdblib is painful:
+
+```bash
+nerdctl build -f Dockerfile.test --target test .
+# or build + run (TTY for colors):
+nerdctl build -f Dockerfile.test -t qllm-test .
+nerdctl run --rm -t qllm-test
+```
+
+Helpers: `scripts/dev/test-in-container.ps1` / `test-in-container.sh`. Env: `QLLM_TEST_V=0` (quiet), `QLLM_TEST_COLOR=0` (no ANSI).
+
 ## Docker / nerdctl
 
 ```bash

@@ -9,8 +9,9 @@ Listener: `--addr` / `serve.addr` (por defecto `127.0.0.1:8088`).
 | GET | `/v1/health` | **no** | Probes |
 | GET | `/v1/howtouseme` | sí* | Guía cerrada para IR y SQL |
 | GET | `/v1/catalog` | sí* | Catálogo (filtrado por ACL) |
+| POST | `/v1/catalog/describe` | sí* | `{ "tables": ["…"], "strict"? }` → descripción estilo execute_sql para un subconjunto (tools en el host; no es tool MCP) |
 | POST | `/v1/queries` | sí* | El cuerpo es un Query IR |
-| POST | `/v1/sql` | sí* | `{ "sql", "version"? }` |
+| POST | `/v1/sql` | sí* | `{ "sql", "version"?, "constraints"?, "constraintMode"? }` |
 | GET | `/v1/queries/{id}` | sí* | Estado asíncrono |
 | GET | `/v1/queries/{id}/result` | sí* | Resultado; `NOT_READY` si aún no terminó |
 
@@ -30,7 +31,7 @@ Tools (solo estas):
 |------|------------|--------|
 | `how_to_use_me` | ninguno | Mismo propósito que `/v1/howtouseme` |
 | `describe_catalog` | ninguno | JSON del catálogo (con ACL aplicada) |
-| `execute_sql` | `sql` (obligatorio), `version` opcional | Igual que `POST /v1/sql` |
+| `execute_sql` | `sql` (obligatorio), `version` opcional, `constraints` / `constraintMode` opcional (D23) | Igual que `POST /v1/sql` |
 
 No existe ninguna tool de Query IR.
 
@@ -52,6 +53,9 @@ Inspector local. Sin Bearer; la ACL proviene de `--app` / `QLLM_APP`.
 |------|------------|
 | `/mcp` | Streamable HTTP |
 | `/sse` + `/message` | SSE (Inspector antiguo) |
+| `/v1/*` | Misma API REST que `--http` (incl. `POST /v1/catalog/describe`) en este puerto |
+
+Un puerto publicado basta: solo `--mcp-http`. Si `--http` y `--mcp-http` usan la misma dirección, hay un solo listener.
 
 Autenticación: el mismo Bearer y la misma ACL que `/v1`. El CORS solo se aplica aquí (`serve.cors` / `--cors-origin`). Orígenes vacíos significan CORS desactivado, por lo que el navegador en modo **Direct** falla; usa **Via Proxy** en el Inspector.
 

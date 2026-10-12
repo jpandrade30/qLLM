@@ -1,0 +1,37 @@
+# syntax=docker/dockerfile:1
+# Unit tests in Linux (pure Go + -tags duckdb), matching CI — no compose / DBs.
+# Verbose + ANSI colors via scripts/dev/run-go-tests.sh (use `nerdctl run -t` for a TTY).
+#
+# Fail the build if tests fail:
+#   nerdctl build -f Dockerfile.test --target test .
+#
+# Or build an image and re-run:
+#   nerdctl build -f Dockerfile.test -t qllm-test .
+#   nerdctl run --rm -t qllm-test
+#
+# Faster iteration (remount source after deps are cached):
+#   nerdctl run --rm -t -v "${PWD}:/src" -w /src qllm-test
+#
+# Helper: .\scripts\dev\test-in-container.ps1   /  ./scripts/dev/test-in-container.sh
+# Quiet:  nerdctl run --rm -t -e QLLM_TEST_V=0 qllm-test
+# No color: nerdctl run --rm -e QLLM_TEST_COLOR=0 qllm-test
+
+FROM golang:1.26.6-bookworm AS deps
+WORKDIR /src
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+COPY go.mod go.sum ./
+RUN go mod download
+
+FROM deps AS test
+COPY . .
+ENV CGO_ENABLED=1
+RUN chmod +x scripts/dev/run-go-tests.sh \
+ && ./scripts/dev/run-go-tests.sh
+
+# Default image: same suite (for `nerdctl run -t`).
+FROM deps
+COPY . .
+ENV CGO_ENABLED=1
+RUN chmod +x scripts/dev/run-go-tests.sh
+CMD ["./scripts/dev/run-go-tests.sh"]

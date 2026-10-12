@@ -64,12 +64,14 @@
 | `userEnv` | 字符串 | |
 | `passwordEnv` | 字符串 | |
 | `sslMode` | 可选 enum | `disable` `require` `verify-ca` `verify-full`（postgres；mysql 不使用时会忽略） |
+| `maxOpenConns` | 可选 int | `1`–`100`；`database/sql` 连接池上限（默认 **5**）。多副本时请按 pod 调低（`pods × maxOpenConns ≲ DB max_connections`） |
+| `maxOpenConnsEnv` | 可选 string | 存放整数的环境变量名；若设置则优先于 `maxOpenConns`。空值或非整数 → 打开 source 时 `CONFIG_ERROR` |
 
-**mssql**：必填字段相同。可选附加字段：`encrypt`：`true` \| `false` \| `disable`。没有 `sslMode`。
+**mssql**：必填字段相同。可选附加字段：`encrypt`：`true` \| `false` \| `disable`。同样可选 `maxOpenConns` / `maxOpenConnsEnv`。没有 `sslMode`。
 
-**clickhouse**：必填字段相同。可选附加字段：`secure`（bool）。
+**clickhouse**：必填字段相同。可选附加字段：`secure`（bool）。同样可选 `maxOpenConns` / `maxOpenConnsEnv`。
 
-**sqlite**：只有 `pathEnv`（保存 `.db` 文件路径的环境变量）。
+**sqlite**：`pathEnv`（保存 `.db` 文件路径的环境变量）。可写 `maxOpenConns` / `maxOpenConnsEnv`，但有效上限始终为 **1**。
 
 **mongodb**：必填 `uriEnv`、`database`。
 
@@ -310,6 +312,8 @@ sources:
 ## `POST /v1/sql` / `execute_sql` 请求体
 
 必填：`sql`。可选：`version`（`"1"` 为冻结版本；省略或 `"2"` 为最新版本）。
+
+可选（D23）：`constraints`（字段→字符串/数字/布尔）与 `constraintMode`（`validate` | `inject`）。有 `constraints` 时默认 `validate`。优先由宿主绑定该映射；见 [multi-user-safety.md](multi-user-safety.md)。
 
 ---
 

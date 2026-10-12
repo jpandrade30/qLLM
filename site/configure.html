@@ -194,7 +194,9 @@ entities:
             <p class="note">
               Draft helpers:
               <code>catalog introspect</code> (SQL) and <code>catalog from-openapi</code> (REST).
-              Always review before serve.
+              Subset agent text:
+              <code>catalog describe --tables …</code> or
+              <code>POST /v1/catalog/describe</code>. Always review before serve.
             </p>
           </section>
 
@@ -747,6 +749,12 @@ env:
         <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
       </span>
       </div>
+      <p class="site-footer__powered">
+        <a class="powered-by-duckdb" href="https://duckdb.org/" rel="noopener noreferrer">
+          <img src="assets/duckdb.svg" width="20" height="20" alt="" />
+          Powered by DuckDB
+        </a>
+      </p>
       <p class="site-footer__disclaimer">
         Experimental project. Provided as-is. The author accepts no responsibility for any damage
         caused by its use.

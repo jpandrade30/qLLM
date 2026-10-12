@@ -280,30 +280,34 @@ func main() {
 				}
 			}
 
+			apiSrv := &httpserver.Server{
+				Idx:          idx,
+				Exec:         exec,
+				Store:        store,
+				AuthToken:    settings.AuthToken,
+				ACL:          acl,
+				MaxBodyBytes: settings.MaxBodyBytes,
+			}
+			sameAddr := httpMode && mcpHTTP && settings.Addr == settings.MCPAddr
 			g, _ := errgroup.WithContext(context.Background())
-			if httpMode {
+			// Dedicated /v1 listener unless it would collide with mcp-http on the same addr.
+			if httpMode && !sameAddr {
 				addr := settings.Addr
 				g.Go(func() error {
 					fmt.Fprintf(os.Stderr, "qllm http listening on %s\n", addr)
-					srv := &httpserver.Server{
-						Idx:          idx,
-						Exec:         exec,
-						Store:        store,
-						AuthToken:    settings.AuthToken,
-						ACL:          acl,
-						MaxBodyBytes: settings.MaxBodyBytes,
-					}
-					return httpserver.ListenAndServe(addr, srv)
+					return httpserver.ListenAndServe(addr, apiSrv)
 				})
 			}
 			if mcpHTTP {
 				mcpAddr := settings.MCPAddr
 				g.Go(func() error {
+					// Always register /v1 on the MCP port so one published port is enough.
 					return mcpserver.ListenAndServe(mcpAddr, mcpSrv, mcpserver.HTTPOptions{
 						AuthToken:    settings.AuthToken,
 						ACL:          acl,
 						CORS:         settings.CORS,
 						MaxBodyBytes: settings.MaxBodyBytes,
+						RegisterAPI:  apiSrv.Register,
 					})
 				})
 			}
@@ -313,9 +317,9 @@ func main() {
 	addConfigFlags(serveCmd)
 	serveCmd.Flags().Bool("http", false, "serve HTTP /v1 API")
 	serveCmd.Flags().Bool("mcp", false, "serve MCP on stdio (exclusive)")
-	serveCmd.Flags().Bool("mcp-http", false, "serve MCP Streamable HTTP (/mcp) + SSE (/sse)")
+	serveCmd.Flags().Bool("mcp-http", false, "serve MCP Streamable HTTP (/mcp) + SSE (/sse); also mounts /v1 on the same port")
 	serveCmd.Flags().String("addr", protocol.DefaultHTTPAddr, "HTTP /v1 listen address")
-	serveCmd.Flags().String("mcp-addr", protocol.DefaultMCPAddr, "MCP HTTP listen address")
+	serveCmd.Flags().String("mcp-addr", protocol.DefaultMCPAddr, "MCP HTTP listen address (also serves /v1 when --mcp-http)")
 	serveCmd.Flags().String("runtime-config", "", "path to qllm.config.yaml (optional)")
 	serveCmd.Flags().String("auth-token-env", "", "env var name for Bearer auth token")
 	serveCmd.Flags().Bool("insecure-bind", false, "allow non-loopback bind without auth")
