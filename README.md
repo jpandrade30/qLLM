@@ -307,7 +307,7 @@ Quiet / no color: `-e QLLM_TEST_V=0` / `-e QLLM_TEST_COLOR=0`.
 
 ## Development
 
-Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.6-bookworm`). `mcp-go` is pinned at **v0.48.0**.
+Requires Go **1.26.9+** (`go.mod` / `toolchain go1.26.9` and image `golang:1.26.9-bookworm`). `mcp-go` is pinned at **v0.48.0**.
 
 Contributions: [CONTRIBUTING.md](CONTRIBUTING.md) (fork → PR, contract checklist, changelog). Community standards: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Short version on the product site: [Contribute](https://jpandrade30.github.io/qLLM/contribute.html).
 
