@@ -1,0 +1,14 @@
+# Harness ACL demo (D16/D24). Presence of this file replaces the single Bearer (authTokenEnv).
+# Compose injects the env values; process env wins over qllm.env.yaml placeholders.
+apps:
+  # CRM identity tables; customers hides phone — try Bearer limited-me
+  - name: crm-limited
+    key: ${QLLM_CRM_LIMITED_KEY}
+    tables: [customers, addresses]
+    fields:
+      customers: [id, email, full_name, country, created_at]
+      # addresses omitted → all address fields
+  # Full catalog — same token as before (Bearer change-me)
+  - name: admin
+    key: ${QLLM_AUTH_TOKEN}
+    tables: ["*"]

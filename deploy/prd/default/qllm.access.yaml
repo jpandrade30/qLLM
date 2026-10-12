@@ -1,20 +1,10 @@
+# Product-image example (D16/D24). File present → per-app keys replace authTokenEnv.
 apps:
-  - name: demo-agent
+  - name: crm-limited
+    key: ${QLLM_CRM_LIMITED_KEY}
+    tables: [customers, addresses]
+    fields:
+      customers: [id, email, full_name, country, created_at]
+  - name: admin
     key: ${QLLM_AUTH_TOKEN}
-    tables:
-      - customers
-      - addresses
-      - support_tickets
-      - subscriptions
-      - products
-      - invoices
-      - invoice_items
-      - payments
-      - events
-      - sessions
-      - notifications
-      - audit_logs
-      - legacy_users
-      - api_products
-      - api_tickets
-      - api_profiles
+    tables: ["*"]

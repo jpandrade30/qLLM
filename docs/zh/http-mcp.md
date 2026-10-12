@@ -31,7 +31,7 @@
 |------|------|------|
 | `how_to_use_me` | 无 | 与 `/v1/howtouseme` 作用相同 |
 | `describe_catalog` | 无 | catalog 的 JSON（已应用 ACL） |
-| `execute_sql` | `sql`（必填）、`version`（可选）、`constraints` / `constraintMode`（可选，D23） | 与 `POST /v1/sql` 相同 |
+| `execute_sql` | `sql`（必填）、`version`（可选）、`constraints` / `constraintMode`（可选，D23） | 与 `POST /v1/sql` 相同。`tools/list` 中的工具描述只列出该 Bearer 应用允许的表/字段（D16/D24） |
 
 没有 Query IR 工具。
 

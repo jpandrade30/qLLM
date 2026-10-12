@@ -26,6 +26,9 @@ type App struct {
 	KeySecret   string
 	Tables      map[string]struct{}
 	Unscoped    map[string]struct{}
+	// Fields: entity → allowlisted field names. Missing entity key = all fields (D24).
+	// Nil/empty Fields map on the app = no field restrictions at all.
+	Fields      map[string]map[string]struct{}
 	ScopeField  string
 	ScopeValues map[string]string
 	ScopeMode   string
@@ -69,6 +72,16 @@ func (a *App) clone() *App {
 		out.Unscoped = make(map[string]struct{}, len(a.Unscoped))
 		for k, v := range a.Unscoped {
 			out.Unscoped[k] = v
+		}
+	}
+	if a.Fields != nil {
+		out.Fields = make(map[string]map[string]struct{}, len(a.Fields))
+		for ent, set := range a.Fields {
+			cp := make(map[string]struct{}, len(set))
+			for f := range set {
+				cp[f] = struct{}{}
+			}
+			out.Fields[ent] = cp
 		}
 	}
 	if a.ScopeValues != nil {
@@ -169,9 +182,13 @@ func Resolve(file *protocol.AccessFile, idx *catalogidx.Index) (*Registry, *prot
 			}
 			unscoped[ent.Name] = struct{}{}
 		}
+		fields, ferr := resolveFields(raw.Name, raw.Fields, tables, idx, scopeField != "" || len(scopeValues) > 0)
+		if ferr != nil {
+			return nil, ferr
+		}
 		app := &App{
 			Name: raw.Name, Key: key, KeySecret: secret, Tables: tables, Unscoped: unscoped,
-			ScopeField: scopeField, ScopeValues: scopeValues, ScopeMode: mode,
+			Fields: fields, ScopeField: scopeField, ScopeValues: scopeValues, ScopeMode: mode,
 		}
 		if err := checkScopedTables(app, idx); err != nil {
 			return nil, err
@@ -179,6 +196,104 @@ func Resolve(file *protocol.AccessFile, idx *catalogidx.Index) (*Registry, *prot
 		reg.Apps = append(reg.Apps, app)
 	}
 	return reg, nil
+}
+
+// resolveFields builds per-entity field allowlists (D24). nil when raw is empty (no restrictions).
+func resolveFields(appName string, raw map[string][]string, tables map[string]struct{}, idx *catalogidx.Index, scoped bool) (map[string]map[string]struct{}, *protocol.ProtocolError) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	out := make(map[string]map[string]struct{}, len(raw))
+	for entName, list := range raw {
+		ent, perr := idx.ResolveEntity(entName)
+		if perr != nil {
+			return nil, protocol.NewError(protocol.ErrConfigError,
+				fmt.Sprintf("app %s fields key %q is not a catalog entity", appName, entName),
+				map[string]any{"app": appName, "table": entName})
+		}
+		if _, ok := tables[ent.Name]; !ok {
+			return nil, protocol.NewError(protocol.ErrConfigError,
+				fmt.Sprintf("app %s fields key %q is not in tables", appName, ent.Name),
+				map[string]any{"app": appName, "table": ent.Name})
+		}
+		set := map[string]struct{}{}
+		star := false
+		for _, f := range list {
+			f = strings.TrimSpace(f)
+			if f == "" {
+				return nil, protocol.NewError(protocol.ErrConfigError,
+					fmt.Sprintf("app %s fields[%s] has empty field name", appName, ent.Name),
+					map[string]any{"app": appName, "table": ent.Name})
+			}
+			if f == "*" {
+				star = true
+				continue
+			}
+			if _, ok := idx.Field(ent, f); !ok {
+				return nil, protocol.NewError(protocol.ErrConfigError,
+					fmt.Sprintf("app %s fields[%s] unknown field %q", appName, ent.Name, f),
+					map[string]any{"app": appName, "table": ent.Name, "field": f})
+			}
+			set[f] = struct{}{}
+		}
+		if star {
+			for _, f := range ent.Fields {
+				set[f.Name] = struct{}{}
+			}
+		}
+		for _, pk := range ent.PrimaryKey {
+			if _, ok := idx.Field(ent, pk); ok {
+				set[pk] = struct{}{}
+			}
+		}
+		if scoped && ent.Scope != nil && ent.Scope.Field != "" {
+			col := ent.Scope.FilterField()
+			if _, ok := idx.Field(ent, col); ok {
+				set[col] = struct{}{}
+			}
+		}
+		if len(set) == 0 {
+			return nil, protocol.NewError(protocol.ErrConfigError,
+				fmt.Sprintf("app %s fields[%s] allowlist is empty", appName, ent.Name),
+				map[string]any{"app": appName, "table": ent.Name})
+		}
+		out[ent.Name] = set
+	}
+	// Join keys between allowed tables when either side is field-restricted.
+	for entName, set := range out {
+		ent, err := idx.ResolveEntity(entName)
+		if err != nil {
+			continue
+		}
+		for _, rel := range ent.Relations {
+			if _, ok := tables[rel.To]; !ok {
+				continue
+			}
+			for _, pair := range rel.On {
+				if len(pair) >= 1 {
+					if _, ok := idx.Field(ent, pair[0]); ok {
+						set[pair[0]] = struct{}{}
+					}
+				}
+			}
+			targetSet, targetRestricted := out[rel.To]
+			if !targetRestricted {
+				continue
+			}
+			target, err := idx.ResolveEntity(rel.To)
+			if err != nil {
+				continue
+			}
+			for _, pair := range rel.On {
+				if len(pair) >= 2 {
+					if _, ok := idx.Field(target, pair[1]); ok {
+						targetSet[pair[1]] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+	return out, nil
 }
 
 func parseAppScope(scope map[string]string) (field string, values map[string]string) {
@@ -296,10 +411,37 @@ func (a *App) Allows(entityName string) bool {
 	return ok
 }
 
+// AllowsField reports whether the app may see entity.field (D24).
+func (a *App) AllowsField(entityName, fieldName string) bool {
+	if a == nil {
+		return true
+	}
+	if _, ok := a.Tables[entityName]; !ok {
+		return false
+	}
+	if len(a.Fields) == 0 {
+		return true
+	}
+	set, restricted := a.Fields[entityName]
+	if !restricted {
+		return true
+	}
+	_, ok := set[fieldName]
+	return ok
+}
+
 // TableSet implements runtime behavior for this package.
 func (a *App) TableSet() map[string]struct{} {
 	if a == nil {
 		return nil
 	}
 	return a.Tables
+}
+
+// CatalogACL builds a catalogidx.ACL for CatalogFor / descriptions (nil app → nil ACL).
+func (a *App) CatalogACL() *catalogidx.ACL {
+	if a == nil {
+		return nil
+	}
+	return &catalogidx.ACL{Tables: a.Tables, Fields: a.Fields}
 }

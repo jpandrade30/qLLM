@@ -247,13 +247,25 @@ func ExecuteSQLDescription(idx *catalogidx.Index) string {
 
 // DescriptionsFor builds capped MCP descriptions from the loaded catalog only.
 func DescriptionsFor(idx *catalogidx.Index) ToolDescriptions {
-	names := EntityNames(idx)
+	return DescriptionsForAllow(idx, nil)
+}
+
+// DescriptionsForAllow builds capped MCP descriptions for the ACL catalog projection (D16/D24).
+// nil acl = full catalog.
+func DescriptionsForAllow(idx *catalogidx.Index, acl *catalogidx.ACL) ToolDescriptions {
+	view := idx
+	if idx != nil {
+		cp := *idx
+		cp.Catalog = idx.CatalogFor(acl)
+		view = &cp
+	}
+	names := EntityNames(view)
 	list := formatNames(names)
 	n := len(names)
 	return ToolDescriptions{
 		HowToUseMe:      CapRunes("Return the SQL dialect guide. Catalog tables: "+list+". Prefer execute_sql whose description already lists tables, fields, joins, and SQL functions.", DescCap),
 		DescribeCatalog: CapRunes(fmt.Sprintf("Return the logical catalog JSON (%d entities: %s) if you need the full dump. execute_sql description already includes fields and relations.", n, list), DescCap),
-		ExecuteSQL:      CapRunes(ExecuteSQLDescription(idx), DescCap),
+		ExecuteSQL:      CapRunes(ExecuteSQLDescription(view), DescCap),
 	}
 }
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://qllm.dev/schemas/access.schema.json",
   "title": "qLLM Access Config",
-  "description": "Optional per-app keys and table allowlists (qllm.access.yaml). One entry per app type, not per user (D21). key or keySecret is a literal or exact ${ENV_NAME}.",
+  "description": "Optional per-app keys, table allowlists, and optional per-table field allowlists (qllm.access.yaml). One entry per app type, not per user (D21/D24). key or keySecret is a literal or exact ${ENV_NAME}.",
   "type": "object",
   "additionalProperties": false,
   "required": ["apps"],
@@ -36,6 +36,15 @@
             "type": "array",
             "minItems": 1,
             "items": { "type": "string", "minLength": 1 }
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "description": "Optional entity→field allowlists (D24). Omitted entity under tables keeps all fields. \"*\" in a list = all fields for that entity."
           },
           "unscopedTables": {
             "type": "array",

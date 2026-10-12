@@ -64,6 +64,7 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       QLLM_AUTH_TOKEN: change-me
+      QLLM_CRM_LIMITED_KEY: limited-me
       QLLM_CRM_PG_PASSWORD: qllm
       QLLM_BILLING_MYSQL_PASSWORD: qllm
     ports:

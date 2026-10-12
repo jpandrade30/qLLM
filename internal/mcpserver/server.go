@@ -24,8 +24,26 @@ import (
 // New registers MCP tools on a transport-agnostic MCPServer.
 func New(idx *catalogidx.Index, exec *executor.Executor, store *querystore.Store) *server.MCPServer {
 	_ = store
-	s := server.NewMCPServer("qllm", protocol.ProtocolVersion)
 	d := DescriptionsFor(idx)
+	s := server.NewMCPServer("qllm", protocol.ProtocolVersion,
+		server.WithToolFilter(func(ctx context.Context, tools []mcp.Tool) []mcp.Tool {
+			// tools/list is static at registration; rewrite descriptions per Bearer/app ACL.
+			ad := DescriptionsForAllow(idx, allowFrom(ctx, exec))
+			out := make([]mcp.Tool, len(tools))
+			copy(out, tools)
+			for i := range out {
+				switch out[i].Name {
+				case "how_to_use_me":
+					out[i].Description = ad.HowToUseMe
+				case "describe_catalog":
+					out[i].Description = ad.DescribeCatalog
+				case "execute_sql":
+					out[i].Description = ad.ExecuteSQL
+				}
+			}
+			return out
+		}),
+	)
 
 	s.AddTool(mcp.NewTool("how_to_use_me",
 		mcp.WithDescription(d.HowToUseMe),
@@ -114,20 +132,20 @@ func constraintsFromMCP(raw any) (map[string]any, *protocol.ProtocolError) {
 	}
 }
 
-// allowFrom implements runtime behavior for this package.
-func allowFrom(ctx context.Context, exec *executor.Executor) map[string]struct{} {
+// allowFrom returns the catalog ACL for the current app (nil = no access file).
+func allowFrom(ctx context.Context, exec *executor.Executor) *catalogidx.ACL {
 	if exec == nil || exec.ACL == nil {
 		return nil
 	}
 	if app := appctx.App(ctx); app != nil {
-		return app.TableSet()
+		return app.CatalogACL()
 	}
 	if exec.StdioApp != "" {
 		if app := exec.ACL.LookupName(exec.StdioApp); app != nil {
-			return app.TableSet()
+			return app.CatalogACL()
 		}
 	}
-	return map[string]struct{}{}
+	return &catalogidx.ACL{Tables: map[string]struct{}{}}
 }
 
 // RunStdio serves MCP over stdio (Inspector / local agents).

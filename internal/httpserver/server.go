@@ -96,17 +96,17 @@ func (s *Server) catalogDescribe(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, protocol.NewError(protocol.ErrInvalidIR, "tables is required", nil))
 		return
 	}
-	allow := s.allow(r)
-	if allow != nil {
+	acl := s.allow(r)
+	if acl != nil {
 		for _, name := range req.Tables {
-			if _, ok := allow[name]; !ok {
+			if !acl.AllowsTable(name) {
 				writeErr(w, http.StatusForbidden, protocol.NewError(protocol.ErrForbidden,
 					"table not allowed for this app: "+name, map[string]any{"table": name}))
 				return
 			}
 		}
 	}
-	base := s.Idx.CatalogFor(allow)
+	base := s.Idx.CatalogFor(acl)
 	out, perr := catalogdesc.Describe(s.Idx.Preset, base, req.Tables, req.Strict)
 	if perr != nil {
 		writeErr(w, httpStatus(perr.Code), perr)
@@ -128,15 +128,15 @@ func (s *Server) catalogDescribe(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// allow implements runtime behavior for this package.
-func (s *Server) allow(r *http.Request) map[string]struct{} {
+// allow returns the request app's catalog ACL (nil when no access file).
+func (s *Server) allow(r *http.Request) *catalogidx.ACL {
 	if s.ACL == nil {
 		return nil
 	}
 	if app := appctx.App(r.Context()); app != nil {
-		return app.TableSet()
+		return app.CatalogACL()
 	}
-	return map[string]struct{}{}
+	return &catalogidx.ACL{Tables: map[string]struct{}{}}
 }
 
 // createSQL implements runtime behavior for this package.

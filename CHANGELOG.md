@@ -3,30 +3,30 @@
 All notable changes to qLLM are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.6-rc.1**.
+Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.6**.
 
-## [0.3.6-rc.3] - 2026-10-11
+## [0.3.6] - 2026-10-12
 
 ### Added
 
+- Harness / product-default `qllm.access.yaml` demo: app `crm-limited` (Bearer `limited-me` → `customers`,`addresses` only) and `admin` (Bearer `change-me` → full catalog). Compose sets `QLLM_CRM_LIMITED_KEY`.
+- **D24** optional `apps[].fields` map (entity → field allowlist). Omitted table keeps all fields; catalog / MCP `tools/list` / IR / SQL share the same projection (`FORBIDDEN` on hidden columns; `SELECT *` fetches allowlisted columns only).
 - Product site footer and README credit: **Powered by DuckDB** (SVG mark in `site/assets/duckdb.svg`).
 - `qllm catalog describe --tables …` and `POST /v1/catalog/describe` generate an execute_sql-style agent description for a catalog subset (host custom tools), with relation/join-key validation (`--strict`). MCP tools unchanged (no 4th tool).
 - `--mcp-http` also mounts `/v1/*` on the MCP listen address (single-port deploys); same `--addr` and `--mcp-addr` bind once.
-
-## [0.3.6-rc.2] - 2026-10-09
-
-### Added
-
 - Optional SQL source `connection.maxOpenConns` / `maxOpenConnsEnv` (1–100; default 5) to tune `database/sql` pool size per process — useful when many pods share one DB. SQLite remains capped at 1.
-
-## [0.3.6-rc.1] - 2026-10-08
-
-### Added
-
 - Link to the end-to-end demo repo [jpandrade30/SmallDemo](https://github.com/jpandrade30/SmallDemo) from the README and product site (home, Get started, Docs).
 - Home page embeds the SmallDemo walkthrough video ([YouTube](https://www.youtube.com/watch?v=1rozeLOgUE0)) before **01 — What**.
 - Optional SQL request `constraints` + `constraintMode` (`validate` | `inject`) on `execute_sql` / `POST /v1/sql` (D23): abort on mismatched field equality; inject forces eq on source fetch. Credential scope (D21) still wins when both apply.
 - `Dockerfile.test` (+ `scripts/dev/test-in-container.ps1` / `.sh`) runs the CI unit suite (pure Go + `-tags duckdb`) in Linux via nerdctl — useful on Windows without local CGO/duckdblib. Verbose colored output via `scripts/dev/run-go-tests.sh` (`nerdctl run -t`).
+
+### Fixed
+
+- MCP `tools/list` tool descriptions (`execute_sql`, `how_to_use_me`, `describe_catalog`) now follow the Bearer app allowlist — limited keys no longer see the full catalog in the static description.
+
+### Security
+
+- Toolchain is **Go 1.26.9** (`go.mod` + `golang:1.26.9-bookworm`) so `govulncheck` stdlib findings on earlier 1.26.x are closed.
 
 ## [0.3.5] - 2026-10-04
 

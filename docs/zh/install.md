@@ -7,8 +7,8 @@
 | 方案 | 需要 | 得到 | 适用场景 |
 |------|------|------|----------|
 | **A. 容器镜像**（`Dockerfile`） | Docker、nerdctl 或 podman | 完整构建（内嵌 DuckDB），已包含 `deploy/prd` 的 YAML | 生产环境，或不想装 C 工具链 |
-| **B. Go 构建（纯 Go）** | Go 1.26.6+ | 不含 CGO 的 `qllm`，不支持目录 SQL | 快速 `validate`、Query IR、无 CGO 的 CI |
-| **C. Go 构建（内嵌 DuckDB，`-tags duckdb`）** | Go 1.26.6+、CGO、C 编译器（Windows 还需 `duckdblib`） | 全部功能，含 `execute_sql` / `qllm sql` | 本地开发完整产品 |
+| **B. Go 构建（纯 Go）** | Go 1.26.9+ | 不含 CGO 的 `qllm`，不支持目录 SQL | 快速 `validate`、Query IR、无 CGO 的 CI |
+| **C. Go 构建（内嵌 DuckDB，`-tags duckdb`）** | Go 1.26.9+、CGO、C 编译器（Windows 还需 `duckdblib`） | 全部功能，含 `execute_sql` / `qllm sql` | 本地开发完整产品 |
 | **D. 独立 zip**（优先 Release 资源；或 `init-standalone.*`） | Docker（运行）；仅从克隆重新生成时需要 Python 3 | 可托管到 GitHub/GitLab 的小型目录 | **默认建议：** 无需克隆本 monorepo 即可运行 |
 | **E. Compose harness**（`docker-compose.yml`） | nerdctl compose（Rancher Desktop） | qLLM + Postgres、MySQL、MongoDB、模拟 API | 运行 golden 测试、体验演示 |
 | **F. Kubernetes 模拟**（`deploy/prd-tst`） | 启用 Kubernetes 的 Rancher Desktop | fleet-ops 风格集群 | 测试发布。独立环境，见 [environments.md](environments.md) |
@@ -34,7 +34,7 @@ qLLM 在统一的 `Engine` API 后面有一个本地 join 引擎，具体用哪�
 
 根目录的 [`Dockerfile`](../../Dockerfile) 分两个阶段。
 
-1. **构建阶段**（`golang:1.26.6-bookworm`）：安装 `gcc` 与 `libc6-dev`，下载 Go 模块，设置 `CGO_ENABLED=1`，执行 `go build -tags duckdb`。
+1. **构建阶段**（`golang:1.26.9-bookworm`）：安装 `gcc` 与 `libc6-dev`，下载 Go 模块，设置 `CGO_ENABLED=1`，执行 `go build -tags duckdb`。
 2. **运行阶段**（`debian:bookworm-slim`）：添加 `ca-certificates`，把二进制复制到 `/usr/local/bin/qllm`，并把 `deploy/prd/` 中的这些文件放进 `/config`：`qllm.preset.yaml`、`qllm.catalog.yaml`、`qllm.config.yaml`、`qllm.env.yaml`、`qllm.access.yaml`。
 
 容器以 `qllm serve --http --mcp-http --config-dir /config` 启动，暴露 **8088**（HTTP `/v1`）和 **8089**（MCP HTTP）。
@@ -81,7 +81,7 @@ nerdctl --namespace k8s.io load -i qllm-local.tar
 
 ## 4. 方案 B：Go 构建（纯 Go）
 
-安装 **Go 1.26.6 或更高**（`go.mod` 声明 `go 1.26.6`）。
+安装 **Go 1.26.9 或更高**（`go.mod` 声明 `go 1.26.9`）。
 
 ```bash
 go build -o qllm ./cmd/qllm        # Windows：-o qllm.exe

@@ -135,6 +135,26 @@ func TestDescriptionsForFullCatalog(t *testing.T) {
 	if !strings.Contains(d.ExecuteSQL, "customer_id") {
 		t.Fatalf("field missing: %s", d.ExecuteSQL)
 	}
+	limited := DescriptionsForAllow(idx, &catalogidx.ACL{Tables: map[string]struct{}{"customers": {}}})
+	if !strings.Contains(limited.ExecuteSQL, "customers") {
+		t.Fatalf("limited missing customers: %s", limited.ExecuteSQL)
+	}
+	if strings.Contains(limited.ExecuteSQL, "invoices") {
+		t.Fatalf("limited leaked invoices: %s", limited.ExecuteSQL)
+	}
+	if strings.Contains(limited.HowToUseMe, "invoices") || strings.Contains(limited.DescribeCatalog, "invoices") {
+		t.Fatal("limited how/describe leaked invoices")
+	}
+	fieldLim := DescriptionsForAllow(idx, &catalogidx.ACL{
+		Tables: map[string]struct{}{"customers": {}},
+		Fields: map[string]map[string]struct{}{"customers": {"id": {}}},
+	})
+	if !strings.Contains(fieldLim.ExecuteSQL, "id") {
+		t.Fatalf("field allow missing id: %s", fieldLim.ExecuteSQL)
+	}
+	if strings.Contains(fieldLim.ExecuteSQL, "email") {
+		t.Fatalf("field allow leaked email: %s", fieldLim.ExecuteSQL)
+	}
 }
 
 func TestExecuteSQLDescriptionSlice(t *testing.T) {

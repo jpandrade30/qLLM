@@ -191,7 +191,7 @@ curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/cat
 
 `GET /v1/health` stays unauthenticated for probes.
 
-Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`) and `tables` from the catalog. One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. Optional SQL `constraints` / `constraintMode` (D23) are a lighter host-bound assist — see [multi-user safety](docs/en/multi-user-safety.md).
+Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`), `tables` from the catalog, and optional `fields` (entity → field allowlist; omit a table to keep all its fields). One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. Optional SQL `constraints` / `constraintMode` (D23) are a lighter host-bound assist — see [multi-user safety](docs/en/multi-user-safety.md).
 
 ```yaml
 apps:
@@ -250,7 +250,7 @@ Product [`Dockerfile`](Dockerfile) bakes [`deploy/prd/default/`](deploy/prd/defa
 nerdctl compose up --build
 ```
 
-HTTP: `Authorization: Bearer change-me`. Seed: `.\scripts\dev\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Recreate `test-api` after seed (`nerdctl compose up -d test-api`). SQL MCP goldens: `.\scripts\dev\check-live.ps1`.
+HTTP: `Authorization: Bearer change-me` (full catalog) or `Bearer limited-me` (`customers` + `addresses`, customers without `phone` — see `deploy/image/config/qllm.access.yaml` `fields`). Seed: `.\scripts\dev\dev-seed-fake.ps1` loads `fixtures/datasets/v1` (add `--regenerate` only to rewrite the frozen JSON). Recreate `test-api` after seed (`nerdctl compose up -d test-api`). SQL MCP goldens: `.\scripts\dev\check-live.ps1`.
 
 Example project YAML (edit + `docker build`): [`deploy/prd/README.md`](deploy/prd/README.md). Scoped-key + LangGraph demo (own compose, not the harness): [`deploy/prd/enforced/README.md`](deploy/prd/enforced/README.md) and [`docker-compose.enforced.yml`](docker-compose.enforced.yml).
 
@@ -307,7 +307,7 @@ Quiet / no color: `-e QLLM_TEST_V=0` / `-e QLLM_TEST_COLOR=0`.
 
 ## Development
 
-Requires Go **1.26.6+** (`go.mod` / `toolchain go1.26.6` and image `golang:1.26.6-bookworm`). `mcp-go` is pinned at **v0.48.0**.
+Requires Go **1.26.9+** (`go.mod` / `toolchain go1.26.9` and image `golang:1.26.9-bookworm`). `mcp-go` is pinned at **v0.48.0**.
 
 Contributions: [CONTRIBUTING.md](CONTRIBUTING.md) (fork → PR, contract checklist, changelog). Community standards: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Short version on the product site: [Contribute](https://jpandrade30.github.io/qLLM/contribute.html).
 

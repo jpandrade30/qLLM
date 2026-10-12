@@ -291,6 +291,7 @@ sources:
 | `keySecret` | 校验派生密钥 `app.scopeValue.expiry.hmac` |
 | `scope` | 模板 `{ field: user_id }` 或静态 `{ user_id: "acme" }` |
 | `tables` | 允许的 `entities[].name`，或 `*` |
+| `fields` | 可选 `entity → [field]` 映射（D24）。未列出的实体保留全部字段；列表中的 `"*"` 表示全部。显式列表时自动加入 PK / scope / join 键 |
 | `unscopedTables` | 应用带 `scope` 时必须列出的共享表 |
 
 ---

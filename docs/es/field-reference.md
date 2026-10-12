@@ -291,6 +291,7 @@ Obligatorio: `apps` (mínimo 1). Cada app necesita `name`, `tables` y exactament
 | `keySecret` | Verifica claves derivadas `app.scopeValue.expiry.hmac` |
 | `scope` | Plantilla `{ field: user_id }` o estática `{ user_id: "acme" }` |
 | `tables` | `entities[].name` permitidos, o `*` |
+| `fields` | Mapa opcional `entity → [field]` (D24). Entidad omitida conserva todos los campos; `"*"` en la lista = todos. PK / scope / joins se autoincluyen si la lista es explícita |
 | `unscopedTables` | Tablas compartidas exigidas cuando la app tiene `scope` |
 
 ---

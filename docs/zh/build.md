@@ -2,7 +2,7 @@
 
 ## Go
 
-要求：**Go 1.26.6 及以上**（`go.mod`，`toolchain go1.26.6`）。镜像：`golang:1.26.6-bookworm`。
+要求：**Go 1.26.9 及以上**（`go.mod`，`toolchain go1.26.9`）。镜像：`golang:1.26.9-bookworm`。
 
 ```bash
 go build -o qllm ./cmd/qllm

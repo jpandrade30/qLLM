@@ -16,7 +16,7 @@
 # Quiet:  nerdctl run --rm -t -e QLLM_TEST_V=0 qllm-test
 # No color: nerdctl run --rm -e QLLM_TEST_COLOR=0 qllm-test
 
-FROM golang:1.26.6-bookworm AS deps
+FROM golang:1.26.9-bookworm AS deps
 WORKDIR /src
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev \
     && rm -rf /var/lib/apt/lists/*
