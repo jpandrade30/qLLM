@@ -12,3 +12,8 @@ type ToolDescriptions = catalogdesc.ToolDescriptions
 func DescriptionsFor(idx *catalogidx.Index) ToolDescriptions {
 	return catalogdesc.DescriptionsFor(idx)
 }
+
+// DescriptionsForAllow builds capped MCP descriptions for an ACL projection.
+func DescriptionsForAllow(idx *catalogidx.Index, acl *catalogidx.ACL) ToolDescriptions {
+	return catalogdesc.DescriptionsForAllow(idx, acl)
+}

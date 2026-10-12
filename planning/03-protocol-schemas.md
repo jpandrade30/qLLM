@@ -93,6 +93,8 @@ apps:
     keySecret: ${QLLM_MOBILE_SECRET}
     tables: [orders, profile, products]
     unscopedTables: [products]
+    fields:
+      profile: [id, user_id, display_name]  # omit orders/products → all fields
     scope:
       field: user_id
   - name: partner-acme
@@ -109,6 +111,7 @@ apps:
 - Chave derivada (template com `keySecret`): `app.scopeValue.expiryUnix.hmac` onde `hmac` é Base64URL(HMAC-SHA256(keySecret, `app.scopeValue.expiryUnix`)). `scopeValue` ∈ `[A-Za-z0-9_-]`, ≤128. O backend mint; o qLLM verifica HMAC e expiração.
 - `scope.field` no app = nome do valor na chave. `entities[].scope.field` (e `column` se o nome físico/lógico diferir) marca a coluna filtrada.
 - `tables: ["*"]` = todas as entidades do catalog. `unscopedTables` = tabelas compartilhadas exigidas quando o app tem `scope`.
+- `fields` (D24): mapa opcional `entity → [field]`. Tabela permitida omitida do mapa → todos os campos. Lista explícita (ou `"*"`) → allowlist; Resolve auto-inclui PK, scope column e join keys entre tabelas do app. Catalog / `tools/list` / IR / SQL usam a mesma projeção; coluna fora → `FORBIDDEN`; `SELECT *` só materializa campos permitidos.
 - HTTP/MCP HTTP: `Authorization: Bearer` (key estática ou derivada). MCP stdio / CLI: `--app` / `QLLM_APP` e, se o app for template, `--scope` / `QLLM_SCOPE` (`42` ou `user_id=42`).
 - Escopo forte = credencial (D21). Constraints opcionais no SQL (D23) são aditivos e não substituem D21.
 
@@ -829,7 +832,7 @@ Todo erro de API:
 | `describe_catalog` | `{}` | body de `GET /v1/catalog` |
 | `execute_sql` | `{ sql, version?, constraints?, constraintMode? }` | body de `POST /v1/sql` |
 
-Descriptions MCP no `serve` interpolam nomes do **catalog carregado** (teto ~4k chars). Sem entidades no YAML, as descriptions não citam tabelas de demo. Sem N tools por tabela (D06).
+Descriptions MCP no `serve` interpolam nomes do **catalog efetivo do app** em `tools/list` (allowlist D16; teto ~24k chars). Sem `qllm.access.yaml`, usa o catalog carregado inteiro. Sem entidades no YAML, as descriptions não citam tabelas de demo. Sem N tools por tabela (D06).
 
 ### Transportes
 

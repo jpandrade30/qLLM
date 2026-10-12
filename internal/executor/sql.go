@@ -269,17 +269,26 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 			need[ent.Name] = m
 		}
 		for _, f := range ent.Fields {
+			if app != nil && !app.AllowsField(ent.Name, f.Name) {
+				continue
+			}
 			m[f.Name] = struct{}{}
 		}
 	}
 
-	needCol := func(ent *protocol.Entity, field string) {
+	needCol := func(ent *protocol.Entity, field string) *protocol.ProtocolError {
+		if app != nil && !app.AllowsField(ent.Name, field) {
+			return protocol.NewError(protocol.ErrForbidden,
+				"field not allowed for this app: "+ent.Name+"."+field,
+				map[string]any{"entity": ent.Name, "field": field})
+		}
 		m := need[ent.Name]
 		if m == nil {
 			m = map[string]struct{}{}
 			need[ent.Name] = m
 		}
 		m[field] = struct{}{}
+		return nil
 	}
 	cteEntities := func(qual string) []*protocol.Entity {
 		var ents []*protocol.Entity
@@ -331,7 +340,9 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 				matched := false
 				for _, src := range ents {
 					if _, ok := e.Idx.Field(src, c.Name); ok {
-						needCol(src, c.Name)
+						if err := needCol(src, c.Name); err != nil {
+							return nil, err
+						}
 						matched = true
 					}
 				}
@@ -344,7 +355,9 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 			if _, ok := e.Idx.Field(ent, c.Name); !ok {
 				return nil, protocol.NewError(protocol.ErrUnknownField, "unknown field: "+c.Name, map[string]any{"field": c.Name, "entity": ent.Name})
 			}
-			needCol(ent, c.Name)
+			if err := needCol(ent, c.Name); err != nil {
+				return nil, err
+			}
 			continue
 		}
 		var hits []*protocol.Entity
@@ -360,12 +373,9 @@ func (e *Executor) planSQLScans(parsed *sqlparse.Result, app *access.App) ([]sql
 		// UNION (and similar) cites the same logical name on more than one entity.
 		// Fetch the column from each; DuckDB still executes the original SQL.
 		for _, ent := range hits {
-			m := need[ent.Name]
-			if m == nil {
-				m = map[string]struct{}{}
-				need[ent.Name] = m
+			if err := needCol(ent, c.Name); err != nil {
+				return nil, err
 			}
-			m[c.Name] = struct{}{}
 		}
 	}
 

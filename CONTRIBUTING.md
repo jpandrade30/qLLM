@@ -34,7 +34,7 @@ slow “warehouse” batch semantics.
 
 ## Development setup
 
-- Go **1.26.6+** (see `go.mod` / `toolchain`).
+- Go **1.26.9+** (see `go.mod` / `toolchain`).
 - Optional DuckDB path: CGO + `-tags duckdb` (see root `README.md`).
 - Local harness: Rancher Desktop (containerd) + `nerdctl compose` — see
   [`docs/en/environments.md`](docs/en/environments.md).

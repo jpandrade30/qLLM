@@ -1,18 +1,24 @@
 package mcpserver_test
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
+	"qLLM/internal/access"
+	"qLLM/internal/appctx"
 	"qLLM/internal/catalogidx"
 	"qLLM/internal/executor"
 	"qLLM/internal/httpserver"
 	"qLLM/internal/mcpserver"
 	"qLLM/internal/protocol"
 	"qLLM/internal/querystore"
+
+	"github.com/mark3labs/mcp-go/mcp"
 )
 
 func TestDescriptionsIncludeLoadedCatalogNames(t *testing.T) {
@@ -169,6 +175,96 @@ func TestMCPHTTPUnknownPath(t *testing.T) {
 	h.ServeHTTP(rec, req)
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("status=%d", rec.Code)
+	}
+}
+
+func TestToolsListDescriptionsRespectAppAllowlist(t *testing.T) {
+	preset := &protocol.Preset{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Limits:          protocol.Limits{DefaultLimit: 10, MaxLimit: 100, MaxSyncMs: 1000, ReadOnly: true},
+		Sources:         []protocol.Source{{ID: "crm_pg", Type: protocol.SourcePostgres}},
+	}
+	catalog := &protocol.Catalog{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Entities: []protocol.Entity{
+			{Name: "customers", Source: "crm_pg", PrimaryKey: []string{"id"}, Fields: []protocol.Field{
+				{Name: "id", Type: protocol.TypeString},
+				{Name: "email", Type: protocol.TypeString},
+				{Name: "phone", Type: protocol.TypeString},
+			}},
+			{Name: "invoices", Source: "crm_pg", Fields: []protocol.Field{{Name: "id", Type: protocol.TypeString}}},
+		},
+	}
+	idx, err := catalogidx.New(preset, catalog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reg, perr := access.Resolve(&protocol.AccessFile{Apps: []protocol.AccessApp{
+		{Name: "crm-limited", Key: "limited-me", Tables: []string{"customers"},
+			Fields: map[string][]string{"customers": {"email"}}},
+		{Name: "admin", Key: "change-me", Tables: []string{"*"}},
+	}}, idx)
+	if perr != nil {
+		t.Fatal(perr)
+	}
+	store := querystore.New(time.Minute)
+	exec := executor.New(idx, nil, store)
+	exec.ACL = reg
+	srv := mcpserver.New(idx, exec, store)
+
+	listSQLDesc := func(ctx context.Context) string {
+		t.Helper()
+		_ = srv.HandleMessage(ctx, []byte(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t","version":"0"}}}`))
+		raw := srv.HandleMessage(ctx, []byte(`{"jsonrpc":"2.0","id":2,"method":"tools/list"}`))
+		b, err := json.Marshal(raw)
+		if err != nil {
+			t.Fatalf("marshal %T: %v", raw, err)
+		}
+		var env struct {
+			Result mcp.ListToolsResult `json:"result"`
+		}
+		if err := json.Unmarshal(b, &env); err != nil {
+			t.Fatalf("unmarshal: %v body=%s", err, b)
+		}
+		for _, tool := range env.Result.Tools {
+			if tool.Name == "execute_sql" {
+				return tool.Description
+			}
+		}
+		t.Fatalf("execute_sql missing in %s", b)
+		return ""
+	}
+
+	limitedApp := reg.LookupBearer("limited-me")
+	if limitedApp == nil {
+		t.Fatal("limited app")
+	}
+	limitedDesc := listSQLDesc(appctx.WithApp(context.Background(), limitedApp))
+	if !strings.Contains(limitedDesc, "customers") {
+		t.Fatalf("limited missing customers: %s", limitedDesc)
+	}
+	if strings.Contains(limitedDesc, "invoices") {
+		t.Fatalf("limited leaked invoices: %s", limitedDesc)
+	}
+	if !strings.Contains(limitedDesc, "email") {
+		t.Fatalf("limited missing email: %s", limitedDesc)
+	}
+	if strings.Contains(limitedDesc, "phone") {
+		t.Fatalf("limited leaked phone: %s", limitedDesc)
+	}
+
+	adminApp := reg.LookupBearer("change-me")
+	if adminApp == nil {
+		t.Fatal("admin app")
+	}
+	adminDesc := listSQLDesc(appctx.WithApp(context.Background(), adminApp))
+	if !strings.Contains(adminDesc, "customers") || !strings.Contains(adminDesc, "invoices") {
+		t.Fatalf("admin missing tables: %s", adminDesc)
+	}
+	if !strings.Contains(adminDesc, "phone") {
+		t.Fatalf("admin missing phone: %s", adminDesc)
 	}
 }
 

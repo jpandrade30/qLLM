@@ -50,7 +50,7 @@ func (e *Executor) Execute(ctx context.Context, q *protocol.QueryIR) *protocol.Q
 		return fail(queryID, mode, start, err, app)
 	}
 	if app != nil {
-		if err := validate.EnforceACL(e.Idx, q, app.TableSet()); err != nil {
+		if err := validate.EnforceACL(e.Idx, q, app); err != nil {
 			return fail(queryID, mode, start, err, app)
 		}
 	}

@@ -293,6 +293,7 @@ Required: `apps` (at least 1). Each app needs `name`, `tables`, and exactly one 
 | `keySecret` | Verifies derived keys `app.scopeValue.expiry.hmac` |
 | `scope` | Template `{ field: user_id }` or static `{ user_id: "acme" }` |
 | `tables` | Allowed `entities[].name` values, or `*` |
+| `fields` | Optional map `entity → [field]` (D24). Omitted entity keeps all fields; `"*"` in a list = all fields. PK / scope / join keys auto-included when explicit |
 | `unscopedTables` | Shared tables required when the app has `scope` |
 
 ---

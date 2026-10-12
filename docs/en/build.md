@@ -4,7 +4,7 @@ For every install option and the Windows `duckdblib` setup, see [install.md](ins
 
 ## Go
 
-Requirement: **Go 1.26.6+** (`go.mod`, `toolchain go1.26.6`). Image: `golang:1.26.6-bookworm`.
+Requirement: **Go 1.26.9+** (`go.mod`, `toolchain go1.26.9`). Image: `golang:1.26.9-bookworm`.
 
 ```bash
 go build -o qllm ./cmd/qllm

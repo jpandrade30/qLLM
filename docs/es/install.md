@@ -7,8 +7,8 @@ Esta página cubre todas las formas de ejecutar qLLM: qué hace cada opción, qu
 | Opción | Requiere | Obtienes | Úsala cuando |
 |--------|----------|----------|--------------|
 | **A. Imagen de contenedor** (`Dockerfile`) | Docker, nerdctl o podman | Build completo (DuckDB embebido) con el YAML de `deploy/prd` dentro | Producción, o si no quieres toolchain C |
-| **B. Build Go, Go puro** | Go 1.26.6+ | `qllm` sin CGO. Sin SQL de catálogo | `validate` rápido, Query IR, CI sin CGO |
-| **C. Build Go, DuckDB embebido** (`-tags duckdb`) | Go 1.26.6+, CGO, compilador C (+ `duckdblib` en Windows) | Todo, incluido `execute_sql` / `qllm sql` | Desarrollar el producto completo en local |
+| **B. Build Go, Go puro** | Go 1.26.9+ | `qllm` sin CGO. Sin SQL de catálogo | `validate` rápido, Query IR, CI sin CGO |
+| **C. Build Go, DuckDB embebido** (`-tags duckdb`) | Go 1.26.9+, CGO, compilador C (+ `duckdblib` en Windows) | Todo, incluido `execute_sql` / `qllm sql` | Desarrollar el producto completo en local |
 | **D. Zip standalone** (preferir el asset de la Release; o `init-standalone.*`) | Docker (para ejecutar); Python 3 solo si regeneras desde un clone | Una carpeta pequeña para alojar en GitHub/GitLab | **Sugerencia por defecto:** ejecutar sin clonar este monorepo |
 | **E. Harness Compose** (`docker-compose.yml`) | nerdctl compose (Rancher Desktop) | qLLM + Postgres, MySQL, MongoDB, API falsa | Ejecutar los goldens y probar el demo |
 | **F. Simulación Kubernetes** (`deploy/prd-tst`) | Rancher Desktop con Kubernetes | Un clúster estilo fleet-ops | Probar rollouts. Mundo aparte, ver [environments.md](environments.md) |
@@ -34,7 +34,7 @@ Las imágenes de contenedor y producción usan `-tags duckdb`. Si una petición 
 
 El [`Dockerfile`](../../Dockerfile) de la raíz tiene dos etapas.
 
-1. **Build** (`golang:1.26.6-bookworm`): instala `gcc` y `libc6-dev`, descarga módulos Go, define `CGO_ENABLED=1` y ejecuta `go build -tags duckdb`.
+1. **Build** (`golang:1.26.9-bookworm`): instala `gcc` y `libc6-dev`, descarga módulos Go, define `CGO_ENABLED=1` y ejecuta `go build -tags duckdb`.
 2. **Runtime** (`debian:bookworm-slim`): añade `ca-certificates`, copia el binario a `/usr/local/bin/qllm` e incluye en `/config` estos archivos de `deploy/prd/`: `qllm.preset.yaml`, `qllm.catalog.yaml`, `qllm.config.yaml`, `qllm.env.yaml`, `qllm.access.yaml`.
 
 El contenedor arranca con `qllm serve --http --mcp-http --config-dir /config` y expone **8088** (HTTP `/v1`) y **8089** (MCP HTTP).
@@ -81,7 +81,7 @@ nerdctl --namespace k8s.io load -i qllm-local.tar
 
 ## 4. Opción B: build Go, Go puro
 
-Instala **Go 1.26.6 o superior** (`go.mod` fija `go 1.26.6`).
+Instala **Go 1.26.9 o superior** (`go.mod` fija `go 1.26.9`).
 
 ```bash
 go build -o qllm ./cmd/qllm        # Windows: -o qllm.exe

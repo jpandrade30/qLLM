@@ -109,25 +109,17 @@ func (idx *Index) CatalogResponse() protocol.CatalogResponse {
 	return idx.CatalogResponseFor(nil)
 }
 
-// CatalogResponseFor builds catalog data.
-func (idx *Index) CatalogResponseFor(allow map[string]struct{}) protocol.CatalogResponse {
-	ents := idx.Catalog.Entities
-	if allow != nil {
-		filtered := make([]protocol.Entity, 0, len(ents))
-		for _, e := range ents {
-			if _, ok := allow[e.Name]; ok {
-				filtered = append(filtered, e)
-			}
-		}
-		ents = filtered
-	}
+// CatalogResponseFor builds catalog data for an ACL view (nil = full catalog).
+func (idx *Index) CatalogResponseFor(acl *ACL) protocol.CatalogResponse {
+	cat := idx.CatalogFor(acl)
+	ents := cat.Entities
 	srcIDs := map[string]struct{}{}
 	for _, e := range ents {
 		srcIDs[e.Source] = struct{}{}
 	}
 	sources := make([]protocol.SourceInfo, 0, len(idx.Preset.Sources))
 	for _, s := range idx.Preset.Sources {
-		if allow != nil {
+		if acl != nil {
 			if _, ok := srcIDs[s.ID]; !ok {
 				continue
 			}
@@ -146,17 +138,18 @@ func (idx *Index) CatalogResponseFor(allow map[string]struct{}) protocol.Catalog
 	}
 }
 
-// CatalogFor builds catalog data.
-func (idx *Index) CatalogFor(allow map[string]struct{}) *protocol.Catalog {
-	if allow == nil {
+// CatalogFor builds a catalog projection for an ACL view (nil = full catalog).
+func (idx *Index) CatalogFor(acl *ACL) *protocol.Catalog {
+	if acl == nil {
 		return idx.Catalog
 	}
 	cp := *idx.Catalog
 	cp.Entities = nil
 	for _, e := range idx.Catalog.Entities {
-		if _, ok := allow[e.Name]; ok {
-			cp.Entities = append(cp.Entities, e)
+		if !acl.AllowsTable(e.Name) {
+			continue
 		}
+		cp.Entities = append(cp.Entities, acl.projectEntity(e))
 	}
 	return &cp
 }
