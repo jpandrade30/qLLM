@@ -110,3 +110,114 @@ func TestUnknownTable(t *testing.T) {
 		t.Fatal("expected unknown table")
 	}
 }
+
+func fieldIdx(t *testing.T) *catalogidx.Index {
+	t.Helper()
+	preset := &protocol.Preset{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Limits:          protocol.Limits{DefaultLimit: 10, MaxLimit: 100, ReadOnly: true},
+		Sources:         []protocol.Source{{ID: "s", Type: protocol.SourcePostgres}},
+	}
+	catalog := &protocol.Catalog{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Entities: []protocol.Entity{
+			{
+				Name: "customers", Source: "s", PrimaryKey: []string{"id"},
+				Fields: []protocol.Field{
+					{Name: "id", Type: protocol.TypeString},
+					{Name: "email", Type: protocol.TypeString},
+					{Name: "phone", Type: protocol.TypeString},
+				},
+			},
+			{
+				Name: "addresses", Source: "s", PrimaryKey: []string{"id"},
+				Fields: []protocol.Field{
+					{Name: "id", Type: protocol.TypeString},
+					{Name: "customer_id", Type: protocol.TypeString},
+					{Name: "city", Type: protocol.TypeString},
+				},
+				Relations: []protocol.Relation{{
+					Name: "customer", To: "customers", Type: "many_to_one",
+					On: [][]string{{"customer_id", "id"}},
+				}},
+			},
+		},
+	}
+	idx, err := catalogidx.New(preset, catalog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return idx
+}
+
+func TestResolveFieldsOmitMeansAll(t *testing.T) {
+	idx := fieldIdx(t)
+	reg, err := Resolve(&protocol.AccessFile{Apps: []protocol.AccessApp{
+		{Name: "lim", Key: "k", Tables: []string{"customers", "addresses"},
+			Fields: map[string][]string{"customers": {"email"}}},
+	}}, idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := reg.LookupBearer("k")
+	if a == nil {
+		t.Fatal("app")
+	}
+	if !a.AllowsField("customers", "email") {
+		t.Fatal("email")
+	}
+	if !a.AllowsField("customers", "id") { // auto PK
+		t.Fatal("pk auto-include")
+	}
+	if a.AllowsField("customers", "phone") {
+		t.Fatal("phone should be forbidden")
+	}
+	if !a.AllowsField("addresses", "city") { // omitted table → all fields
+		t.Fatal("addresses unrestricted")
+	}
+}
+
+func TestResolveFieldsStarAndUnknown(t *testing.T) {
+	idx := fieldIdx(t)
+	reg, err := Resolve(&protocol.AccessFile{Apps: []protocol.AccessApp{
+		{Name: "lim", Key: "k", Tables: []string{"customers"},
+			Fields: map[string][]string{"customers": {"*"}}},
+	}}, idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := reg.LookupBearer("k")
+	if !a.AllowsField("customers", "phone") {
+		t.Fatal("star should allow phone")
+	}
+	_, err = Resolve(&protocol.AccessFile{Apps: []protocol.AccessApp{
+		{Name: "bad", Key: "k2", Tables: []string{"customers"},
+			Fields: map[string][]string{"customers": {"nope"}}},
+	}}, idx)
+	if err == nil {
+		t.Fatal("unknown field")
+	}
+}
+
+func TestResolveFieldsJoinAutoInclude(t *testing.T) {
+	idx := fieldIdx(t)
+	reg, err := Resolve(&protocol.AccessFile{Apps: []protocol.AccessApp{
+		{Name: "lim", Key: "k", Tables: []string{"customers", "addresses"},
+			Fields: map[string][]string{
+				"customers": {"email"},
+				"addresses": {"city"},
+			}},
+	}}, idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := reg.LookupBearer("k")
+	if !a.AllowsField("addresses", "customer_id") {
+		t.Fatal("join local key")
+	}
+	if !a.AllowsField("customers", "id") {
+		t.Fatal("join remote / pk")
+	}
+}

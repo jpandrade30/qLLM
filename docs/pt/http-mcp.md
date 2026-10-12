@@ -31,7 +31,7 @@ Tools (somente estas):
 |------|------------|--------|
 | `how_to_use_me` | nenhum | Mesma finalidade de `/v1/howtouseme` |
 | `describe_catalog` | nenhum | JSON do catálogo (com ACL aplicada) |
-| `execute_sql` | `sql` (obrigatório), `version` opcional, `constraints` / `constraintMode` opcional (D23) | Igual a `POST /v1/sql` |
+| `execute_sql` | `sql` (obrigatório), `version` opcional, `constraints` / `constraintMode` opcional (D23) | Igual a `POST /v1/sql`. A descrição em `tools/list` lista só tabelas/campos da allowlist do app Bearer (D16/D24) |
 
 Não existe tool de Query IR.
 

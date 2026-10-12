@@ -68,7 +68,7 @@ pytest fixtures/sqlcheck
 MCP gate: Streamable HTTP `http://127.0.0.1:8089/mcp` Bearer `change-me`. Compare `execute_sql` rows to `fixtures/goldens/sql-v1/expected`. Matrix tags in `cases.yaml` must cover every connector and every dialect-07 family (including composed statements); CI fails if a required tag is missing. CI must not regenerate goldens.
 
 
-HTTP: `Authorization: Bearer change-me` (compose injeta `QLLM_AUTH_TOKEN`; `qllm.env.yaml` só tem `${QLLM_AUTH_TOKEN}`).
+HTTP: `Authorization: Bearer change-me` (app `admin`, catalog inteiro) ou `Bearer limited-me` (app `crm-limited`, `customers`/`addresses`; customers sem `phone` via `fields`). Compose injeta `QLLM_AUTH_TOKEN` + `QLLM_CRM_LIMITED_KEY`; ver `qllm.access.yaml`.
 
 Host binário (sem container qllm): `--config-dir deploy/image/config` e env de [`qllm.env.host.yaml`](../deploy/image/config/qllm.env.host.yaml) (`127.0.0.1`). Process env ganha de `qllm.env.yaml` (DNS compose).
 

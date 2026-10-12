@@ -144,30 +144,203 @@ func QueryResponse(r *protocol.QueryResponse) *protocol.ProtocolError {
 	return validateSchema(queryRespSchema, r, protocol.ErrInternal)
 }
 
-// EnforceACL implements runtime behavior for this package.
-func EnforceACL(idx *catalogidx.Index, q *protocol.QueryIR, allow map[string]struct{}) *protocol.ProtocolError {
-	if allow == nil {
+// AppACL is the table/field allowlist used by EnforceACL (implemented by access.App).
+type AppACL interface {
+	Allows(entityName string) bool
+	AllowsField(entityName, fieldName string) bool
+}
+
+// EnforceACL rejects entities and fields outside the app allowlist (D16/D24).
+// nil app = no ACL.
+func EnforceACL(idx *catalogidx.Index, q *protocol.QueryIR, app AppACL) *protocol.ProtocolError {
+	if app == nil {
 		return nil
 	}
-	check := func(ref string) *protocol.ProtocolError {
+	checkTable := func(ref string) (*protocol.Entity, *protocol.ProtocolError) {
 		ent, err := idx.ResolveEntity(ref)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		if _, ok := allow[ent.Name]; !ok {
-			return protocol.NewError(protocol.ErrForbidden, "entity not allowed for this app: "+ent.Name, map[string]any{"entity": ent.Name})
+		if !app.Allows(ent.Name) {
+			return nil, protocol.NewError(protocol.ErrForbidden, "entity not allowed for this app: "+ent.Name, map[string]any{"entity": ent.Name})
 		}
-		return nil
+		return ent, nil
 	}
-	if err := check(q.From); err != nil {
+	if _, err := checkTable(q.From); err != nil {
 		return err
 	}
 	for _, j := range q.Joins {
-		if err := check(j.From); err != nil {
+		if _, err := checkTable(j.From); err != nil {
 			return err
 		}
 	}
+
+	bindings := map[string]binding{}
+	add := func(entityRef, as string) *protocol.ProtocolError {
+		ent, err := checkTable(entityRef)
+		if err != nil {
+			return err
+		}
+		name := as
+		if name == "" {
+			name = ent.Name
+		}
+		bindings[name] = binding{name: name, entity: ent}
+		return nil
+	}
+	if err := add(q.From, q.As); err != nil {
+		return err
+	}
+	for _, j := range q.Joins {
+		if err := add(j.From, j.As); err != nil {
+			return err
+		}
+	}
+	multi := len(bindings) > 1
+	checkField := func(ref string) *protocol.ProtocolError {
+		entName, field, err := resolveFieldNames(idx, bindings, multi, ref)
+		if err != nil {
+			return err
+		}
+		if entName == "" {
+			return nil
+		}
+		if !app.AllowsField(entName, field) {
+			return protocol.NewError(protocol.ErrForbidden,
+				"field not allowed for this app: "+entName+"."+field,
+				map[string]any{"entity": entName, "field": field})
+		}
+		return nil
+	}
+	for _, item := range q.Select {
+		switch v := item.(type) {
+		case string:
+			if err := checkField(v); err != nil {
+				return err
+			}
+		default:
+			m, ok := asMap(item)
+			if !ok {
+				continue
+			}
+			if field, ok := m["field"].(string); ok && field != "" {
+				if err := checkField(field); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if q.Where != nil {
+		if err := walkWhereACL(idx, bindings, multi, app, q.Where); err != nil {
+			return err
+		}
+	}
+	for _, g := range q.GroupBy {
+		if err := checkField(g); err != nil {
+			return err
+		}
+	}
+	for _, o := range q.OrderBy {
+		if isOutputAlias(q, o.Field) {
+			continue
+		}
+		if err := checkField(o.Field); err != nil {
+			return err
+		}
+	}
+	for _, j := range q.Joins {
+		for _, on := range j.On {
+			if err := checkField(on.Left); err != nil {
+				return err
+			}
+			if err := checkField(on.Right); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
+}
+
+func resolveFieldNames(idx *catalogidx.Index, bindings map[string]binding, multi bool, ref string) (entity, field string, err *protocol.ProtocolError) {
+	parts := strings.Split(ref, ".")
+	switch len(parts) {
+	case 1:
+		if multi {
+			return "", "", protocol.NewError(protocol.ErrAmbiguousField,
+				"unqualified field with multiple entities: "+ref,
+				map[string]any{"field": ref})
+		}
+		var only binding
+		for _, b := range bindings {
+			only = b
+			break
+		}
+		if _, ok := idx.Field(only.entity, parts[0]); ok {
+			return only.entity.Name, parts[0], nil
+		}
+		return "", "", protocol.NewError(protocol.ErrUnknownField,
+			"unknown field: "+ref, map[string]any{"field": ref})
+	case 2:
+		b, ok := bindings[parts[0]]
+		if !ok {
+			ent, rerr := idx.ResolveEntity(parts[0])
+			if rerr != nil {
+				return "", "", protocol.NewError(protocol.ErrUnknownField,
+					"unknown binding in field: "+ref, map[string]any{"field": ref})
+			}
+			found := false
+			for _, bb := range bindings {
+				if bb.entity.Name == ent.Name {
+					found = true
+					b = bb
+					break
+				}
+			}
+			if !found {
+				return "", "", protocol.NewError(protocol.ErrUnknownField,
+					"entity not in query scope: "+parts[0], map[string]any{"field": ref})
+			}
+		}
+		if _, ok := idx.Field(b.entity, parts[1]); !ok {
+			return "", "", protocol.NewError(protocol.ErrUnknownField,
+				"unknown field: "+ref, map[string]any{"field": ref})
+		}
+		return b.entity.Name, parts[1], nil
+	default:
+		return "", "", protocol.NewError(protocol.ErrInvalidIR, "invalid field ref: "+ref, nil)
+	}
+}
+
+func walkWhereACL(idx *catalogidx.Index, bindings map[string]binding, multi bool, app AppACL, w map[string]any) *protocol.ProtocolError {
+	if op, ok := w["op"].(string); ok {
+		switch op {
+		case "and", "or", "not":
+			args, _ := w["args"].([]any)
+			for _, a := range args {
+				m, ok := asMap(a)
+				if !ok {
+					return protocol.NewError(protocol.ErrInvalidIR, "invalid where args", nil)
+				}
+				if err := walkWhereACL(idx, bindings, multi, app, m); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}
+	if field, ok := w["field"].(string); ok {
+		entName, fname, err := resolveFieldNames(idx, bindings, multi, field)
+		if err != nil {
+			return err
+		}
+		if entName != "" && !app.AllowsField(entName, fname) {
+			return protocol.NewError(protocol.ErrForbidden,
+				"field not allowed for this app: "+entName+"."+fname,
+				map[string]any{"entity": entName, "field": fname})
+		}
+		return nil
+	}
+	return protocol.NewError(protocol.ErrInvalidIR, "invalid where clause", nil)
 }
 
 // Bundle implements runtime behavior for this package.

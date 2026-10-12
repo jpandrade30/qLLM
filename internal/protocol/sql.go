@@ -96,11 +96,12 @@ type AccessFile struct {
 }
 
 type AccessApp struct {
-	Name           string            `json:"name" yaml:"name"`
-	Key            string            `json:"key,omitempty" yaml:"key,omitempty"`
-	KeySecret      string            `json:"keySecret,omitempty" yaml:"keySecret,omitempty"`
-	Tables         []string          `json:"tables" yaml:"tables"`
-	UnscopedTables []string          `json:"unscopedTables,omitempty" yaml:"unscopedTables,omitempty"`
-	Scope          map[string]string `json:"scope,omitempty" yaml:"scope,omitempty"`
-	ScopeMode      string            `json:"scopeMode,omitempty" yaml:"scopeMode,omitempty"`
+	Name           string              `json:"name" yaml:"name"`
+	Key            string              `json:"key,omitempty" yaml:"key,omitempty"`
+	KeySecret      string              `json:"keySecret,omitempty" yaml:"keySecret,omitempty"`
+	Tables         []string            `json:"tables" yaml:"tables"`
+	UnscopedTables []string            `json:"unscopedTables,omitempty" yaml:"unscopedTables,omitempty"`
+	Fields         map[string][]string `json:"fields,omitempty" yaml:"fields,omitempty"`
+	Scope          map[string]string   `json:"scope,omitempty" yaml:"scope,omitempty"`
+	ScopeMode      string              `json:"scopeMode,omitempty" yaml:"scopeMode,omitempty"`
 }

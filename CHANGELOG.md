@@ -5,6 +5,17 @@ All notable changes to qLLM are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.6-rc.1**.
 
+## [Unreleased]
+
+### Added
+
+- Harness / product-default `qllm.access.yaml` demo: app `crm-limited` (Bearer `limited-me` → `customers`,`addresses` only) and `admin` (Bearer `change-me` → full catalog). Compose sets `QLLM_CRM_LIMITED_KEY`.
+- **D24** optional `apps[].fields` map (entity → field allowlist). Omitted table keeps all fields; catalog / MCP `tools/list` / IR / SQL share the same projection (`FORBIDDEN` on hidden columns; `SELECT *` fetches allowlisted columns only).
+
+### Fixed
+
+- MCP `tools/list` tool descriptions (`execute_sql`, `how_to_use_me`, `describe_catalog`) now follow the Bearer app allowlist — limited keys no longer see the full catalog in the static description.
+
 ## [0.3.6-rc.3] - 2026-10-11
 
 ### Added
