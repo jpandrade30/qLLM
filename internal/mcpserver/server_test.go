@@ -9,6 +9,7 @@ import (
 
 	"qLLM/internal/catalogidx"
 	"qLLM/internal/executor"
+	"qLLM/internal/httpserver"
 	"qLLM/internal/mcpserver"
 	"qLLM/internal/protocol"
 	"qLLM/internal/querystore"
@@ -168,5 +169,42 @@ func TestMCPHTTPUnknownPath(t *testing.T) {
 	h.ServeHTTP(rec, req)
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("status=%d", rec.Code)
+	}
+}
+
+func TestMCPHTTPMountsV1API(t *testing.T) {
+	preset := &protocol.Preset{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Limits:          protocol.Limits{DefaultLimit: 10, MaxLimit: 100, MaxSyncMs: 1000, ReadOnly: true},
+		Sources:         []protocol.Source{{ID: "crm_pg", Type: protocol.SourcePostgres}},
+	}
+	catalog := &protocol.Catalog{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Project:         "demo",
+		Entities: []protocol.Entity{{
+			Name: "customers", Source: "crm_pg",
+			Fields: []protocol.Field{{Name: "id", Type: protocol.TypeString}},
+		}},
+	}
+	idx, err := catalogidx.New(preset, catalog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := querystore.New(time.Minute)
+	exec := executor.New(idx, nil, store)
+	api := &httpserver.Server{Idx: idx, Exec: exec, Store: store}
+	h := mcpserver.Handler(mcpserver.New(idx, exec, store), mcpserver.HTTPOptions{RegisterAPI: api.Register})
+
+	body := `{"tables":["customers"]}`
+	req := httptest.NewRequest(http.MethodPost, "/v1/catalog/describe", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "customers") {
+		t.Fatalf("body=%s", rec.Body.String())
 	}
 }

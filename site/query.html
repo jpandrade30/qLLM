@@ -71,7 +71,11 @@
               </tr>
               <tr>
                 <td><code>execute_sql</code></td>
-                <td>Catalog SQL against the logical catalog. Logs SQL to stderr.</td>
+                <td>
+                  Catalog SQL against the logical catalog. Optional
+                  <code>constraints</code> / <code>constraintMode</code> (D23) for host-bound
+                  equality checks or inject. Logs SQL to stderr.
+                </td>
               </tr>
             </tbody>
           </table>
@@ -103,18 +107,32 @@
                 <td>Logical catalog for the caller</td>
               </tr>
               <tr>
+                <td><code>POST /v1/catalog/describe</code></td>
+                <td>
+                  Subset execute_sql-style description for host custom tools
+                  (<code>tables</code>, optional <code>strict</code>). Also on the
+                  <code>--mcp-http</code> port under <code>/v1/…</code>
+                </td>
+              </tr>
+              <tr>
                 <td><code>POST /v1/queries</code></td>
                 <td>Execute Query IR JSON</td>
               </tr>
               <tr>
                 <td><code>POST /v1/sql</code></td>
-                <td>Execute catalog SQL</td>
+                <td>
+                  Execute catalog SQL (<code>constraints</code> /
+                  <code>constraintMode</code> optional)
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
         <pre><code>curl -s http://127.0.0.1:8088/v1/howtouseme | jq .
 curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/catalog
+curl -s -X POST -H "Authorization: Bearer $QLLM_AUTH_TOKEN" -H "Content-Type: application/json" \
+  http://127.0.0.1:8088/v1/catalog/describe \
+  -d '{"tables":["customers","addresses"]}'
 curl -s -X POST http://127.0.0.1:8088/v1/queries -d @query.json</code></pre>
       </section>
 
@@ -178,6 +196,12 @@ curl -s -X POST http://127.0.0.1:8088/v1/queries -d @query.json</code></pre>
         <a href="https://github.com/jpandrade30/qLLM/tree/main/planning">planning/</a>
       </span>
       </div>
+      <p class="site-footer__powered">
+        <a class="powered-by-duckdb" href="https://duckdb.org/" rel="noopener noreferrer">
+          <img src="assets/duckdb.svg" width="20" height="20" alt="" />
+          Powered by DuckDB
+        </a>
+      </p>
       <p class="site-footer__disclaimer">
         Experimental project. Provided as-is. The author accepts no responsibility for any damage
         caused by its use.

@@ -166,6 +166,26 @@ Stdio con `qllm.access.yaml` y sin `--app` / `QLLM_APP` devuelve `CONFIG_ERROR`.
 
 Logs: cada `execute_sql` imprime un bloque `---- execute_sql ----` en stderr; las otras dos tools imprimen `---- mcp_tool ----`.
 
+## `qllm catalog describe`
+
+Imprime una descripción al estilo **execute_sql** para un **subconjunto** de entidades del catálogo (tools/prompts en el host). **No** cambia las tres tools MCP. Valida hints de join en `relations[]` del slice.
+
+| Flag | Significado |
+|------|-------------|
+| flags de config | ver arriba |
+| `--tables a,b,c` | **Obligatoria.** Nombres de entidad (orden conservado) |
+| `--format text\|json` | Por defecto `text` (descripción en stdout). `json` incluye `description`, `entities`, `issues`, `catalog` |
+| `--strict` | Trata avisos `relation_outside_slice` como error (exit 1) |
+
+Nombre desconocido y campo de join ausente son errores. Relación cuyo `to` queda fuera de `--tables` es aviso (stderr en modo text), salvo `--strict`.
+
+El texto **no** aplica allowlist en runtime — usa `qllm.access.yaml` o un catálogo reducido para gating real.
+
+```bash
+./qllm catalog describe --config-dir ./my-project --tables customers,invoices
+./qllm catalog describe --config-dir ./my-project --tables customers,invoices --format json --strict
+```
+
 ## `qllm catalog introspect`
 
 Lee `information_schema` de una fuente **postgres o mysql** del preset y escribe el YAML del catálogo. No sirve.

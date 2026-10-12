@@ -48,7 +48,10 @@ func OpenMSSQL(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	if err != nil {
 		return nil, protocol.NewError(protocol.ErrConfigError, "mssql open failed", map[string]any{"source": src.ID})
 	}
-	db.SetMaxOpenConns(5)
+	if perr := applyMaxOpenConns(db, src); perr != nil {
+		_ = db.Close()
+		return nil, perr
+	}
 	_ = maxSourceMs
 	return &SQLConnector{
 		id: src.ID, srcType: protocol.SourceMSSQL, db: db,
@@ -67,7 +70,10 @@ func OpenSQLite(src protocol.Source, maxSourceMs int) (*SQLConnector, error) {
 	if err != nil {
 		return nil, protocol.NewError(protocol.ErrConfigError, "sqlite open failed", map[string]any{"source": src.ID})
 	}
-	db.SetMaxOpenConns(1)
+	if perr := applyMaxOpenConns(db, src); perr != nil {
+		_ = db.Close()
+		return nil, perr
+	}
 	_ = maxSourceMs
 	return &SQLConnector{
 		id: src.ID, srcType: protocol.SourceSQLite, db: db,
@@ -101,7 +107,10 @@ func OpenClickHouse(src protocol.Source, maxSourceMs int) (*SQLConnector, error)
 	}
 	_ = maxSourceMs
 	db := clickhouse.OpenDB(opts)
-	db.SetMaxOpenConns(5)
+	if perr := applyMaxOpenConns(db, src); perr != nil {
+		_ = db.Close()
+		return nil, perr
+	}
 	return &SQLConnector{
 		id: src.ID, srcType: protocol.SourceClickHouse, db: db,
 		dialect: sqlbuild.ClickHouse,

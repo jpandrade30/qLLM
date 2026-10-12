@@ -64,12 +64,14 @@ Obligatorios: `id`, `type`, `connection`.
 | `userEnv` | cadena | |
 | `passwordEnv` | cadena | |
 | `sslMode` | enum opcional | `disable` `require` `verify-ca` `verify-full` (postgres; mysql lo ignora si no se usa) |
+| `maxOpenConns` | int opcional | `1`–`100`; tope del pool `database/sql` (por defecto **5**). Con muchos pods, bájalo por réplica (`pods × maxOpenConns ≲ max_connections` del DB) |
+| `maxOpenConnsEnv` | string opcional | Nombre de la env con un entero; si está definida, gana a `maxOpenConns`. Vacía o no numérica → `CONFIG_ERROR` al abrir la source |
 
-**mssql**: los mismos obligatorios. Extra opcional: `encrypt`: `true` \| `false` \| `disable`. No tiene `sslMode`.
+**mssql**: los mismos obligatorios. Extra opcional: `encrypt`: `true` \| `false` \| `disable`. Mismos `maxOpenConns` / `maxOpenConnsEnv` opcionales. No tiene `sslMode`.
 
-**clickhouse**: los mismos obligatorios. Extra opcional: `secure` (bool).
+**clickhouse**: los mismos obligatorios. Extra opcional: `secure` (bool). Mismos `maxOpenConns` / `maxOpenConnsEnv` opcionales.
 
-**sqlite**: solo `pathEnv` (la variable de entorno con la ruta del archivo `.db`).
+**sqlite**: `pathEnv` (la variable de entorno con la ruta del archivo `.db`). Se aceptan `maxOpenConns` / `maxOpenConnsEnv`, pero el tope efectivo es siempre **1**.
 
 **mongodb**: obligatorios `uriEnv`, `database`.
 
@@ -310,6 +312,8 @@ No uses este archivo para secretos versionados en git. En Kubernetes, usa un Sec
 ## Cuerpo de `POST /v1/sql` / `execute_sql`
 
 Obligatorio: `sql`. Opcional: `version` (`"1"` congelado; omitido o `"2"` es el más reciente).
+
+Opcional (D23): `constraints` (objeto campo→string/número/boolean) y `constraintMode` (`validate` | `inject`). Por defecto con mapa no vacío: `validate`. Preferir mapa fijado en el host; ver [multi-user-safety.md](multi-user-safety.md).
 
 ---
 

@@ -166,6 +166,26 @@ qllm
 
 日志：每次 `execute_sql` 会在 stderr 输出 `---- execute_sql ----` 块；另外两个工具输出 `---- mcp_tool ----`。
 
+## `qllm catalog describe`
+
+为所选 catalog 实体子集打印 **execute_sql** 风格的 agent 描述（供宿主侧自定义 tool / prompt）。**不**改动三个 MCP tools。会校验子集上的 `relations[]` join 提示。
+
+| 标志 | 含义 |
+|------|------|
+| 配置标志 | 见上 |
+| `--tables a,b,c` | **必填。** 实体名（保持顺序） |
+| `--format text\|json` | 默认 `text`（描述到 stdout）。`json` 含 `description`、`entities`、`issues`、`catalog` |
+| `--strict` | 将 `relation_outside_slice` 警告视为错误（exit 1） |
+
+未知表名与缺失 join 字段为错误。`to` 不在 `--tables` 中的 relation 为警告（text 模式打到 stderr），除非 `--strict`。
+
+该文本**不会**在运行时强制 allowlist — 真正门控请用 `qllm.access.yaml` 或精简 catalog。
+
+```bash
+./qllm catalog describe --config-dir ./my-project --tables customers,invoices
+./qllm catalog describe --config-dir ./my-project --tables customers,invoices --format json --strict
+```
+
 ## `qllm catalog introspect`
 
 读取 preset 中 **postgres 或 mysql** 数据源的 `information_schema`，并写出 catalog YAML。不提供服务。

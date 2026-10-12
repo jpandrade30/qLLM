@@ -334,6 +334,30 @@ type CatalogResponse struct {
 	Sources         []SourceInfo `json:"sources"`
 }
 
+// CatalogDescribeRequest asks for an execute_sql-style description of a table subset (HTTP).
+type CatalogDescribeRequest struct {
+	Tables []string `json:"tables"`
+	Strict bool     `json:"strict,omitempty"`
+}
+
+// CatalogDescribeIssue is a relation/join finding for a catalog slice.
+type CatalogDescribeIssue struct {
+	Severity string `json:"severity"`
+	Code     string `json:"code"`
+	Message  string `json:"message"`
+	Entity   string `json:"entity,omitempty"`
+	Relation string `json:"relation,omitempty"`
+}
+
+// CatalogDescribeResponse is the filtered agent description for host custom tools.
+type CatalogDescribeResponse struct {
+	ProtocolVersion string                 `json:"protocolVersion"`
+	Description     string                 `json:"description"`
+	Entities        []string               `json:"entities"`
+	Issues          []CatalogDescribeIssue `json:"issues"`
+	Catalog         *Catalog               `json:"catalog,omitempty"`
+}
+
 type HealthResponse struct {
 	OK              bool   `json:"ok"`
 	ProtocolVersion string `json:"protocolVersion"`

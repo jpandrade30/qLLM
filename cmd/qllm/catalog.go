@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"qLLM/internal/catalogdesc"
 	"qLLM/internal/cataloggen"
 	"qLLM/internal/config"
 	"qLLM/internal/protocol"
@@ -19,8 +22,98 @@ func newCatalogCmd(opts func() config.Options, addFlags func(*cobra.Command)) *c
 		Use:   "catalog",
 		Short: "Author catalog YAML (introspect SQL or import OpenAPI). Writes files; does not serve.",
 	}
-	cmd.AddCommand(newIntrospectCmd(opts, addFlags), newFromOpenAPICmd(opts, addFlags))
+	cmd.AddCommand(newIntrospectCmd(opts, addFlags), newFromOpenAPICmd(opts, addFlags), newCatalogDescribeCmd(opts, addFlags))
 	return cmd
+}
+
+// newCatalogDescribeCmd prints an execute_sql-style agent description for a table subset.
+func newCatalogDescribeCmd(opts func() config.Options, addFlags func(*cobra.Command)) *cobra.Command {
+	var tables, format string
+	var strict bool
+	cmd := &cobra.Command{
+		Use:   "describe",
+		Short: "Print an execute_sql-style description for selected catalog tables (host-side custom tools)",
+		Long: `Filter the loaded catalog to --tables and print a description suitable for pasting into a
+host custom tool (LangGraph/BFF). Does not change MCP tools. Validates relations/join keys;
+relation targets outside the selection are warnings (errors with --strict).`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			names := splitCSV(tables)
+			if len(names) == 0 {
+				return fmt.Errorf("--tables is required (comma-separated entity names)")
+			}
+			format = strings.ToLower(strings.TrimSpace(format))
+			if format == "" {
+				format = "text"
+			}
+			if format != "text" && format != "json" {
+				return fmt.Errorf("--format must be text or json")
+			}
+			cfg := opts()
+			if err := config.ApplyEnvFile(cfg.ConfigDir); err != nil {
+				return printErr(err)
+			}
+			p, c, _, err := config.LoadBundle(cfg)
+			if err != nil {
+				return printErr(err)
+			}
+			out, perr := catalogdesc.Describe(p, c, names, strict)
+			if perr != nil {
+				if out != nil {
+					_ = printSliceIssues(out.Issues)
+				}
+				return printErr(perr)
+			}
+			if format == "json" {
+				resp := protocol.CatalogDescribeResponse{
+					ProtocolVersion: protocol.ProtocolVersion,
+					Description:     out.Description,
+					Entities:        out.Entities,
+					Catalog:         out.Catalog,
+				}
+				for _, iss := range out.Issues {
+					resp.Issues = append(resp.Issues, protocol.CatalogDescribeIssue{
+						Severity: iss.Severity, Code: iss.Code, Message: iss.Message,
+						Entity: iss.Entity, Relation: iss.Relation,
+					})
+				}
+				if resp.Issues == nil {
+					resp.Issues = []protocol.CatalogDescribeIssue{}
+				}
+				enc := json.NewEncoder(os.Stdout)
+				enc.SetIndent("", "  ")
+				return enc.Encode(resp)
+			}
+			for _, iss := range out.Issues {
+				fmt.Fprintf(os.Stderr, "%s: %s (%s)\n", iss.Severity, iss.Message, iss.Code)
+			}
+			_, err = fmt.Fprintln(os.Stdout, out.Description)
+			return err
+		},
+	}
+	cmd.Flags().StringVar(&tables, "tables", "", "comma-separated catalog entity names (required)")
+	cmd.Flags().StringVar(&format, "format", "text", "text | json")
+	cmd.Flags().BoolVar(&strict, "strict", false, "treat relation_outside_slice warnings as errors")
+	addFlags(cmd)
+	return cmd
+}
+
+func splitCSV(s string) []string {
+	parts := strings.Split(s, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func printSliceIssues(issues []catalogdesc.Issue) error {
+	for _, iss := range issues {
+		fmt.Fprintf(os.Stderr, "%s: %s (%s)\n", iss.Severity, iss.Message, iss.Code)
+	}
+	return fmt.Errorf("catalog slice validation failed")
 }
 
 // newIntrospectCmd implements runtime behavior for this package.

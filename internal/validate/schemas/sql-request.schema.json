@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://qllm.dev/schemas/sql-request.schema.json",
   "title": "qLLM SQL Request",
-  "description": "SQL dialect request (alongside Query IR). version omitted = latest dialect.",
+  "description": "SQL dialect request (alongside Query IR). version omitted = latest dialect. Optional constraints (D23) are additive to credential scope (D21).",
   "type": "object",
   "additionalProperties": false,
   "required": ["sql"],
@@ -15,6 +15,18 @@
     "sql": {
       "type": "string",
       "minLength": 1
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Catalog field → scalar. Host should bind this map; do not let the model invent subjects. D23.",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean"]
+      }
+    },
+    "constraintMode": {
+      "type": "string",
+      "enum": ["validate", "inject"],
+      "description": "validate (default when constraints non-empty): abort on mismatched eq. inject: also force eq on source fetch."
     }
   }
 }

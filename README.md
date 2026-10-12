@@ -4,6 +4,11 @@
   <img src="StudyingCat.png" alt="A cat studying at a laptop screen" width="360">
 </p>
 
+<p align="center">
+  <a href="https://duckdb.org/"><img src="site/assets/duckdb.svg" alt="DuckDB" height="28"></a><br>
+  <sub>Local joins and catalog SQL powered by <a href="https://duckdb.org/">DuckDB</a></sub>
+</p>
+
 Multi-source query runtime (Go). Configure sources with YAML preset + logical catalog, query via JSON IR, serve HTTP `/v1` or MCP.
 
 Release **0.3.5**. Protocol **0.2.0** (0.1.0 files remain valid) — see [planning/](planning/) (contracts) and [CHANGELOG.md](CHANGELOG.md).
@@ -62,13 +67,13 @@ Harness / CI covers **postgres**, **mysql**, **mongodb**, and **rest**. Everythi
 
 | `type` | Status | Pushdown | Notes |
 |--------|--------|----------|-------|
-| `postgres` | stable | filter, project, agg, groupBy, order, limit, same-source join | `sslMode`; `statementTimeoutMs` |
-| `mysql` | stable | same as postgres | |
+| `postgres` | stable | filter, project, agg, groupBy, order, limit, same-source join | `sslMode`; `statementTimeoutMs`; optional `maxOpenConns` / `maxOpenConnsEnv` (pool; default 5) |
+| `mysql` | stable | same as postgres | same optional pool keys as postgres |
 | `mongodb` | stable | filter, project, agg, groupBy, order, limit | same-source join goes through DuckDB |
 | `rest` | stable | `eq` filter, project, limit/offset | `options.resources` required; aggregations in DuckDB; optional `getById`, `itemsKey`, offset pagination; `fromFilter` fills keys the API omits |
-| `mssql` | experimental | same as postgres | `encrypt` |
-| `sqlite` | experimental | same as postgres | `pathEnv`; `binding.schema: main` |
-| `clickhouse` | experimental | same as postgres | native port is typically 9000 |
+| `mssql` | experimental | same as postgres | `encrypt`; optional `maxOpenConns` / `maxOpenConnsEnv` |
+| `sqlite` | experimental | same as postgres | `pathEnv`; `binding.schema: main`; pool always capped at 1 |
+| `clickhouse` | experimental | same as postgres | native port is typically 9000; optional pool keys |
 | `dynamodb` | experimental | key equality, project, limit | `binding.accessPath` pk/sk required or `UNSUPPORTED` |
 | `cassandra` | experimental | partition equality, project, limit | `accessPath.partition` required or `UNSUPPORTED` |
 | `ksql` | experimental | key equality, project, limit | **pull only**; `accessPath.ksqlKey` required or `UNSUPPORTED` |
@@ -133,6 +138,8 @@ Draft a catalog from a live SQL source or an OpenAPI file (review before serve):
 
 ```bash
 ./qllm catalog introspect --source crm_pg --config-dir ./my-project --out ./my-project/qllm.catalog.yaml
+# Host-side subset tool description (CLI or POST /v1/catalog/describe; not an MCP tool):
+./qllm catalog describe --config-dir ./my-project --tables customers,invoices
 ./qllm catalog from-openapi -f ./other-team.yaml --source legacy_api --config-dir ./my-project --out ./draft.catalog.yaml --resources-out ./draft.resources.yaml
 ```
 
@@ -184,7 +191,7 @@ curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/cat
 
 `GET /v1/health` stays unauthenticated for probes.
 
-Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`) and `tables` from the catalog. One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. See [multi-user safety](docs/en/multi-user-safety.md).
+Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`) and `tables` from the catalog. One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. Optional SQL `constraints` / `constraintMode` (D23) are a lighter host-bound assist — see [multi-user safety](docs/en/multi-user-safety.md).
 
 ```yaml
 apps:
@@ -287,6 +294,16 @@ go run -tags duckdb .\scripts\dev\duckdb_smoke.go
 **Windows users:** download the DuckDB C/C++ library (`duckdb.dll` and `duckdb.lib`) from the [official DuckDB site](https://duckdb.org/docs/installation/) (the `libduckdb-windows-amd64` zip) and place both files in the `duckdblib/` folder at the repo root before using `-tags duckdb`. `scripts/dev/dev-shell.ps1` expects them there.
 
 Without `-tags duckdb`, `go test ./...` stays CGO-free.
+
+**Prefer Linux for unit tests with DuckDB:** [`Dockerfile.test`](Dockerfile.test) mirrors CI (`go vet`, `go test ./...`, `go test -tags duckdb` on `duckdblocal` + `executor`). No compose / DBs.
+
+```powershell
+.\scripts\dev\test-in-container.ps1
+# or: nerdctl build -f Dockerfile.test --target test .
+# re-run (TTY for colors): nerdctl run --rm -t qllm-test
+```
+
+Quiet / no color: `-e QLLM_TEST_V=0` / `-e QLLM_TEST_COLOR=0`.
 
 ## Development
 
