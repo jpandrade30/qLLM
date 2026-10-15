@@ -198,6 +198,13 @@ func (e *Executor) ExecuteSQL(ctx context.Context, req *protocol.SQLRequest) (re
 	if tab != nil {
 		tab.Truncated = tab.Truncated || truncated
 	}
+	ents := make([]string, 0, len(scans))
+	for _, sc := range scans {
+		if sc.entity != nil {
+			ents = append(ents, sc.entity.Name)
+		}
+	}
+	e.applyRedact(tab, ents, nil, parsed)
 	return &protocol.QueryResponse{
 		ProtocolVersion: protocol.ProtocolVersion,
 		QueryID:         queryID,

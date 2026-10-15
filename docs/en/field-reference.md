@@ -247,6 +247,7 @@ Required: `name`, `type`, `physical`.
 | `description` | optional string |
 | `fromFilter` | optional bool; REST only. The API does not return this field; qLLM copies the value from a top-level `eq` filter (decision **D20** in [`planning/01-decisions.md`](../../planning/01-decisions.md)) |
 | `shape` | optional free text; only for `type: json`. Inner structure for the LLM (`{street, city}`, `string[]`). Shown in `describe_catalog`. Not validated (decision **D22** in [`planning/01-decisions.md`](../../planning/01-decisions.md)) |
+| `redact` | optional bool. Join/filter/groupBy use the real value; result cells become `"[REDACTED]"` and `columns[].type` becomes `string`. Still listed in catalog/`describe_catalog` (decision **D25** in [`planning/01-decisions.md`](../../planning/01-decisions.md)). Unlike access `fields` omit (**D24** → `FORBIDDEN`) |
 
 ### `relations[]`
 

@@ -191,7 +191,7 @@ curl -s -H "Authorization: Bearer $QLLM_AUTH_TOKEN" http://127.0.0.1:8088/v1/cat
 
 `GET /v1/health` stays unauthenticated for probes.
 
-Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`), `tables` from the catalog, and optional `fields` (entity → field allowlist; omit a table to keep all its fields). One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. Optional SQL `constraints` / `constraintMode` (D23) are a lighter host-bound assist — see [multi-user safety](docs/en/multi-user-safety.md).
+Optional `qllm.access.yaml` replaces the single Bearer token. Each app has a `key` or `keySecret` (literal or `${ENV_NAME}`), `tables` from the catalog, and optional `fields` (entity → field allowlist; omit a table to keep all its fields). One entry per app type, not per user: the backend mints `app.userCode.expiry.hmac` so row filters (`entities[].scope`) come from the credential, not from the query. HTTP/MCP HTTP use `Authorization: Bearer <key>`. MCP stdio uses `--app` / `QLLM_APP` and `--scope` / `QLLM_SCOPE`. Catalog `fields[].redact` (D25) keeps join keys usable while masking result cells as `"[REDACTED]"`. Optional SQL `constraints` / `constraintMode` (D23) are a lighter host-bound assist — see [multi-user safety](docs/en/multi-user-safety.md).
 
 ```yaml
 apps:

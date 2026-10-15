@@ -61,6 +61,8 @@ Não trate HTTP 200 como sucesso sem olhar `status` e `error`. Um POST pode devo
 
 Um campo `json` no catálogo pode ter `shape` (texto livre) para o LLM saber as chaves internas. O runtime não valida `shape`. REST lê **só chaves de topo**: `physical: addr.city` fica vazio no REST. Coloque o objeto em `addr` e deixe o cliente navegar.
 
+Campos com `redact: true` (**D25**) continuam em `result.columns`, mas cada célula é a string `"[REDACTED]"` (`columns[].type` = `string`). Joins e `GROUP BY` usam o valor real internamente — use outra coluna para diferenciar linhas.
+
 ## Erro
 
 ```json

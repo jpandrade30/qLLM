@@ -61,6 +61,8 @@ HTTP `/v1/queries`、`/v1/sql`、CLI `query`/`sql` 和 MCP `execute_sql` 都返�
 
 目录中的 `json` 字段可设 `shape`（自由文本），供 LLM 了解内部键。运行时不校验 `shape`。REST **只读顶层键**：`physical: addr.city` 在 REST 上为空。把对象放在 `addr` 上，由客户端再取子字段。
 
+带 `redact: true`（**D25**）的字段仍出现在 `result.columns`，但每个单元格为字符串 `"[REDACTED]"`（`columns[].type` 为 `string`）。Join/`GROUP BY` 内部仍用真实值——请用其他列区分行。
+
 ## 错误
 
 ```json

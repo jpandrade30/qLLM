@@ -175,6 +175,7 @@ type Field struct {
 	Description string      `json:"description,omitempty" yaml:"description,omitempty"`
 	FromFilter  bool        `json:"fromFilter,omitempty" yaml:"fromFilter,omitempty"`
 	Shape       string      `json:"shape,omitempty" yaml:"shape,omitempty"`
+	Redact      bool        `json:"redact,omitempty" yaml:"redact,omitempty"`
 }
 
 type Relation struct {
