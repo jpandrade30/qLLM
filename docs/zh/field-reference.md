@@ -245,6 +245,7 @@ sources:
 | `description` | 可选字符串 |
 | `fromFilter` | 可选布尔；仅 REST。API 不返回该字段；qLLM 从顶层 `eq` 过滤器复制值（D20） |
 | `shape` | 可选自由文本；仅 `type: json`。给 LLM 看的内部结构（`{street, city}`、`string[]`）。出现在 `describe_catalog`。运行时不校验（D22） |
+| `redact` | 可选布尔。Join/filter/groupBy 仍用真实值；结果单元格变为 `"[REDACTED]"`（`columns[].type` → `string`）。仍出现在 catalog/`describe_catalog`（**D25**）。不同于 access 省略字段（**D24** → `FORBIDDEN`） |
 
 ### `relations[]`
 

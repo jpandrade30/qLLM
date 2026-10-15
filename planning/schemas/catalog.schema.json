@@ -159,6 +159,10 @@
         "shape": {
           "type": "string",
           "description": "Free-text hint of the inner structure of a type: json field (D22). Shown in describe_catalog."
+        },
+        "redact": {
+          "type": "boolean",
+          "description": "D25: usable in join/filter/groupBy; result cells replaced with [REDACTED]. Shown in catalog/describe."
         }
       }
     },

@@ -24,7 +24,7 @@ stdio MCP：`--app mobile` 加上 `--scope 42`（或 `QLLM_SCOPE`）。
 
 少数长期主体可用固定 `key` 和 `scope: { user_id: "acme" }`。
 
-Query IR 过滤其他用户时返回 `FORBIDDEN_SCOPE`（默认 `scopeMode: reject`）。目录 SQL 在拉取时**注入**范围（结果为空）。没有 `scope` 的应用（管理员）不注入。目录中未声明 `scope` 的实体不受保护，需写明 `unscopedTables`。数据库 RLS/视图仍建议作为第二层。
+Query IR 过滤其他用户时返回 `FORBIDDEN_SCOPE`（默认 `scopeMode: reject`）。目录 SQL 在拉取时**注入**范围（结果为空）。没有 `scope` 的应用（管理员）不注入。目录中未声明 `scope` 的实体不受保护，需写明 `unscopedTables`。列：`fields[].redact`（**D25**）将单元格掩码为 `"[REDACTED]"`；access 省略字段（**D24**）→ `FORBIDDEN`。数据库 RLS/视图仍建议作为第二层。
 
 LangGraph：图只编译一次；Bearer 放在 `config["configurable"]["qllm_token"]`；每次 `execute_sql` 打开短 MCP 会话。示例：[`deploy/prd/enforced/`](../../deploy/prd/enforced/README.md)。
 

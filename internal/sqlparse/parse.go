@@ -20,9 +20,17 @@ type ColUse struct {
 	Star bool
 }
 
+// SelectOut describes one top-level SELECT list item for D25 redaction provenance.
+type SelectOut struct {
+	OutName string   // AS alias, or simple column name when unambiguous; empty if unknown
+	Fields  []string // logical field names referenced in the item
+	Star    bool
+}
+
 type Result struct {
 	Tables   []TableUse
 	Columns  []ColUse
+	SelectOuts []SelectOut
 	Star     bool
 	Limit    *int
 	CTENames []string
@@ -312,9 +320,28 @@ func (p *parser) parseSelectList(out *Result) *protocol.ProtocolError {
 		}
 		if p.peek().kind == 'p' && p.peek().val == "*" {
 			out.Star = true
+			out.SelectOuts = append(out.SelectOuts, SelectOut{Star: true})
 			p.i++
-		} else if err := p.scanSelectItem(out); err != nil {
-			return err
+		} else {
+			colStart := len(out.Columns)
+			alias, err := p.scanSelectItem(out)
+			if err != nil {
+				return err
+			}
+			so := SelectOut{OutName: alias}
+			for _, c := range out.Columns[colStart:] {
+				if c.Star {
+					so.Star = true
+					continue
+				}
+				if c.Name != "" {
+					so.Fields = append(so.Fields, c.Name)
+				}
+			}
+			if so.OutName == "" && len(so.Fields) == 1 && !so.Star {
+				so.OutName = so.Fields[0]
+			}
+			out.SelectOuts = append(out.SelectOuts, so)
 		}
 		if p.peek().kind == 'p' && p.peek().val == "," {
 			p.i++
@@ -325,20 +352,20 @@ func (p *parser) parseSelectList(out *Result) *protocol.ProtocolError {
 	return nil
 }
 
-// scanSelectItem implements runtime behavior for this package.
-func (p *parser) scanSelectItem(out *Result) *protocol.ProtocolError {
+// scanSelectItem scans one SELECT list item and returns an AS alias when present.
+func (p *parser) scanSelectItem(out *Result) (string, *protocol.ProtocolError) {
 	t := p.peek()
 	if t.kind == 'i' {
 		name := t.val
 		p.i++
 		if p.peek().kind == 'p' && p.peek().val == "(" {
 			if _, bad := bannedFns[strings.ToLower(name)]; bad {
-				return protocol.NewError(protocol.ErrInvalidSQL, "function not allowed: "+name, map[string]any{"fn": name})
+				return "", protocol.NewError(protocol.ErrInvalidSQL, "function not allowed: "+name, map[string]any{"fn": name})
 			}
 			if err := p.skipBalancedScan(out); err != nil {
-				return err
+				return "", err
 			}
-			return p.scanExpr(out, "FROM")
+			return p.scanExprAlias(out, "FROM")
 		}
 		if p.peek().kind == 'p' && p.peek().val == "." {
 			p.i++
@@ -351,26 +378,37 @@ func (p *parser) scanSelectItem(out *Result) *protocol.ProtocolError {
 				out.Columns = append(out.Columns, ColUse{Qual: name, Name: n.val})
 				p.i++
 			}
-			if p.eatKW("AS") {
-				if p.peek().kind == 'i' && !isFromBreaker(p.peek().val) {
-					p.i++
-				}
-			}
-			return nil
+			return p.eatSelectAlias(), nil
 		}
 		if isSQLKeyword(name) || p.atExprContinuator() {
 			p.i-- // rescan expression from this identifier
-			return p.scanExpr(out, "FROM")
+			return p.scanExprAlias(out, "FROM")
 		}
 		out.Columns = append(out.Columns, ColUse{Name: name})
-		if p.eatKW("AS") {
-			if p.peek().kind == 'i' && !isFromBreaker(p.peek().val) {
-				p.i++
-			}
-		}
-		return nil
+		return p.eatSelectAlias(), nil
 	}
-	return p.scanExpr(out, "FROM")
+	return p.scanExprAlias(out, "FROM")
+}
+
+// eatSelectAlias consumes optional AS ident (or bare ident alias after AS only).
+func (p *parser) eatSelectAlias() string {
+	if p.eatKW("AS") {
+		if p.peek().kind == 'i' && !isFromBreaker(p.peek().val) {
+			a := p.peek().val
+			p.i++
+			return a
+		}
+	}
+	return ""
+}
+
+// scanExprAlias is scanExpr that also returns a trailing AS alias at depth 0.
+func (p *parser) scanExprAlias(out *Result, until string) (string, *protocol.ProtocolError) {
+	alias := ""
+	if err := p.scanExprCapturingAlias(out, until, &alias); err != nil {
+		return "", err
+	}
+	return alias, nil
 }
 
 // parseFrom implements runtime behavior for this package.
@@ -536,6 +574,11 @@ func isFromBreaker(s string) bool {
 
 // scanExpr implements runtime behavior for this package.
 func (p *parser) scanExpr(out *Result, until string) *protocol.ProtocolError {
+	return p.scanExprCapturingAlias(out, until, nil)
+}
+
+// scanExprCapturingAlias scans an expression; when aliasOut != nil, records a depth-0 AS alias.
+func (p *parser) scanExprCapturingAlias(out *Result, until string, aliasOut *string) *protocol.ProtocolError {
 	_ = until
 	depth := 0
 	for p.i < len(p.toks) {
@@ -573,6 +616,9 @@ func (p *parser) scanExpr(out *Result, until string) *protocol.ProtocolError {
 			if strings.EqualFold(name, "AS") {
 				// output alias is not a catalog column to fetch
 				if p.peek().kind == 'i' {
+					if aliasOut != nil && depth == 0 {
+						*aliasOut = p.peek().val
+					}
 					p.i++
 				}
 				continue
@@ -700,6 +746,7 @@ func (p *parser) skipBalancedScan(out *Result) *protocol.ProtocolError {
 func merge(dst, src *Result) {
 	dst.Tables = append(dst.Tables, src.Tables...)
 	dst.Columns = append(dst.Columns, src.Columns...)
+	dst.SelectOuts = append(dst.SelectOuts, src.SelectOuts...)
 	dst.CTENames = append(dst.CTENames, src.CTENames...)
 	if src.CTEBind != nil {
 		if dst.CTEBind == nil {

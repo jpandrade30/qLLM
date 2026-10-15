@@ -61,6 +61,8 @@ Do not treat HTTP 200 as success without checking `status` and `error`. A POST m
 
 A `json` field in the catalog may set `shape` (free text) so the LLM knows the inner keys. The runtime does not validate `shape`. REST still reads **only top-level** keys: `physical: addr.city` is empty on REST. Put the object on `addr` and let the client walk it.
 
+Catalog fields with `redact: true` (**D25**) still appear in `result.columns`, but every cell is the string `"[REDACTED]"` (`columns[].type` is `string`). Joins and `GROUP BY` use the real value internally — pick another column to differentiate rows for the user.
+
 Harness example: entity `api_profiles` (`address` / `tags` / `prefs`). SQL goldens `rest_json_*` in `fixtures/goldens/sql-v1`. Dataset: `fixtures/datasets/v1/api_profiles.json`. After seed, `GET /profiles` on the fake API. Compare with `python -m sqlcheck check-oracle` (or `mcp` against a running compose).
 
 ## Error

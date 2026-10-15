@@ -24,7 +24,7 @@ MCP stdio: `--app mobile` e `--scope 42` (ou `QLLM_SCOPE`).
 
 Poucos principals fixos podem usar `key` + `scope: { user_id: "acme" }`.
 
-Filtro de outro usuário no Query IR: `FORBIDDEN_SCOPE` (`scopeMode: reject`). No SQL de catálogo o escopo é **injetado** no fetch (resultado vazio, não erro). App sem `scope` (admin) não injeta. Entidade sem `scope` no catálogo não é protegida; use `unscopedTables` de forma explícita. RLS no banco continua recomendado.
+Filtro de outro usuário no Query IR: `FORBIDDEN_SCOPE` (`scopeMode: reject`). No SQL de catálogo o escopo é **injetado** no fetch (resultado vazio, não erro). App sem `scope` (admin) não injeta. Entidade sem `scope` no catálogo não é protegida; use `unscopedTables` de forma explícita. Colunas: `fields[].redact` (**D25**) mascara células como `"[REDACTED]"`; omitir no access (**D24**) → `FORBIDDEN`. RLS no banco continua recomendado.
 
 Grafo LangGraph: compile uma vez; o Bearer vai em `config["configurable"]["qllm_token"]`; cada `execute_sql` abre uma sessão MCP curta. Exemplo: [`deploy/prd/enforced/`](../../deploy/prd/enforced/README.md).
 
