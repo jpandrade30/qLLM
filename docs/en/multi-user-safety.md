@@ -70,7 +70,7 @@ Prefer binding `constraints` in the **host** (BFF / LangGraph) after auth — do
 
 ## Limits
 
-The catalog is the first layer: an entity without `scope` is unprotected. Columns in allowed rows stay visible. The source account still sees everything — keep RLS or a view in the database.
+The catalog is the first layer: an entity without `scope` is unprotected. Columns in allowed rows stay visible unless `fields[].redact: true` (**D25**, masked as `"[REDACTED]"`) or the app ACL omits them (**D24**, `FORBIDDEN`). The source account still sees everything — keep RLS or a view in the database.
 
 Catalog SQL (`execute_sql`) always **injects** D21 scope on the source fetch when present. Query IR still uses `scopeMode` (`reject` by default).
 

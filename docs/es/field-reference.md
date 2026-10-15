@@ -245,6 +245,7 @@ Obligatorios: `name`, `type`, `physical`.
 | `description` | cadena opcional |
 | `fromFilter` | bool opcional; solo REST. La API no devuelve el campo; qLLM copia el valor de un `eq` de primer nivel (D20) |
 | `shape` | texto libre opcional; solo `type: json`. Estructura interna para el LLM (`{street, city}`, `string[]`). Sale en `describe_catalog`. No se valida (D22) |
+| `redact` | bool opcional. Join/filter/groupBy usan el valor real; celdas del resultado pasan a `"[REDACTED]"` (`columns[].type` → `string`). Sigue en catalog/`describe_catalog` (**D25**). Distinto de omitir en access (**D24** → `FORBIDDEN`) |
 
 ### `relations[]`
 

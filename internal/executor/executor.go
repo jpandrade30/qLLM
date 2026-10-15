@@ -13,6 +13,8 @@ import (
 	"qLLM/internal/planner"
 	"qLLM/internal/protocol"
 	"qLLM/internal/querystore"
+	"qLLM/internal/redact"
+	"qLLM/internal/sqlparse"
 	"qLLM/internal/validate"
 
 	"github.com/google/uuid"
@@ -153,6 +155,8 @@ func (e *Executor) run(ctx context.Context, queryID, mode string, plan *planner.
 		}
 	}
 
+	e.applyRedact(final, irEntityNames(q), q, nil)
+
 	return &protocol.QueryResponse{
 		ProtocolVersion: protocol.ProtocolVersion,
 		QueryID:         queryID,
@@ -167,6 +171,48 @@ func (e *Executor) run(ctx context.Context, queryID, mode string, plan *planner.
 				Steps:      metaSteps,
 			},
 		},
+	}
+}
+
+func irEntityNames(q *protocol.QueryIR) []string {
+	if q == nil {
+		return nil
+	}
+	names := []string{q.From}
+	for _, j := range q.Joins {
+		names = append(names, j.From)
+	}
+	return names
+}
+
+// applyRedact masks D25 fields[].redact columns in the success result.
+func (e *Executor) applyRedact(tab *protocol.TabularResult, entityNames []string, q *protocol.QueryIR, parsed *sqlparse.Result) {
+	if tab == nil || e == nil || e.Idx == nil {
+		return
+	}
+	// Resolve aliases to entity names when possible.
+	resolved := make([]string, 0, len(entityNames))
+	for _, n := range entityNames {
+		if n == "" {
+			continue
+		}
+		if ent, err := e.Idx.ResolveEntity(n); err == nil && ent != nil {
+			resolved = append(resolved, ent.Name)
+		} else {
+			resolved = append(resolved, n)
+		}
+	}
+	names := redact.FieldNames(e.Idx.Catalog, resolved)
+	if len(names) == 0 {
+		return
+	}
+	extra := redact.ExtraOutNamesFromIR(q, names)
+	for k, v := range redact.ExtraOutNamesFromSQL(parsed, names) {
+		extra[k] = v
+	}
+	redact.Apply(tab, names, extra)
+	if parsed != nil {
+		redact.ApplySelectOuts(tab, names, parsed.SelectOuts)
 	}
 }
 

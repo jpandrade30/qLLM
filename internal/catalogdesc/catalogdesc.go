@@ -297,6 +297,9 @@ func fieldLine(f protocol.Field) string {
 	b.WriteString(f.Name)
 	b.WriteByte(' ')
 	b.WriteString(string(f.Type))
+	if f.Redact {
+		b.WriteString(" [REDACTED in results]")
+	}
 	if d := strings.TrimSpace(f.Description); d != "" {
 		b.WriteString(" — ")
 		b.WriteString(d)

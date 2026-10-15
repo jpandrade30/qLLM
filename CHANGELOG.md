@@ -5,6 +5,12 @@ All notable changes to qLLM are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Protocol versions are the `protocolVersion` field (`planning/`). Runtime responses advertise **0.2.0**; **0.1.0** preset/catalog/IR files remain valid. Latest product release: **0.3.6**.
 
+## [0.3.7] - 2026-10-15
+
+### Added
+
+- **D25** catalog `fields[].redact`: join/filter/groupBy use real values; matching result cells become `"[REDACTED]"` (`columns[].type` → `string`). Field stays visible in catalog/describe with the flag. Orthogonal to D24 (omit → `FORBIDDEN`).
+
 ## [0.3.6] - 2026-10-12
 
 ### Added

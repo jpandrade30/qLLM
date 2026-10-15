@@ -100,6 +100,7 @@ func Build(preset *protocol.Preset, catalog *protocol.Catalog) protocol.HowToUse
 			"Query with execute_sql (catalog entity names as tables).",
 			"Prefer small limits; filter early.",
 			"Use catalog relations for join keys.",
+			"Catalog fields with redact:true are joinable but result cells are \"[REDACTED]\" — pick another field to differentiate rows.",
 			"On INVALID_SQL / SOURCE_ERROR, fix SQL or catalog names — see error.message.",
 		},
 		Errors: []protocol.HowToError{
